@@ -1,0 +1,58 @@
+version: '3.8'
+
+services:
+  mysql-db1:
+    image: mysql:latest
+    restart: always
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: password1
+      MYSQL_DATABASE: database1
+      MYSQL_USER: user1
+      MYSQL_PASSWORD: password1
+    volumes:
+      - mysql-data1:/var/lib/mysql
+
+  mysql-db2:
+    image: mysql:latest
+    restart: always
+    ports:
+      - "3307:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: password2
+      MYSQL_DATABASE: database2
+      MYSQL_USER: user2
+      MYSQL_PASSWORD: password2
+    volumes:
+      - mysql-data2:/var/lib/mysql
+
+  service1:
+    build:
+      context: ./User-Service
+      dockerfile: Dockerfile
+    ports:
+      - "8082:8082"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql-db1:3306/database1
+      SPRING_DATASOURCE_USERNAME: user1
+      SPRING_DATASOURCE_PASSWORD: password1
+    depends_on:
+      - mysql-db1
+
+  service2:
+    build:
+      context: ./Product-Service
+      dockerfile: Dockerfile
+    ports:
+      - "8081:8081"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql-db2:3306/database2
+      SPRING_DATASOURCE_USERNAME: user2
+      SPRING_DATASOURCE_PASSWORD: password2
+    depends_on:
+      - mysql-db2
+
+volumes:
+  mysql-data1:
+  mysql-data2:
