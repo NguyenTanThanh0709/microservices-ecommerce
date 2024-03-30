@@ -20,7 +20,6 @@ public class CartEntity {
     private Long id;
     private Long customerId;
     private Long orderId;
-    private Double priceTotal = 0.0;
 
 
     @OneToMany(mappedBy = "cart", fetch = FetchType.EAGER, cascade = CascadeType.MERGE)

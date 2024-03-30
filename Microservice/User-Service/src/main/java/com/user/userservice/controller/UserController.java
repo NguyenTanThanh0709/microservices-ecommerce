@@ -21,35 +21,15 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/v1/users")
 public class UserController {
-    @Autowired
-    private IUser userimpl;
 
 
     @Autowired
     private EventProducer eventProducer;
-    @GetMapping("/hello1")
-    public String hello(){
-        Mono<String> result = eventProducer.send(Constant.DEMO_TOPIC, "Hello");
-        result.subscribe(
-                value -> {
-                    // Xử lý kết quả thành công (nếu cần)
-                    System.out.println("Message sent successfully: " + value);
-                },
-                error -> {
-                    // Xử lý lỗi (nếu có)
-                    System.err.println("Failed to send message: " + error.getMessage());
-                }
-        );
-        return  "check ";
-    }
 
-    @PostMapping("/")
-    public ResponseEntity<UserEntity> addUser(@RequestBody UserDTO user) {
-        if (user.getEmail() == null || user.getPhoneNumber() == null || user.getPassword() == null || user.getAddress() == null || user.getAddress() == null || user.getRole() == null) {
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-        }
-        UserEntity userEntity =  userimpl.addUser(user);
-        return  new ResponseEntity<>(userEntity, HttpStatus.CREATED);
+
+    @GetMapping("/okok")
+    public  String ok(){
+        return "ok";
     }
 
 }

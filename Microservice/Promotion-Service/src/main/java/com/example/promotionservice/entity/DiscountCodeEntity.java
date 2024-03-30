@@ -1,12 +1,11 @@
 package com.example.promotionservice.entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.ZonedDateTime;
+import java.util.List;
 
 @Entity
 @Getter
@@ -25,4 +24,8 @@ public class DiscountCodeEntity {
     private ZonedDateTime startDate;
     private ZonedDateTime endDate;
     private double discountValue; // Giá trị ưu đãi
+
+    @OneToMany(mappedBy = "discountCode", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
+    private List<DiscountAppEntity> discountApps;
 }

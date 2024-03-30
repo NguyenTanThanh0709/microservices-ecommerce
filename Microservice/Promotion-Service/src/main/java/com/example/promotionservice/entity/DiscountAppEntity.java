@@ -18,6 +18,7 @@ public class DiscountAppEntity {
 
     @ManyToOne
     @JoinColumn(name = "discount_code_id", referencedColumnName = "id")
-    private DiscountCodeEntity discountCode; // Tham chiếu đến mã giảm giá
-    private String IdProduct;
+    private DiscountCodeEntity discountCode;
+
+    private Long IdProduct;
 }

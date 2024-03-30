@@ -1,5 +1,6 @@
 package com.order.orderservice.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -15,10 +16,9 @@ public class OrderItemsEntity {
     private Long id;
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "orderId", referencedColumnName = "id")
+    @JsonIgnore
     private OrderEntity orderId;
     private Long productId;
-    private String productName;
-    private String note;
     private int quantity;
     private Double price;
 }

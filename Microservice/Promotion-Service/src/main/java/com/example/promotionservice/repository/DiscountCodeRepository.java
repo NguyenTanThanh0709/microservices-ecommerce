@@ -1,8 +1,10 @@
 package com.example.promotionservice.repository;
 
 import com.example.promotionservice.entity.DiscountCodeEntity;
+import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -26,4 +28,9 @@ public interface DiscountCodeRepository extends JpaRepository<DiscountCodeEntity
                                             @Param("startDate") ZonedDateTime startDate,
                                             @Param("endDate") ZonedDateTime endDate,
                                             Pageable pageable);
+
+    @Transactional
+    @Modifying
+    @Query("UPDATE DiscountCodeEntity d SET d.isActive = :isActive WHERE d.id = :id")
+    void updateDiscountCodeStatus(Long id, boolean isActive);
 }

@@ -2,6 +2,8 @@ import { yupResolver } from '@hookform/resolvers/yup'
 import { useMutation } from '@tanstack/react-query'
 import { useForm } from 'react-hook-form'
 import { Link, useNavigate } from 'react-router-dom'
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 import authApi from 'src/apis/auth.api'
 import Input from 'src/components/Input'
 import omit from 'lodash/omit'
@@ -12,8 +14,26 @@ import { useContext } from 'react'
 import { AppContext } from 'src/contexts/app.context'
 import Button from 'src/components/Button'
 
-type FormData = Pick<IAuthSchema, 'email' | 'password' | 'confirm_password' | 'term_of_use'>
-export const registerSchema = AuthSchema.pick(['email', 'password', 'confirm_password', 'term_of_use'])
+type City = {
+  Id: string;
+  Name: string;
+  Districts: District[];
+}
+
+type District = {
+  Id: string;
+  Name: string;
+  Wards: Ward[];
+}
+
+type Ward = {
+  Id: string;
+  Name: string;
+}
+
+type FormData = Pick<IAuthSchema, 'email' | 'phoneNumber' | 'password' | 'confirm_password' | 'role' | 'term_of_use'>
+
+export const registerSchema = AuthSchema.pick(['email','phoneNumber',  'password', 'confirm_password', 'term_of_use', 'role'])
 export default function Register() {
   const {
     handleSubmit,
@@ -34,10 +54,11 @@ export default function Register() {
   })
   // handle submit
   const onSubmit = handleSubmit((data) => {
-    console.log('data', data)
     console.log('errors', errors)
-    const body = omit(data, ['confirm_password'])
-    registerAccountMutation.mutate(body, {
+    const body = omit(data, ['confirm_password', 'term_of_use'])
+    const address = `${specificAddress}-${selectedWard}-${selectedDistrict}-${selectedCity}`;
+    const formDataWithAddress = { ...body, address };
+    registerAccountMutation.mutate(formDataWithAddress, {
       onSuccess: (data) => {
         console.log('dataRegister Mutation', data)
         setIsAuthenticated(true)
@@ -75,8 +96,57 @@ export default function Register() {
       }
     })
   })
+
+  const [cities, setCities] = useState<City[]>([]);
+  const [selectedCity, setSelectedCity] = useState<string>('');
+  const [districts, setDistricts] = useState<District[]>([]);
+  const [selectedDistrict, setSelectedDistrict] = useState<string>('');
+  const [wards, setWards] = useState<Ward[]>([]);
+  const [selectedWard, setSelectedWard] = useState<string>('');
+  const [specificAddress, setSpecificAddress] = useState('');
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await axios.get<City[]>('https://raw.githubusercontent.com/kenzouno1/DiaGioiHanhChinhVN/master/data.json');
+        setCities(response.data);
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  const handleCityChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const cityId = e.target.value;
+    setSelectedCity(cityId);
+    const selectedCityData = cities.find(city => city.Id === cityId);
+    if (selectedCityData) {
+      setDistricts(selectedCityData.Districts);
+      setSelectedDistrict('');
+      setWards([]);
+      setSelectedWard('');
+    }
+  };
+
+  const handleDistrictChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const districtId = e.target.value;
+    setSelectedDistrict(districtId);
+    const selectedDistrictData = districts.find(district => district.Id === districtId);
+    if (selectedDistrictData) {
+      setWards(selectedDistrictData.Wards);
+      setSelectedWard('');
+    }
+  };
+
+  const handleWardChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setSelectedWard(e.target.value);
+  };
+
+
   return (
-    <div className='h-[600px] bg-orange'>
+    <div className='h-[900px] bg-orange'>
       <div className='container bg-shopee bg-contain bg-center bg-no-repeat'>
         <div className='grid grid-cols-1 py-12 lg:h-[470px] lg:grid-cols-5 lg:pr-10'>
           <div className='md:col-span-2 md:col-start-4 md:mx-8'>
@@ -90,6 +160,58 @@ export default function Register() {
                 register={register}
                 errorMessage={errors.email?.message}
               />
+              <Input
+  className='my-2'
+  type='tel' // Sử dụng type 'tel' cho input số điện thoại
+  placeholder='Số điện thoại'
+  name='phoneNumber' // Tên của trường số điện thoại
+  register={register}
+  autoComplete='on'
+  errorMessage={errors.phoneNumber?.message} // Hiển thị thông báo lỗi nếu có
+/>
+
+<div className="flex flex-col items-center space-y-4">
+  <select 
+    value={selectedCity} 
+    onChange={handleCityChange} 
+    className="w-full p-2 rounded border border-gray-300 focus:outline-none focus:border-blue-500"
+  >
+    <option value="">Chọn tỉnh thành</option>
+    {cities.map(city => (
+      <option key={city.Id} value={city.Id}>{city.Name}</option>
+    ))}
+  </select>
+  <select 
+    value={selectedDistrict} 
+    onChange={handleDistrictChange} 
+    className="w-full p-2 rounded border border-gray-300 focus:outline-none focus:border-blue-500"
+  >
+    <option value="">Chọn quận huyện</option>
+    {districts.map(district => (
+      <option key={district.Id} value={district.Id}>{district.Name}</option>
+    ))}
+  </select>
+  <select 
+    value={selectedWard} 
+    onChange={handleWardChange} 
+    className="w-full p-2 rounded border border-gray-300 focus:outline-none focus:border-blue-500"
+  >
+    <option value="">Chọn phường xã</option>
+    {wards.map(ward => (
+      <option key={ward.Id} value={ward.Id}>{ward.Name}</option>
+    ))}
+  </select>
+  <input 
+    type="text" 
+    placeholder="Nhập địa chỉ cụ thể" 
+    value={specificAddress} 
+    onChange={(e) => setSpecificAddress(e.target.value)} 
+    className="w-full p-2 rounded border border-gray-300 focus:outline-none focus:border-blue-500"
+  />
+</div>
+
+
+
               <Input
                 className='mt-2'
                 type='text'

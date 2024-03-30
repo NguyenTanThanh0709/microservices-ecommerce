@@ -6,6 +6,10 @@ import com.cart.cartservice.repository.CartItemRepository;
 import com.cart.cartservice.repository.CartRepository;
 import com.cart.cartservice.service.ICart;
 import com.example.commonservice.DTO.CartDTO;
+import com.example.commonservice.utils.Constant;
+import com.google.gson.Gson;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,12 +23,17 @@ import java.util.Set;
 @Service
 @RequiredArgsConstructor
 @Transactional
+
 public class CartImpl implements ICart {
     @Autowired
     private CartRepository cartRepository;
 
     @Autowired
     private CartItemRepository cartItemRepository;
+
+    @PersistenceContext
+    private EntityManager entityManager;
+
 
     @Override
     public CartEntity createCartIExitsAddProduct(CartDTO cartDTO) {
@@ -37,14 +46,23 @@ public class CartImpl implements ICart {
             cart = new CartEntity();
             cart.setCustomerId(cartDTO.getCustomerId());
         }
+
         CartItemEntity cartItem = new CartItemEntity();
         cartItem.setProductId(cartDTO.getProductId());
         cartItem.setPrice(cartDTO.getPrice());
         cartItem.setQuantity(cartDTO.getQuantity());
-        cart.getCartItems().add(cartItem);
-        cart.setPriceTotal(cart.getPriceTotal() + cartDTO.getQuantity() * cartDTO.getPrice());
 
-        return cartRepository.save(cart);
+
+        cart.getCartItems().add(cartItem);
+        cartItem.setCart(cart);
+
+
+// Lưu CartEntity và CartItemEntity vào cơ sở dữ liệu
+        entityManager.persist(cart);
+        entityManager.persist(cartItem);
+
+
+        return cart;
     }
 
 

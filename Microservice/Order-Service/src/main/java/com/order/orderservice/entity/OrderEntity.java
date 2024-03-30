@@ -15,14 +15,14 @@ import java.util.Set;
 @Builder
 public class OrderEntity {
     @Id
-    private Integer id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
     private String phoneNumber;
     private String address;
     private String statusDelivery;
     private String statusOrder;
-    private Double priceTotal;
     private String note;
 
-    @OneToMany(mappedBy = "orderId", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
-    Set<OrderItemsEntity> orderItems;
+    @OneToMany(mappedBy = "orderId", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    List<OrderItemsEntity> orderItems;
 }

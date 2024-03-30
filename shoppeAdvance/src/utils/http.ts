@@ -23,7 +23,7 @@ export class Http {
     this.accessToken = getAccessTokenFromLS()
     this.refreshToken = getRefreshTokenFromLS()
     this.instance = axios.create({
-      baseURL: 'https://api-ecom.duthanhduoc.com/',
+      baseURL: 'https://api-ecom.duthanhduoc.com/', //http://localhost:8222/
       headers: {
         'Content-Type': 'application/json'
         // 'expire-access-token': 10,

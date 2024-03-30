@@ -17,11 +17,24 @@ async function getChatMessages(user1Id, user2Id) {
     }
 }
 
-// Sử dụng function để lấy thông tin của các tin nhắn giữa hai bên
-// getChatMessages('user1_id', 'user2_id')
-//     .then(chatMessages => {
-//         console.log('Chat messages:', chatMessages);
-//     })
-//     .catch(error => {
-//         console.error('Error:', error);
-//     });
+
+async function sendMessage(senderId, receiverId, message) {
+    try {
+        const newChat = new Chat({
+            sender_id: senderId,
+            receiver_id: receiverId,
+            message: message
+        });
+
+        const savedChat = await newChat.save();
+        return savedChat;
+    } catch (error) {
+        console.error('Error sending message:', error);
+        throw error;
+    }
+}
+
+module.exports = {
+    sendMessage,
+    getChatMessages
+}

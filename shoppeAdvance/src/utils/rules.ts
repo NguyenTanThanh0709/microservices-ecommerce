@@ -86,10 +86,10 @@ export const AuthSchema = yup.object({
     .max(160, 'Email must have at most 160 characters'),
   password: yup
     .string()
-    .matches(
-      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]+$/,
-      'Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character'
-    )
+    // .matches(
+    //   /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]+$/,
+    //   'Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character'
+    // )
     .required('Password does not exist')
     .min(6, 'Password must have at least 6 characters')
     .max(20, 'Password must have at most 20 characters'),
@@ -99,6 +99,11 @@ export const AuthSchema = yup.object({
     .min(6, 'Password must have at least 6 characters')
     .max(20, 'Password must have at most 20 characters')
     .oneOf([yup.ref('password')], 'Passwords must match'),
+    phoneNumber: yup
+    .string()
+    .required('Must have confirm phoneNumber')
+    .min(6, 'phoneNumber must have at least 6 characters')
+    .max(20, 'phoneNumber must have at most 20 characters'),
   price_min: yup.string().test({
     name: 'price-not-allowed',
     message: 'Price min must be less than price max',
@@ -109,7 +114,11 @@ export const AuthSchema = yup.object({
     message: 'Price max must be greater than price min',
     test: testPriceMinMax
   }),
-  term_of_use: yup.boolean().oneOf([true], 'You must accept the terms and conditions')
+  term_of_use: yup.boolean().oneOf([true], 'You must accept the terms and conditions'),
+  role: yup
+    .string()
+    .default('customer'),
+
 })
 export const schemaSearch = yup.object({
   name: yup.string().trim().required('Name does not exist')
@@ -129,7 +138,7 @@ const handleConfirmPasswordYup = (refString: string) => {
 }
 export const userSchema = yup.object({
   name: yup.string().max(160, 'Độ dài tối đa là 160 ký tự'),
-  phone: yup.string().max(20, 'Độ dài tối đa là 20 ký tự'),
+  phoneNumber: yup.string().max(20, 'Độ dài tối đa là 20 ký tự'),
   address: yup.string().max(160, 'Độ dài tối đa là 160 ký tự'),
   avatar: yup.string().max(1000, 'Độ dài tối đa là 1000 ký tự'),
   date_of_birth: yup.date().max(new Date(), 'Hãy chọn một ngày trong quá khứ'),
