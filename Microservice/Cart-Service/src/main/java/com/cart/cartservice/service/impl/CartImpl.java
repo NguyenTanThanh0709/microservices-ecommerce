@@ -2,34 +2,47 @@ package com.cart.cartservice.service.impl;
 
 import com.cart.cartservice.entity.CartEntity;
 import com.cart.cartservice.entity.CartItemEntity;
+import com.cart.cartservice.reponse.CartReponse;
+import com.cart.cartservice.reponse.CartReponseWithMessage;
 import com.cart.cartservice.repository.CartItemRepository;
 import com.cart.cartservice.repository.CartRepository;
 import com.cart.cartservice.service.ICart;
 import com.example.commonservice.DTO.CartDTO;
-import com.example.commonservice.utils.Constant;
-import com.google.gson.Gson;
+
+import com.example.commonservice.DTO.ProductReponse;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Service;
+import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
 
 
 @Service
 @RequiredArgsConstructor
 @Transactional
-
 public class CartImpl implements ICart {
     @Autowired
     private CartRepository cartRepository;
 
     @Autowired
     private CartItemRepository cartItemRepository;
+
+    @Autowired
+    private  WebClient webClient;
+
+
+
+
 
     @PersistenceContext
     private EntityManager entityManager;
@@ -47,9 +60,26 @@ public class CartImpl implements ICart {
             cart.setCustomerId(cartDTO.getCustomerId());
         }
 
+
+        boolean check  = false;
+
+        // Check if cartExist is not null and has cartItems
+        if(cartExist != null && cartExist.getCartItems() != null && cartExist.getCartItems().size() > 0){
+            for (CartItemEntity cartItem: cartExist.getCartItems()){
+                if(cartItem.getProductId() == cartDTO.getProductId()){
+                    check = true;
+                    cartItem.setQuantity(cartItem.getQuantity() + 1);
+                }
+            }
+        }
+
+        if(check){
+            entityManager.persist(cart);
+            return cart;
+        }
+
         CartItemEntity cartItem = new CartItemEntity();
         cartItem.setProductId(cartDTO.getProductId());
-        cartItem.setPrice(cartDTO.getPrice());
         cartItem.setQuantity(cartDTO.getQuantity());
 
 
@@ -73,6 +103,62 @@ public class CartImpl implements ICart {
             return  optionalCartEntity.get();
         }
         return null;
+    }
+
+
+    @Override
+    public List<CartReponse> findCartByUserHave(Long idUser, String token) {
+        CartEntity cartEntity = findCartByUser(idUser);
+        List<CartReponse> cartReponseList = new ArrayList<>();
+
+        // Tạo request entity với headers
+        for(CartItemEntity cartItem : cartEntity.getCartItems()){
+            CartReponse cartReponse = new CartReponse();
+            cartReponse.set_id(cartItem.getId().toString());
+            cartReponse.setBuy_count(cartItem.getQuantity());
+            cartReponse.setStatus(-1);
+            cartReponse.setUser(cartEntity.getCustomerId().toString());
+            getProductResponse(cartItem.getProductId().toString(), token)
+                    .subscribe(productResponse -> {
+                        cartReponse.setProduct(productResponse);
+                        cartReponse.setPrice(productResponse.getPrice());
+                        cartReponse.setPrice_before_discount(productResponse.getPrice());
+                        cartReponseList.add(cartReponse);
+                    });
+        }
+
+
+        // Wait for all asynchronous operations to complete
+        while (cartReponseList.size() < cartEntity.getCartItems().size()) {
+            try {
+                Thread.sleep(100); // Wait for 100 milliseconds
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                throw new RuntimeException("Thread interrupted while waiting for product responses", e);
+            }
+        }
+
+        return  cartReponseList;
+    }
+
+    @Override
+    public CartReponseWithMessage getCartWithMessage(Long idUser, String token) {
+        CartReponseWithMessage cartReponseWithMessage = new CartReponseWithMessage();
+        List<CartReponse> list = findCartByUserHave(idUser,token);
+        if(list != null){
+            cartReponseWithMessage.setMessage("Lấy giỏ hàng thành công");
+            cartReponseWithMessage.setData(list);
+            return cartReponseWithMessage;
+        }
+        return  null;
+    }
+
+    private  Mono<ProductReponse> getProductResponse(String productId, String token) {
+        return webClient.get()
+                .uri("http://localhost:8222/api/v1/products/one/" + productId)
+                .headers(headers -> headers.setBearerAuth(token.substring(7)))
+                .retrieve()
+                .bodyToMono(ProductReponse.class);
     }
 
     @Override

@@ -13,7 +13,7 @@ export default function useQueryConfig() {
   //Because we don't want to send undefined value to server
   const queryConfig: QueryConfig = omitBy(
     {
-      page: queryParams.page || '1',
+      page: queryParams.page || '0',
       limit: queryParams.limit,
       sort_by: queryParams.sort_by,
       exclude: queryParams.exclude,

@@ -46,7 +46,7 @@ public class SecurityConfiguration {
                 .authorizeHttpRequests(req ->
                         req
                                 .requestMatchers(WHITE_LIST_URL).permitAll()
-//                                .requestMatchers("/api/v2/admin/**").hasAnyAuthority("ADMIN","OWNER")
+//                                .requestMatchers("/api/v1/**").hasAnyAuthority("seller")
 //                                .requestMatchers("/api/v1/owner/**").hasAnyAuthority("OWNER","STAFF")
 //                                .requestMatchers("/api/v1/staff/**").hasAnyAuthority("STAFF","USER","OWNER","DRIVER")
 //                                .requestMatchers("/api/v1/driver/**").hasAnyAuthority("DRIVER")
@@ -58,7 +58,7 @@ public class SecurityConfiguration {
                 .authenticationProvider(authenticationProvider)
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
                 .logout(logout ->
-                        logout.logoutUrl("/api/v1/auth/logout")
+                        logout.logoutUrl("/api/v1/users/logout")
                                 .addLogoutHandler(logoutHandler)
                                 .logoutSuccessHandler((request, response, authentication) -> {
                                     SecurityContextHolder.clearContext();

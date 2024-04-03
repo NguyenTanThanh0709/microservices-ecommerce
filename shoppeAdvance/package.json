@@ -36,6 +36,7 @@
     "immer": "^9.0.21",
     "jsdom": "^21.1.1",
     "lodash": "^4.17.21",
+    "query-string": "^9.0.0",
     "react": "^18.2.0",
     "react-bootstrap": "^2.10.1",
     "react-dom": "^18.2.0",
@@ -44,6 +45,7 @@
     "react-i18next": "^12.2.0",
     "react-icons": "^4.7.1",
     "react-router-dom": "^6.8.1",
+    "react-spinners": "^0.13.8",
     "react-toastify": "^9.1.1",
     "styled-components": "^6.1.8",
     "yup": "^1.0.0"

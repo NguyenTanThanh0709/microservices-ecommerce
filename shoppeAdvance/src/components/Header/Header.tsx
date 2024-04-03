@@ -26,9 +26,15 @@ export default function Header() {
   // not unmount - mount again
   // except of course case logout then jump to RegisterLayout comback in case
   // should queries not have inactive => not call again > unecessary set stale: infinity
+
+  const id = localStorage.getItem('id');
+  const token = localStorage.getItem('accessToken');
+  const tokenus = token !== null ? token :""
+  const userId = id !== null ? parseInt(id) : 0;
+
   const { data: purchasesInCartData } = useQuery({
     queryKey: ['purchases', { status: purchasesStatus.inCart }],
-    queryFn: () => purchaseApi.getPurchases({ status: purchasesStatus.inCart }),
+    queryFn: () => purchaseApi.getPurchases(userId, tokenus),
     // explain : here, we don't want to call api when user is not authenticated
     enabled: isAuthenticated
   })
@@ -148,7 +154,7 @@ export default function Header() {
               >
                 <div className='mr-2 h-5 w-5 flex-shrink-0'>
                   <img
-                    src={getAvatarUrl(profile?.avatar)}
+                    src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS2sKnjHa_dGUJpI7Q7nn0kXLHDg27jmNlRUR9t-0fmOg&s"
                     alt='avatar'
                     className='h-full w-full rounded-full object-cover'
                   />
@@ -216,7 +222,7 @@ export default function Header() {
                           <div className='mt-2 flex py-2 hover:bg-gray-100' key={purchase._id}>
                             <div className='flex-shrink-0'>
                               <img
-                                src={purchase.product.image}
+                                src={purchase.product.productImages[0].urlimg}
                                 alt={purchase.product.name}
                                 className='h-11 w-11 object-cover'
                               />

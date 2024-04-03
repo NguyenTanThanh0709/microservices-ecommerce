@@ -19,8 +19,6 @@ public class CartEntity {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
     private Long customerId;
-    private Long orderId;
-
 
     @OneToMany(mappedBy = "cart", fetch = FetchType.EAGER, cascade = CascadeType.MERGE)
     private Set<CartItemEntity> cartItems = new HashSet<>();

@@ -4,15 +4,18 @@ import FormAoQuan from './form/FormAoQuan';
 import FormGiay from './form/FormGiay';
 import FoodForm from './form/FoodForm';
 import WatchForm from './form/WatchForm';
+import {  Product} from 'src/constants/contant';
 
-const ThongtinChiTiet: React.FC = () => {
+
+
+const ThongtinChiTiet: React.FC<{ updateFormDataProduct: (data: Partial<Product>) => void }> = ({ updateFormDataProduct }) => {
   return (
     <>
-      {/* <FormQuanAo/> */}
+      <FormQuanAo updateFormDataProduct={updateFormDataProduct}/>
       {/* <FormAoQuan/> */}
       {/* <FormGiay/> */}
       {/* <FoodForm/> */}
-      <WatchForm/>
+      {/* <WatchForm/> */}
     </>
   );
 };

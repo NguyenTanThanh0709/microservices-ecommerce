@@ -3,27 +3,45 @@ import { toast } from 'react-toastify'
 import { URL_LOGIN, URL_LOGOUT, URL_REFRESH_TOKEN, URL_REGISTER } from 'src/apis/auth.api'
 import { AuthResponse, RefreshTokenRespone } from 'src/types/auth.type'
 import { ErrorResponse } from 'src/types/utils.type'
+import {User} from 'src/types/user.type'
 import {
   clearLS,
   getAccessTokenFromLS,
   getRefreshTokenFromLS,
   setAccessTokenToLS,
+  setRefreshTokenToLS,
+  getProfileFromLS,
   setProfileToLS,
-  setRefreshTokenToLS
+  setIdToLS,
+  getIdFromLS,
+  getEmailFromLS,
+  getPhoneFromLS,
+  setEmailToLS,
+  setPhoneToLS,
 } from './auth'
 import { isAxiosExpiredTokenError, isAxiosUnauthorizedError } from './utils'
 export class Http {
   instance: AxiosInstance
   private accessToken: string
   private refreshToken: string
+
+  private email: string
+  private phone: string
+  private id: string
+
+  private user : User
   private refreshTokenRequest: Promise<any> | null = null
   constructor() {
     // why do we need to use this.accessToken = getAccessTokenFromLS() here?
     // because when getdata from localstorage(hard drive) ALWAYS SLOWER than get accessToken from (Ram)
     this.accessToken = getAccessTokenFromLS()
     this.refreshToken = getRefreshTokenFromLS()
+    this.email = getEmailFromLS()
+    this.phone = getPhoneFromLS()
+    this.id = getIdFromLS()
+    this.user = getProfileFromLS()
     this.instance = axios.create({
-      baseURL: 'https://api-ecom.duthanhduoc.com/', //http://localhost:8222/
+      baseURL: 'http://localhost:8222/', //https://api-ecom.duthanhduoc.com/
       headers: {
         'Content-Type': 'application/json'
         // 'expire-access-token': 10,
@@ -31,10 +49,11 @@ export class Http {
       }
     })
     // Add a request interceptor
+    console.log('this.accessToken', this.accessToken)
     this.instance.interceptors.request.use(
       (config) => {
         if (this.accessToken && config.headers) {
-          config.headers.authorization = this.accessToken
+          config.headers.authorization = "Bearer " +  this.accessToken
           return config
         }
         return config
@@ -51,11 +70,27 @@ export class Http {
         if (url?.includes(URL_LOGIN) || url?.includes(URL_REGISTER)) {
           console.log('response', response)
           const dataResponse = response.data as AuthResponse
-          this.accessToken = dataResponse.data.access_token
-          this.refreshToken = dataResponse.data.refresh_token
+          console.log('dataResponse', dataResponse)
+          this.accessToken = dataResponse.access_token
+          this.refreshToken = dataResponse.refresh_token
+          this.email = dataResponse.email
+          this.phone = dataResponse.phone
+          this.id = dataResponse.id
           setAccessTokenToLS(this.accessToken)
           setRefreshTokenToLS(this.refreshToken)
-          setProfileToLS(dataResponse.data.user)
+          setIdToLS(this.id)
+          setEmailToLS(this.email)
+          setPhoneToLS(this.phone)
+
+          this.user = {
+            id: this.id,
+            role: dataResponse.role, // Bạn có thể định nghĩa role ở đây nếu có thông tin từ dataResponse
+            email: this.email,
+            phone: this.phone,
+            address: dataResponse.address
+          }
+          setProfileToLS(this.user)
+
         } else if (url?.includes(URL_LOGOUT)) {
           console.log('did logout')
           this.accessToken = ''

@@ -1,72 +1,75 @@
 import React, { useState } from 'react';
+import {  thongtinbanhang, ProductSize } from 'src/constants/contant';
 
-interface FormData {
-  gia: string;
-  tonkhotong: string;
-  tonKho_quanao: {
-    [key: string]: string;
-  };
-  tonKho_giay: {
-    [key: string]: string;
-  };
+interface ThongtinBanHangProps {
+  updateFormDataProduct: (data: Partial<thongtinbanhang>) => void;
 }
 
-export default function ThongtinBanHang() {
-  const [formData, setFormData] = useState<FormData>({
-    gia: '',
-    tonkhotong: '',
-    tonKho_quanao: {
-      xs: '',
-      s: '',
-      m: '',
-      l: '',
-      xl: '',
-      xxl: '',
-    },
-    tonKho_giay: {
-      32: '',
-      33: '',
-      34: '',
-      35: '',
-      36: '',
-      37: '',
-      38: '',
-      39: '',
-      40: '',
-      41: '',
-      42: '',
-      43: '',
-      44: '',
-    },
+
+const ThongtinBanHang: React.FC<ThongtinBanHangProps> = ({ updateFormDataProduct }) => {
+  const [formDatathongtinbanhang, setFormDatathongtinbanhang] = useState<thongtinbanhang>({
+    price: 0,
+    stockQuantity: 0,
+    productSize: [],
+    colors: ''
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setFormData({
-      ...formData,
+    setFormDatathongtinbanhang(prevState => ({
+      ...prevState,
       [name]: value,
-    });
+    }));
   };
 
-  const handleQuanAoTonKhoChange = (size: string, value: string) => {
-    setFormData({
-      ...formData,
-      tonKho_quanao: {
-        ...formData.tonKho_quanao,
-        [size]: value,
-      },
-    });
+  const [size, setSize] = useState<string>('');
+  const [color, setColor] = useState<string>('');
+  const [productColor, setProductColor] = useState<String[]>([]);
+
+  const handleChange1 = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setColor(e.target.value);
+};
+
+const handleSubmit1 = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (color.trim() !== '') {
+        setProductColor([...productColor, color]); // Thêm màu mới vào danh sách
+        setColor(''); // Xóa giá trị trong input sau khi thêm
+    }
+};
+
+
+
+  const [quantity, setQuantity] = useState<number>(0);
+  const [productSizes, setProductSizes] = useState<ProductSize[]>([]);
+
+  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (size.trim() !== '' && quantity > 0) {
+      const newProductSize: ProductSize = {
+        size: size,
+        quantity: quantity
+      };
+      setProductSizes([...productSizes, newProductSize]);
+      setSize('');
+      setQuantity(0);
+      setFormDatathongtinbanhang(prevState => ({
+        ...prevState,
+        productSize: [...prevState.productSize, newProductSize]
+    }));
+    }
   };
 
-  const handleGiayTonKhoChange = (size: string, value: string) => {
-    setFormData({
-      ...formData,
-      tonKho_giay: {
-        ...formData.tonKho_giay,
-        [size]: value,
-      },
+  const handleClick = () => {
+    console.log(formDatathongtinbanhang);
+    const formattedProductColor = productColor.join('-'); 
+    updateFormDataProduct({
+        price: formDatathongtinbanhang.price,
+        stockQuantity: formDatathongtinbanhang.stockQuantity,
+        productSize: formDatathongtinbanhang.productSize,
+        colors: formattedProductColor,
     });
-  };
+  }
 
   return (
     <div className='m-4 p-4'>
@@ -75,8 +78,8 @@ export default function ThongtinBanHang() {
         <input
           type="number"
           id="gia"
-          name="gia"
-          value={formData.gia}
+          name="price" // Thay đổi tên thành price
+          value={formDatathongtinbanhang.price}
           onChange={handleChange}
           className="w-full bg-gray-100 border border-gray-300 rounded py-2 px-3 focus:outline-none focus:bg-white"
           placeholder="Nhập giá"
@@ -88,53 +91,72 @@ export default function ThongtinBanHang() {
         <input
           type="number"
           id="tonkhotong"
-          name="tonkhotong"
-          value={formData.tonkhotong}
+          name="stockQuantity" // Thay đổi tên thành stockQuantity
+          value={formDatathongtinbanhang.stockQuantity}
           onChange={handleChange}
           className="w-full bg-gray-100 border border-gray-300 rounded py-2 px-3 focus:outline-none focus:bg-white"
           placeholder="Nhập Tồn kho tổng"
         />
       </div>
 
-      <div className="mb-4">
-        <label className="block font-medium mb-2 text-red-500">Tồn kho quần áo theo size</label>
-        <div className="flex">
-          {Object.keys(formData.tonKho_quanao).map((size) => (
-            <div key={size} className="mr-4">
-              <label htmlFor={size} className="block font-medium mb-1">{size.toUpperCase()}</label>
-              <input
-                type="number"
-                id={size}
-                name={size}
-                value={formData.tonKho_quanao[size]}
-                onChange={(e) => handleQuanAoTonKhoChange(size, e.target.value)}
-                className="w-full bg-gray-100 border border-gray-300 rounded py-1 px-2 focus:outline-none focus:bg-white"
-                placeholder="Nhập tồn kho"
-              />
-            </div>
-          ))}
+      <div className="max-w-md mx-auto bg-white rounded-md overflow-hidden shadow-md p-4">
+        <h2 className="text-lg font-semibold text-gray-800 mb-2">Add Product Size</h2>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="flex flex-col">
+            <label htmlFor="size" className="text-sm text-gray-600">Size</label>
+            <input type="text" id="size" value={size} onChange={e => setSize(e.target.value)} placeholder="Enter size (e.g., S, M, L)" className="border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring focus:ring-blue-200" />
+          </div>
+          <div className="flex flex-col">
+            <label htmlFor="quantity" className="text-sm text-gray-600">Quantity</label>
+            <input type="number" id="quantity" value={quantity} onChange={e => setQuantity(parseInt(e.target.value))} placeholder="Enter quantity" className="border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring focus:ring-blue-200" />
+          </div>
+          <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition">Add</button>
+        </form>
+        <div>
+          <h3 className="text-lg font-semibold text-gray-800 mt-4 mb-2">Product Sizes:</h3>
+          <ul>
+            {productSizes.map((productSize, index) => (
+              <li key={index}>{productSize.size}: {productSize.quantity}</li>
+            ))}
+          </ul>
         </div>
       </div>
 
-      <div className="mb-4">
-        <label className="block font-medium mb-2 text-red-500">Tồn kho giày theo size</label>
-        <div className="flex">
-          {Object.keys(formData.tonKho_giay).map((size) => (
-            <div key={size} className="mr-4">
-              <label htmlFor={size} className="block font-medium mb-1">{size.toUpperCase()}</label>
-              <input
-                type="number"
-                id={size}
-                name={size}
-                value={formData.tonKho_giay[size]}
-                onChange={(e) => handleGiayTonKhoChange(size, e.target.value)}
-                className="w-full bg-gray-100 border border-gray-300 rounded py-1 px-2 focus:outline-none focus:bg-white"
-                placeholder="Nhập tồn kho"
-              />
+      <div className="max-w-md mx-auto bg-white rounded-md overflow-hidden shadow-md p-4 mt-2">
+            <h2 className="text-lg font-semibold text-gray-800 mb-2">Add Product Color</h2>
+            <form onSubmit={handleSubmit1} className="space-y-4">
+                <div className="flex flex-col">
+                    <label htmlFor="color" className="text-sm text-gray-600">Color</label>
+                    <input
+                        type="text"
+                        id="color"
+                        value={color}
+                        onChange={handleChange1}
+                        placeholder="Enter color (e.g., S, M, L)"
+                        className="border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring focus:ring-blue-200"
+                    />
+                </div>
+                <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition">Add</button>
+            </form>
+            <div>
+                <h3 className="text-lg font-semibold text-gray-800 mt-4 mb-2">Product color:</h3>
+                <ul>
+                    {productColor.map((item, index) => (
+                        <li key={index}>{item}</li>
+                    ))}
+                </ul>
             </div>
-          ))}
         </div>
-      </div>
+
+      <button
+        className="bg-emerald-500 text-white active:bg-emerald-600 font-bold uppercase px-6 py-3 rounded shadow hover:shadow-lg outline-none focus:outline-none mr-1 mb-1 ease-linear transition-all duration-150"
+        type="button"
+        onClick={handleClick}
+      >
+        Save
+      </button>
     </div>
   );
 }
+
+export default ThongtinBanHang;

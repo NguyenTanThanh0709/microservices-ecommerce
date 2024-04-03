@@ -10,7 +10,7 @@ const path = {
   productDetail: ':nameId',
   cart: '/cart',
   adminhome:'/admin-home',
-  pageShop:'admin-shop'
+  pageShop:'/admin-shop'
 } as const
 
 export default path

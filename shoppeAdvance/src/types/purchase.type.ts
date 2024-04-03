@@ -12,8 +12,6 @@ export interface Purchase {
   status: PurchaseStatus
   user: string
   product: Product
-  createdAt: string
-  updatedAt: string
 }
 
 export interface ExtendedPurchase extends Purchase {

@@ -1,22 +1,46 @@
 export interface Product {
-  _id: string
-  images: string[]
-  price: number
-  rating: number
-  price_before_discount: number
-  quantity: number
-  sold: number
-  view: number
-  name: string
-  description: string
-  category: {
-    _id: string
-    name: string
-  }
-  image: string
-  createdAt: string
-  updatedAt: string
+  id: number;
+  name: string;
+  shortDescription: string;
+  description: string;
+  price: number;
+  phoneOwner: number;
+  stockQuantity: number;
+  sold: number;
+  view: number;
+  urlVideo: string;
+  category: string;
+  cannangdonggoi: number;
+  thetich_dai: number;
+  thetich_rong: number;
+  thetich_cao: number;
+  productImages: ProductImage[];
+  productSize: ProductSize[];
+  relatedProducts: any[]; // Đối tượng này có thể được mô tả chi tiết hơn nếu bạn biết cấu trúc của nó
+  brand: Brand;
+  featured: boolean;
+  published: boolean;
+  colors: String;
 }
+
+interface ProductImage {
+  id: number;
+  urlimg: string;
+}
+
+interface ProductSize {
+  id: number;
+  size: string;
+  quantity: number;
+}
+
+interface Brand {
+  id: number;
+  name: string;
+  slug: string;
+  urlBrand: string;
+}
+
 export interface ProductList {
   products: Product[]
   pagination: {

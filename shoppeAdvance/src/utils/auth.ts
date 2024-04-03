@@ -8,10 +8,23 @@ export const setAccessTokenToLS = (accessToken: string) => {
 export const setRefreshTokenToLS = (refreshToken: string) => {
   localStorage.setItem('refreshToken', refreshToken)
 }
+export const setEmailToLS = (email: string) => {
+  localStorage.setItem('email', email)
+}
+export const setPhoneToLS = (phone: string) => {
+  localStorage.setItem('phone', phone)
+}
+
+export const setIdToLS = (phone: string) => {
+  localStorage.setItem('id', phone)
+}
 
 export const clearLS = () => {
   localStorage.removeItem('accessToken')
   localStorage.removeItem('refreshToken')
+  localStorage.removeItem('email')
+  localStorage.removeItem('phone')
+  localStorage.removeItem('id')
   localStorage.removeItem('profile')
   const clearLSEvent = new Event('clearLS')
   localStorageEventTarget.dispatchEvent(clearLSEvent)
@@ -22,6 +35,17 @@ export const getAccessTokenFromLS = () => {
 }
 export const getRefreshTokenFromLS = () => {
   return localStorage.getItem('refreshToken') || ''
+}
+
+export const getEmailFromLS = () => {
+  return localStorage.getItem('email') || ''
+}
+export const getPhoneFromLS = () => {
+  return localStorage.getItem('phone') || ''
+}
+
+export const getIdFromLS = () => {
+  return localStorage.getItem('id') || ''
 }
 
 export const getProfileFromLS = () => {

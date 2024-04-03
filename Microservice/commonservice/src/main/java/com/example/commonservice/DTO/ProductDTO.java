@@ -1,9 +1,12 @@
 package com.example.commonservice.DTO;
 
 import lombok.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Getter
 @Setter
@@ -11,6 +14,7 @@ import java.util.List;
 @NoArgsConstructor
 @Builder
 public class ProductDTO {
+
     private Long id;
     private String name;
     private String shortDescription;
@@ -20,18 +24,27 @@ public class ProductDTO {
     private boolean isPublished;
     private boolean isFeatured;
     private Long stockQuantity;
-    private String metaTitle;
-    private String metaKeyword;
-    private String metaDescription;
+    private int sold;
+    private int view;
     private String category;
-    private int countSell;
-    private List<String> productImages = new ArrayList<>();
+    private Double cannangdonggoi;
+    private Double thetich_dai;
+    private Double thetich_rong;
+    private Double thetich_cao;
+    private List<ProductSize> productSize;
     private Long idBrand;
+    private String urlVideo;
+    private List<String> imgsurl;
+    private String colors;
+
 
     public boolean isValid() {
         return name != null && shortDescription != null && description != null
                 && price != null && phoneOwner != null && stockQuantity != null
-                && metaTitle != null && metaKeyword != null && metaDescription != null
+                && cannangdonggoi != null && thetich_dai != null
+                && thetich_rong != null && thetich_cao != null
+                && urlVideo != null
+                && imgsurl != null
                 && category != null && idBrand != null;
     }
 }

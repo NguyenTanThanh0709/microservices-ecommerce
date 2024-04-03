@@ -1,14 +1,9 @@
-type Role = 'User' | 'Admin'
+type Role = 'customer' | 'seller';
 
 export interface User {
-  _id: string
-  roles: Role[]
-  email: string
-  name?: string
-  date_of_birth?: string // ISO 8610
-  avatar?: string
-  address?: string
-  phone?: string
-  createdAt: string
-  updatedAt: string
+  id: string
+  role: { id: number; name: Role }[]; // Role được chuyển thành string union type
+  email: string;
+  phone: string;
+  address?: string;
 }

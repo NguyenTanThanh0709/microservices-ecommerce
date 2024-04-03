@@ -16,7 +16,6 @@ public class CartItemEntity {
     private Long id;
     private Long productId;
     private int quantity;
-    private Double price;
 
     @ManyToOne
     @JoinColumn(name = "cart_id", nullable = false)

@@ -11,7 +11,7 @@ export default function Product({ product }: Props) {
     <Link
       to={`${path.home}${generateNameId({
         name: product.name,
-        id: product._id
+        id: product.id.toString()
       })}`}
     >
       <div
@@ -20,7 +20,7 @@ export default function Product({ product }: Props) {
       >
         {/* Explain: why used pt-100% ? Because we want to make image have ratio 1:1. And set absolute with top, left, right, bottom is 0. And set width, height is 100%. */}
         <div className='relative w-full pt-[100%]'>
-          <img src={product.image} alt={product.name} className='absolute inset-0 h-full w-full object-cover' />
+          <img src={product.productImages && product.productImages.length > 0 ? product.productImages[0].urlimg : ''} alt={product.name} className='absolute inset-0 h-full w-full object-cover' />
         </div>
         <div className='overflow-hidden p-2'>
           {/* Because property(class) truncate just handle one line, but we need 2 lines or mutiple lines. It's used line-clamp */}
@@ -30,7 +30,7 @@ export default function Product({ product }: Props) {
           <div className='mt-2 flex justify-start gap-2'>
             <div className='max-w-[50%] truncate text-gray-500 line-through'>
               <span className='text-xs'>₫</span>
-              <span className='text-sm'>{product.price_before_discount}</span>
+              <span className='text-sm'>{product.price}</span>
             </div>
             <div className='max-w-[50%] truncate text-orange'>
               <span className='text-xs'>₫</span>
@@ -38,7 +38,7 @@ export default function Product({ product }: Props) {
             </div>
           </div>
           <div className='mt-2 flex items-center justify-end'>
-            <ProductRating rating={product.rating} />
+            <ProductRating rating={3} />
             <div className='ml-2'>
               <span className='text-xs'>{formatNumberToSocialStyle(product.sold)}</span>
               <span className='ml-1 text-xs'>sold</span>

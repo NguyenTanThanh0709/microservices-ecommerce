@@ -56,11 +56,11 @@ export default function HistoryPurchase() {
             {purchasesInCart?.map((purchase) => (
               <div key={purchase._id} className='mt-4 rounded-sm border-black/10 bg-white p-6 text-gray-800 shadow-sm'>
                 <Link
-                  to={`${path.home}${generateNameId({ name: purchase.product.name, id: purchase.product._id })}`}
+                  to={`${path.home}${generateNameId({ name: purchase.product.name, id: purchase.product.id.toString() })}`}
                   className='flex'
                 >
                   <div className='flex-shrink-0'>
-                    <img className='h-20 w-20 object-cover' src={purchase.product.image} alt={purchase.product.name} />
+                    <img className='h-20 w-20 object-cover' src={purchase.product.productImages[0].urlimg} alt={purchase.product.name} />
                   </div>
                   <div className='ml-3 flex-grow overflow-hidden'>
                     <div className='truncate'>{purchase.product.name}</div>
@@ -68,7 +68,7 @@ export default function HistoryPurchase() {
                   </div>
                   <div className='ml-3 flex-shrink-0'>
                     <span className='truncate text-gray-500 line-through'>
-                      ₫{formatCurrency(purchase.product.price_before_discount)}
+                      ₫{formatCurrency(purchase.product.price)}
                     </span>
                     <span className='ml-2 truncate text-orange'>₫{formatCurrency(purchase.product.price)}</span>
                   </div>

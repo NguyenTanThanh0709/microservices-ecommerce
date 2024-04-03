@@ -15,6 +15,8 @@ import java.util.Set;
 @NoArgsConstructor
 public class AuthenticationResponse {
 
+    @JsonProperty("id")
+    private Long id;
     @JsonProperty("access_token")
     private String accessToken;
     @JsonProperty("refresh_token")
@@ -25,4 +27,7 @@ public class AuthenticationResponse {
     private String phone;
     @JsonProperty("email")
     private String email;
+    @JsonProperty("address")
+    private String address;
+
 }

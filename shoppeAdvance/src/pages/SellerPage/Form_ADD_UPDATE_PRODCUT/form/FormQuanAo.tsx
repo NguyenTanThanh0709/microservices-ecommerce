@@ -1,5 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Col, Container } from 'react-bootstrap';
+import { ThongtinChiTiet_, BrandData, BrandReponse, Product } from 'src/constants/contant';
+import axiosInstance from 'src/apis/axiosClient'; 
+import { u } from 'msw/lib/glossary-de6278a9';
+import { set } from 'lodash';
+
 
 interface FormData {
   brand: string;
@@ -15,7 +20,14 @@ interface FormData {
   manufacturerName: string;
 }
 
-const FormQuanAo: React.FC = () => {
+const FormQuanAo: React.FC<{ updateFormDataProduct: (data: Partial<Product>) => void }> = ({ updateFormDataProduct }) => {
+
+  const [formthongtinchitiet, setFormthongtinchitiet] = useState<ThongtinChiTiet_>({
+    description: '',
+    idBrand: 0,
+  });
+
+
   const [formData, setFormData] = useState<FormData>({
     brand: '',
     material: '',
@@ -30,6 +42,37 @@ const FormQuanAo: React.FC = () => {
     manufacturerName: '',
   });
 
+  const [formDatabrand, setFormDataBrand] = useState<BrandData>({
+    name: "",
+    slug: "",
+    urlBrand: "",
+  });
+
+  const [brands, setBrands] = useState<BrandReponse[]>([]);
+
+  const handleChangeBrand = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormDataBrand((prevData) => ({
+      ...prevData,
+      [name]: value,
+    }));
+  };
+
+  const handleBrandChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const brandValue = e.target.value;
+    setFormData((prevData) => ({
+      ...prevData,
+      brand: brandValue,
+    }));
+  };
+
+  const handleSubmitBrand = (e: React.FormEvent) => {
+    e.preventDefault();
+    console.log(formDatabrand);
+    
+    fetchDataPost(formDatabrand);
+  };
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData({
@@ -38,23 +81,150 @@ const FormQuanAo: React.FC = () => {
     });
   };
 
+  const formDataToString = (data: FormData): string => {
+    let result = '';
+    for (const key in data) {
+      if (key !== 'brand') {
+        result += key + ': ' + data[key as keyof FormData] + '-';
+      }
+    }
+    // Remove the trailing dash if it exists
+    if (result.endsWith('-')) {
+      result = result.slice(0, -1);
+    }
+    return result;
+  };
+  
+
+  const handleClick = () => {
+    if (isFormDataNull(formData)) {
+      alert('Please fill in all fields!');
+    } else {
+      
+      console.log(formthongtinchitiet);
+      updateFormDataProduct({
+        description: formthongtinchitiet.description,
+        idBrand: formthongtinchitiet.idBrand,
+    });
+
+    }
+
+  }
+
+  useEffect(() => {
+    console.log(formthongtinchitiet);
+    console.log(formData);
+      setFormthongtinchitiet({
+        description: formDataToString(formData),
+        idBrand: parseInt(formData.brand, 10)
+      });
+  }, [formData]);
+
+  const isFormDataNull = (data: FormData): boolean => {
+    for (const key in data) {
+      if (data[key as keyof FormData] === '') {
+        return true;
+      }
+    }
+    return false;
+  };
+  
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  async function fetchData() {
+    try {
+        // Example GET request
+        const response = await axiosInstance.get('/api/v1/products/brand-list');
+        // console.log(response.data);
+        setBrands(response.data);
+    } catch (error) {
+        console.error('Error fetching data:', error);
+    }
+}
+
+async function fetchDataPost(data: any) {
+  try {
+      // Example POST request
+      const response = await axiosInstance.post('/api/v1/products/seller/add-brand', data);
+      alert('Thêm thương hiệu thành công');
+      fetchData()
+  } catch (error) {
+      console.error('Error fetching data:', error);
+  }
+}
+
+  
+
+
   return (
     <Container>
       <div className='flex text-2xl m-4 p-4 justify-content-center justify-between w-full'>
         <Col lg={6}>
           {/* Brand */}
+          
+          <form onSubmit={handleSubmitBrand} className="max-w-lg p-2  mx-auto mt-8">  
+            <div>Thêm thương hiệu nếu bạn muốn</div>
           <div className="mb-4">
-            <label htmlFor="brand" className="block font-medium mb-2 text-red-500">Thương hiệu</label>
+            <label htmlFor="name" className="block text-gray-700 font-bold mb-2">
+              Name:
+            </label>
             <input
               type="text"
-              id="brand"
-              name="brand"
-              value={formData.brand}
-              onChange={handleChange}
-              className="w-full bg-gray-100 border border-gray-300 rounded py-2 px-3 focus:outline-none focus:bg-white"
-              placeholder="Nhập thương hiệu"
+              id="name"
+              name="name"
+              value={formDatabrand.name}
+              onChange={handleChangeBrand}
+              className="border border-gray-300 rounded-md py-2 px-4 w-full focus:outline-none focus:border-blue-400"
             />
           </div>
+          <div className="mb-4">
+            <label htmlFor="slug" className="block text-gray-700 font-bold mb-2">
+              Slug:
+            </label>
+            <input
+              type="text"
+              id="slug"
+              name="slug"
+              value={formDatabrand.slug}
+              onChange={handleChangeBrand}
+              className="border border-gray-300 rounded-md py-2 px-4 w-full focus:outline-none focus:border-blue-400"
+            />
+          </div>
+          <div className="mb-4">
+            <label
+              htmlFor="urlBrand"
+              className="block text-gray-700 font-bold mb-2"
+            >
+              URL Brand:
+            </label>
+            <input
+              type="text"
+              id="urlBrand"
+              name="urlBrand"
+              value={formDatabrand.urlBrand}
+              onChange={handleChangeBrand}
+              className="border border-gray-300 rounded-md py-2 px-4 w-full focus:outline-none focus:border-blue-400"
+            />
+          </div>
+          <button
+            type="submit"
+            className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+          >
+            Submit
+          </button>
+          </form>
+
+          <div className="mb-4">
+            <label htmlFor="brand" className="block font-medium mb-2 text-red-500">Thương hiệu</label>
+            <select className="w-full p-2 border rounded-md" onChange={handleBrandChange}>
+            {brands.map(brand => (
+                <option key={brand.id} value={brand.id}>{brand.name}</option>
+            ))}
+        </select>
+          </div>
+
 
           {/* Material */}
           <div className="mb-4">
@@ -231,7 +401,15 @@ const FormQuanAo: React.FC = () => {
             />
           </div>
         </Col>
+
       </div>
+      <button
+                    className="bg-emerald-500 text-white active:bg-emerald-600 font-bold uppercase px-6 py-3 rounded shadow hover:shadow-lg outline-none focus:outline-none mr-1 mb-1 ease-linear transition-all duration-150"
+                    type="button"
+                    onClick={handleClick}
+                  >
+                    Save
+                  </button>
     </Container>
   );
 };

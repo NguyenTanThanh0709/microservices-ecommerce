@@ -17,11 +17,17 @@ import { Purchase } from 'src/types/purchase.type'
 import PaymentPage from './PaymentPage'
 
 export default function Cart() {
+
   const { extendedPurchases, setExtendedPurchases } = useContext(AppContext)
+
+  const id = localStorage.getItem('id');
+  const token = localStorage.getItem('accessToken');
+  const tokenus = token !== null ? token :""
+  const userId = id !== null ? parseInt(id) : 0;
+
   const { data: purchasesInCartData, refetch } = useQuery({
-    queryKey: ['purchases', { status: purchasesStatus.inCart }],
-    queryFn: () => purchaseApi.getPurchases({ status: purchasesStatus.inCart })
-  })
+    queryFn: () => purchaseApi.getPurchases(userId, tokenus),
+  });
   const updatePurchaseMutation = useMutation({
     mutationFn: purchaseApi.updatePurchase,
     onSuccess: () => {
@@ -60,7 +66,7 @@ export default function Cart() {
   const totalCheckedPurchaseSavingPrice = useMemo(
     () =>
       checkedPurchases.reduce((result, current) => {
-        return result + (current.product.price_before_discount - current.product.price) * current.buy_count
+        return result + (current.product.price - current.product.price) * current.buy_count
       }, 0),
     [checkedPurchases]
   )
@@ -120,7 +126,7 @@ export default function Cart() {
           draft[purchaseIndex].disabled = true
         })
       )
-      updatePurchaseMutation.mutate({ product_id: purchase.product._id, buy_count: value })
+      updatePurchaseMutation.mutate({ product_id: purchase.product.id.toString(), buy_count: value })
     }
   }
 
@@ -138,7 +144,7 @@ export default function Cart() {
   const handleBuyPurchases = () => {
     if (checkedPurchases.length > 0) {
       const body = checkedPurchases.map((purchase) => ({
-        product_id: purchase.product._id,
+        product_id: purchase.product.id.toString(),
         buy_count: purchase.buy_count
       }))
       buyProductsMutation.mutate(body)
@@ -198,16 +204,16 @@ export default function Cart() {
                                   className='h-20 w-20 flex-shrink-0 '
                                   to={`${path.home}${generateNameId({
                                     name: purchase.product.name,
-                                    id: purchase.product._id
+                                    id: purchase.product.id.toString()
                                   })}`}
                                 >
-                                  <img alt={purchase.product.name} src={purchase.product.image} />
+                                  <img alt={purchase.product.name} src={purchase.product.productImages[0].urlimg} />
                                 </Link>
                                 <div className='flex-grow px-2 pt-1 pb-2'>
                                   <Link
                                     to={`${path.home}${generateNameId({
                                       name: purchase.product.name,
-                                      id: purchase.product._id
+                                      id: purchase.product.id.toString()
                                     })}`}
                                     className='text-left line-clamp-2'
                                   >
@@ -223,19 +229,19 @@ export default function Cart() {
                             <div className='col-span-2'>
                               <div className='flex items-center justify-center'>
                                 <span className='text-gray-300 line-through'>
-                                  ₫{formatCurrency(purchase.product.price_before_discount)}
+                                  ₫{formatCurrency(purchase.product.price)}
                                 </span>
                                 <span className='ml-3'>₫{formatCurrency(purchase.product.price)}</span>
                               </div>
                             </div>
                             <div className='col-span-1'>
                               <QuantityController
-                                max={purchase.product.quantity}
+                                max={purchase.product.stockQuantity}
                                 value={purchase.buy_count}
                                 classNameWrapper='flex items-center'
                                 onIncrease={(value) => {
-                                  console.log(value, purchase.product.quantity)
-                                  handleQuantity(index, value, value <= purchase.product.quantity)
+                                  console.log(value, purchase.product.stockQuantity)
+                                  handleQuantity(index, value, value <= purchase.product.stockQuantity)
                                 }}
                                 onDecrease={(value) => handleQuantity(index, value, value >= 1)}
                                 onType={handleTypeQuantity(index)}
@@ -244,7 +250,7 @@ export default function Cart() {
                                     index,
                                     value,
                                     value >= 1 &&
-                                      value <= purchase.product.quantity &&
+                                      value <= purchase.product.stockQuantity &&
                                       value !== (purchasesInCart as Purchase[])[index].buy_count
                                   )
                                 }
@@ -273,7 +279,6 @@ export default function Cart() {
               </div>
             </div>
 
-            <div>okokookoko</div>
             <PaymentPage/>                      
 
             <div className='sticky bottom-0 z-10 mt-8 flex flex-col rounded-sm border border-gray-100 bg-white p-5 shadow sm:flex-row sm:items-center'>

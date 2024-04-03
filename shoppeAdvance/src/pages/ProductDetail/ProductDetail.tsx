@@ -17,6 +17,14 @@ import { convert } from 'html-to-text'
 import { Head } from 'src/components/head'
 
 export default function ProductDetail() {
+
+
+  const navigate = useNavigate()
+
+  const navigateToPageShop = () => {
+    window.location.href = '/admin-shop';
+  };
+
   const queryClient = useQueryClient()
   const [buyCount, setBuyCount] = useState(1)
   const { nameId } = useParams()
@@ -28,12 +36,15 @@ export default function ProductDetail() {
   const [currentIndexImages, setCurrentIndexImages] = useState([0, 5])
   const [activeImage, setActiveImage] = useState('')
   const product = productDetailData?.data.data
+  // console.log(product)
   const imageRef = useRef<HTMLImageElement>(null)
   const currentImages = useMemo(
-    () => (product ? product.images.slice(...currentIndexImages) : []),
+    () => (product ? product.productImages.map(image => image.urlimg).slice(...currentIndexImages) : []),
     [product, currentIndexImages]
-  )
-  const queryConfig: ProductListConfig = { limit: '20', page: '1', category: product?.category._id }
+);
+// console.log(currentImages)
+
+  const queryConfig: ProductListConfig = { limit: '20', page: '1', category: "1" }
 
   const { data: productsData } = useQuery({
     queryKey: ['products', queryConfig],
@@ -44,20 +55,15 @@ export default function ProductDetail() {
     enabled: Boolean(product)
   })
   const addToCartMutation = useMutation(purchaseApi.addToCart)
-  const navigate = useNavigate()
-
-  const navigateToPageShop = () => {
-    window.location.href = '/admin-shop';
-  };
 
   useEffect(() => {
-    if (product && product.images.length > 0) {
-      setActiveImage(product.images[0])
+    if (product && product.productImages.length > 0) {
+      setActiveImage(product.productImages[0].urlimg)
     }
   }, [product])
 
   const next = () => {
-    if (currentIndexImages[1] < (product as ProductType).images.length) {
+    if (currentIndexImages[1] < (product as ProductType).productImages.length) {
       setCurrentIndexImages((prev) => [prev[0] + 1, prev[1] + 1])
     }
   }
@@ -101,8 +107,12 @@ export default function ProductDetail() {
   }
 
   const addToCart = () => {
+    // Retrieve customerId from localStorage
+    const customerId = parseInt(localStorage.getItem('id') || '0', 10);
+    console.log({ customerId:customerId as number, productId: product?.id as number, quantity: buyCount })
     addToCartMutation.mutate(
-      { buy_count: buyCount, product_id: product?._id as string },
+      
+      { customerId:customerId as number, productId: product?.id as number, quantity: buyCount },
       {
         onSuccess: (data) => {
           toast.success(data.data.message, { autoClose: 1000 })
@@ -112,20 +122,31 @@ export default function ProductDetail() {
     )
   }
 
-  const buyNow = async () => {
-    const res = await addToCartMutation.mutateAsync({ buy_count: buyCount, product_id: product?._id as string })
-    const purchase = res.data.data
-    navigate(path.cart, {
-      state: {
-        purchaseId: purchase._id
-      }
-    })
-  }
+  // const buyNow = async () => {
+  //   const res = await addToCartMutation.mutateAsync({ buy_count: buyCount, product_id:  product?.id as number  })
+  //   const purchase = res.data.data
+  //   navigate(path.cart, {
+  //     state: {
+  //       purchaseId: purchase._id
+  //     }
+  //   })
+  // }
+
+  const [selectedProductId, setSelectedProductId] = useState<number | null>(null);
+  const handleItemClick = (productId: number) => {
+      setSelectedProductId(productId);
+      // Perform any other actions you want when an item is clicked
+  };
+
+  const [selectColor, setSelectColor] = useState<string>('');
+  const handleItemClickColor = (color: string) => {
+      setSelectColor(color);
+  };
 
   if (!product) return null
   return (
     <div className='bg-gray-200 py-6'>
-      {/* <Helmet>
+      <Helmet>
         <title>{product.name} | Shopee Clone</title>
         <meta
           name='description'
@@ -135,7 +156,7 @@ export default function ProductDetail() {
             }
           })}
         />
-      </Helmet> */}
+      </Helmet>
       <Head title={product.name} description={product.description} />
       <div className='container'>
         <div className='bg-white p-4 shadow'>
@@ -156,7 +177,7 @@ export default function ProductDetail() {
               <div className='relative mt-4 grid grid-cols-5 gap-1'>
                 <button
                   className='absolute left-0 top-1/2 z-10 h-9 w-5 -translate-y-1/2 bg-black/20 text-white'
-                  onClick={prev}
+                  // onClick={prev}
                 >
                   <svg
                     xmlns='http://www.w3.org/2000/svg'
@@ -184,7 +205,7 @@ export default function ProductDetail() {
                 })}
                 <button
                   className='absolute right-0 top-1/2 z-10 h-9 w-5 -translate-y-1/2 bg-black/20 text-white'
-                  onClick={next}
+                  // onClick={next}
                 >
                   <svg
                     xmlns='http://www.w3.org/2000/svg'
@@ -203,9 +224,9 @@ export default function ProductDetail() {
               <h1 className='text-xl font-medium uppercase'>{product.name}</h1>
               <div className='mt-8 flex items-center'>
                 <div className='flex items-center'>
-                  <span className='mr-1 border-b border-b-orange text-orange'>{product.rating}</span>
+                  <span className='mr-1 border-b border-b-orange text-orange'>{product.view}</span>
                   <ProductRating
-                    rating={product.rating}
+                    rating={product.view}
                     activeClassname='fill-orange text-orange h-4 w-4'
                     nonActiveClassname='fill-gray-300 text-gray-300 h-4 w-4'
                   />
@@ -217,11 +238,28 @@ export default function ProductDetail() {
                 </div>
               </div>
               <div className='mt-8 flex items-center bg-gray-50 px-5 py-4'>
-                <div className='text-gray-500 line-through'>₫{formatCurrency(product.price_before_discount)}</div>
+                <div className='text-gray-500 line-through'>₫{formatCurrency(product.price)}</div>
                 <div className='ml-3 text-3xl font-medium text-orange'>₫{formatCurrency(product.price)}</div>
                 <div className='ml-4 rounded-sm bg-orange px-1 py-[2px] text-xs font-semibold uppercase text-white'>
-                  {rateSale(product.price_before_discount, product.price)} giảm
+                  {rateSale(product.price, product.price)} giảm
                 </div>
+              </div>
+              <div className='mt-8  items-center bg-gray-50 px-5 py-4'>
+                <h1>Thông tin Size</h1>
+                {product.productSize.map((items) => (
+                  <div key={items.id}  className={`items-center border-2 cursor-pointer rounded-sm px-4 py-2 mt-2 ${selectedProductId === items.id ? 'border-blue-500' : 'border-gray-300'}`}   onClick={() => handleItemClick(items.id)}> 
+                  <p>Size: {items.size}</p>
+                  <p>Số lượng trong kho: {items.quantity}</p>
+                </div>
+            ))}
+              </div>
+              <div className='mt-8  items-center bg-gray-50 px-5 py-4'>
+                <h1>Thông tin màu</h1>
+                {product.colors.split("-").map((items, index) => (
+                  <div key={index}  className={`items-center border-2 cursor-pointer rounded-sm px-4 py-2 mt-2 ${selectColor == items ? 'border-blue-500' : 'border-gray-300'}`}   onClick={() => handleItemClickColor(items)}> 
+                  <p>Màu: {items}</p>
+                </div>
+            ))}
               </div>
               <div className='mt-8 flex items-center'>
                 <div className='capitalize text-gray-500'>Số lượng</div>
@@ -230,9 +268,9 @@ export default function ProductDetail() {
                   onIncrease={handleBuyCount}
                   onType={handleBuyCount}
                   value={buyCount}
-                  max={product.quantity}
+                  max={product.stockQuantity}
                 />
-                <div className='ml-6 text-sm text-gray-500'>{product.quantity} sản phẩm có sẵn</div>
+                <div className='ml-6 text-sm text-gray-500'>{product.stockQuantity} sản phẩm có sẵn</div>
               </div>
               <div className='mt-8 flex items-center'>
                 <button
@@ -265,7 +303,7 @@ export default function ProductDetail() {
                   Thêm vào giỏ hàng
                 </button>
                 <button
-                  onClick={buyNow}
+                  // onClick={buyNow}
                   className='fkex ml-4 h-12 min-w-[5rem] items-center justify-center rounded-sm bg-orange px-5 capitalize text-white shadow-sm outline-none hover:bg-orange/90'
                 >
                   Mua ngay
@@ -278,13 +316,33 @@ export default function ProductDetail() {
       <div className='mt-8'>
         <div className='container'>
           <div className=' bg-white p-4 shadow'>
-            <div className='rounded bg-gray-50 p-4 text-lg capitalize text-slate-700'>Mô tả sản phẩm</div>
-            <div className='mx-4 mt-12 mb-4 text-sm leading-loose'>
+            <div className='rounded bg-gray-50 p-4 text-lg capitalize text-slate-700'>Mô tả Chi tiết</div>
+            <div className='mx-4 mt-12 mb-4 text-lg leading-loose'>
+              
+              {product.description.split('-').map((line, index) => (
               <div
+              key={index}
                 dangerouslySetInnerHTML={{
-                  __html: DOMPurify.sanitize(product.description)
+                  
+                  __html: DOMPurify.sanitize(line)
                 }}
               />
+          ))}
+            </div>
+          </div>
+
+          <div className=' bg-white p-4 shadow'>
+            <div className='rounded bg-gray-50 p-4 text-lg capitalize text-slate-700'>Mô tả sản phẩm</div>
+            <div className='mx-4 mt-12 mb-4 text-lg leading-loose'>
+            {product.shortDescription.split('-').map((line, index) => (
+              <div
+              key={index}
+
+                dangerouslySetInnerHTML={{
+                  __html: DOMPurify.sanitize(line)
+                }}
+              />
+          ))}
             </div>
           </div>
         </div>
@@ -332,7 +390,7 @@ export default function ProductDetail() {
       <div className='mt-8'>
         <div className='container'>
           <div className='uppercase text-gray-400'>CÓ THỂ BẠN CŨNG THÍCH</div>
-          {productsData && (
+          {/* {productsData && (
             <div className='mt-6 grid grid-cols-2 gap-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6'>
               {productsData.data.data.products.map((product) => (
                 <div className='col-span-1' key={product._id}>
@@ -340,7 +398,7 @@ export default function ProductDetail() {
                 </div>
               ))}
             </div>
-          )}
+          )} */}
         </div>
       </div>
     </div>

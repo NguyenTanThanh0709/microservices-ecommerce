@@ -2,17 +2,25 @@ import { Purchase, PurchaseListStatus } from 'src/types/purchase.type'
 import { SuccessResponse } from 'src/types/utils.type'
 import http from 'src/utils/http'
 
-const URL = 'purchases'
+const URL = 'api/v1/carts'
+
+interface GetPurchasesParams {
+  iduser: number;
+}
 
 const purchaseApi = {
-  addToCart(body: { product_id: string; buy_count: number }) {
-    return http.post<SuccessResponse<Purchase>>(`${URL}/add-to-cart`, body)
+  addToCart(body: { customerId:number;productId: number; quantity: number }) {
+    return http.post<SuccessResponse<Purchase>>(`${URL}/create`, body)
   },
-  getPurchases(params: { status: PurchaseListStatus }) {
-    return http.get<SuccessResponse<Purchase[]>>(`${URL}`, {
-      params
-    })
-  },
+  getPurchases(idUser: number, token: string) {
+    const params: GetPurchasesParams = { iduser: idUser };
+    return http.get<SuccessResponse<Purchase[]>>(`${URL}/carts-user-data`, { 
+      params,
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    });
+  },  
   buyProducts(body: { product_id: string; buy_count: number }[]) {
     return http.post<SuccessResponse<Purchase[]>>(`${URL}/buy-products`, body)
   },

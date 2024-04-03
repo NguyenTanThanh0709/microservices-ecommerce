@@ -1,6 +1,8 @@
 package com.product.productservice.controller;
 
 import com.example.commonservice.DTO.ProductDTO;
+import com.product.productservice.DTO.Reponse.ProductReponSingle;
+import com.product.productservice.DTO.Reponse.ProductReponse;
 import com.product.productservice.entity.ProductEntity;
 import com.product.productservice.service.impl.ProductImpl;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,26 +16,12 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("api/v1/products")
+@RequestMapping("/api/v1/products")
 public class ProductController {
 
     @Autowired
     private ProductImpl productimpl;
 
-
-    @GetMapping("/hello1")
-    public String hello(){
-        return  "Hello ";
-    }
-
-    @PostMapping("/")
-    public ResponseEntity<?> addProduct(@RequestBody ProductDTO product) {
-        if(!product.isValid()){
-            return new ResponseEntity<>("Vui lòng điền đầy đủ thông tin của sản phẩm.", HttpStatus.BAD_REQUEST);
-        }
-        ProductEntity newProduct = productimpl.addProduct(product);
-        return new ResponseEntity<>(newProduct, HttpStatus.CREATED);
-    }
 
     @GetMapping("/brand")
     public ResponseEntity<?> getBYBrand(@RequestParam Long idbrand) {
@@ -41,13 +29,28 @@ public class ProductController {
         return new ResponseEntity<>(newProduct, HttpStatus.OK);
     }
 
+
+
     @GetMapping("/")
     public ResponseEntity<?> getAll(@RequestParam(defaultValue = "0") int page,
-                                    @RequestParam(defaultValue = "10") int size) {
+                                    @RequestParam(defaultValue = "30") int size) {
         Pageable pageable = PageRequest.of(page, size);
-        Page<ProductEntity> productPage = productimpl.findAll(pageable);
-        return new ResponseEntity<>(productPage.getContent(), HttpStatus.OK);
+        ProductReponse productPage = productimpl.findAll(pageable);
+        return new ResponseEntity<>(productPage, HttpStatus.OK);
     }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<?> getOne(@PathVariable Long id) {
+        ProductReponSingle productOptional = productimpl.findOneById(id);
+        return new ResponseEntity<>(productOptional, HttpStatus.OK);
+    }
+
+    @GetMapping("/one/{id}")
+    public ResponseEntity<?> getOneone(@PathVariable Long id) {
+        ProductEntity productOptional = productimpl.findOneByIdone(id);
+        return new ResponseEntity<>(productOptional, HttpStatus.OK);
+    }
+
 
     @GetMapping("/user")
     public ResponseEntity<?> getAll(@RequestParam Long iduser) {

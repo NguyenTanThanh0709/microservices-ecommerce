@@ -2,6 +2,8 @@ package com.cart.cartservice.controller;
 
 import com.cart.cartservice.entity.CartEntity;
 import com.cart.cartservice.entity.CartItemEntity;
+import com.cart.cartservice.reponse.CartReponse;
+import com.cart.cartservice.reponse.CartReponseWithMessage;
 import com.cart.cartservice.service.ICart;
 import com.cart.cartservice.service.impl.CartImpl;
 import com.example.commonservice.DTO.CartDTO;
@@ -75,5 +77,25 @@ public class CartController {
             return ResponseEntity.notFound().build();
         }
     }
+
+
+    @GetMapping("/carts-user/{idUser}")
+    public ResponseEntity<List<CartReponse>> findCartByUserHave(@PathVariable Long idUser, @RequestHeader("Authorization") String token) {
+        List<CartReponse> cartResponseList = cartService.findCartByUserHave(idUser, token);
+        return new ResponseEntity<>(cartResponseList, HttpStatus.OK);
+    }
+
+    @GetMapping("/carts-user-data")
+    public ResponseEntity<CartReponseWithMessage> findCartByUserHavedata(@RequestParam Long iduser, @RequestHeader("Authorization") String token) {
+        CartReponseWithMessage cartResponseWithMessage = cartService.getCartWithMessage(iduser, token);
+        if (cartResponseWithMessage != null) {
+            return ResponseEntity.ok()
+                    .body(cartResponseWithMessage);
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(null); // You can customize the response body accordingly
+        }
+    }
+
 
 }

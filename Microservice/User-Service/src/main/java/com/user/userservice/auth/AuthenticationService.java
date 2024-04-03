@@ -58,6 +58,8 @@ public class AuthenticationService {
                 .role(savedUser.getRoles())
                 .phone(savedUser.getPhoneNumber())
                 .email(savedUser.getEmail())
+                .id(savedUser.getId())
+                .address(user.getAddress())
                 .build();
     }
 
@@ -80,6 +82,8 @@ public class AuthenticationService {
                 .role(user.getRoles())
                 .phone(user.getPhoneNumber())
                 .email(user.getEmail())
+                .id(user.getId())
+                .address(user.getAddress())
                 .build();
     }
 

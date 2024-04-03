@@ -25,5 +25,9 @@ public class Brand{
     @JsonIgnore
     List<ProductEntity> products;
 
+    public void addProdcut(ProductEntity product){
+        products.add(product);
+    }
+
 
 }

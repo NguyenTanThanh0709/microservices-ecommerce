@@ -9,6 +9,7 @@ import Input from 'src/components/Input'
 import { ErrorResponse } from 'src/types/utils.type'
 import { userSchema, UserSchema } from 'src/utils/rules'
 import { isAxiosUnprocessableEntityError } from 'src/utils/utils'
+import axios, { AxiosResponse } from 'axios';
 
 type FormData = Pick<UserSchema, 'password' | 'new_password' | 'confirm_password'>
 const passwordSchema = userSchema.pick(['password', 'new_password', 'confirm_password'])
@@ -28,12 +29,38 @@ export default function ChangePassword() {
     },
     resolver: yupResolver(passwordSchema)
   })
-  const updateProfileMutation = useMutation(userApi.updateProfile)
+
+  const updateUserPassword = async ( updatePassword: FormData): Promise<string> => {
+    try {
+      const token = localStorage.getItem('accessToken');
+      const userId = localStorage.getItem('id');
+      if (!token || !userId) {
+        throw new Error('Access token or user ID not found in localStorage');
+      }
+        if (!token) {
+          throw new Error('Access token not found');
+        }
+      const response: AxiosResponse<string> = await axios.patch(`http://localhost:8222/api/v1/users/${userId}/update-password`, updatePassword,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      }
+      );
+      alert(response.data.toString())
+      return response.data; // Assuming the response contains a message
+    } catch (error) {
+      alert("Update không thành công")
+      throw new Error('An error occurred while updating password.');
+    }
+  };
 
   const onSubmit = handleSubmit(async (data) => {
+    console.log(data)
     try {
-      const res = await updateProfileMutation.mutateAsync(omit(data, ['confirm_password']))
-      toast.success(res.data.message)
+      const res = await updateUserPassword(data)
+      toast.success(res)
       reset()
     } catch (error) {
       if (isAxiosUnprocessableEntityError<ErrorResponse<FormData>>(error)) {

@@ -62,22 +62,13 @@ export default function Register() {
       onSuccess: (data) => {
         console.log('dataRegister Mutation', data)
         setIsAuthenticated(true)
-        setProfile(data.data.data.user)
+        setProfile(data.data)
         navigate('/')
       },
       onError: (error) => {
         if (isAxiosUnprocessableEntityError<SuccessResponse<Omit<IAuthSchema, 'confirm_password'>>>(error)) {
           const formError = error.response?.data?.data
-          // case 1
-          // if (formError?.email) {
-          //   // after setError, the error will be show in the input of error response from server
-          //   setError('email', {
-          //     type: 'Server',
-          //     message: formError.email
-          //   })
-          // }
-
-          // but in case have many error, we can use Object.keys to loop all error
+ console.log('formError', formError)
           if (formError) {
             Object.keys(formError).forEach((key) => {
               setError(

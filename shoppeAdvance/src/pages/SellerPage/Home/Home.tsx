@@ -3,6 +3,7 @@ import Navbar from 'src/pages/SellerPage/components/Navbar/Navbar';
 import { Container, Row, Col } from 'react-bootstrap';
 import ProductTable from '../ListProduct/ProductTable';
 import ListOrder from '../ListOrder/ListOrder';
+import Form_ADD_UPDATE_PRODCUT from '../Form_ADD_UPDATE_PRODCUT/Form_ADD_UPDATE_PRODCUT';
 
 export default function Home() {
   // Dữ liệu mẫu cho các sản phẩm
@@ -21,7 +22,8 @@ export default function Home() {
             <Col lg={3}><Navbar/></Col>
             <Col lg={9} className='p-4 sm:ml-60'>
               {/* <ProductTable products={products} /> */}
-              <ListOrder/>
+              {/* <ListOrder/> */}
+              <Form_ADD_UPDATE_PRODCUT/>
             </Col>
           </Row>
         </div>

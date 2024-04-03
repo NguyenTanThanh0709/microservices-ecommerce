@@ -11,15 +11,11 @@ import org.springframework.web.client.RestTemplate;
 @SpringBootApplication
 @EnableDiscoveryClient
 @ComponentScan({"com.cart.cartservice", "com.example.commonservice"})
+
 public class CartServiceApplication {
 
 	public static void main(String[] args) {
 		SpringApplication.run(CartServiceApplication.class, args);
 	}
 
-	@Bean
-	@LoadBalanced
-	public RestTemplate restTemplate(){
-		return new RestTemplate();
-	}
 }

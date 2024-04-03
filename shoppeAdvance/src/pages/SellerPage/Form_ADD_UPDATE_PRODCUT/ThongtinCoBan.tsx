@@ -1,27 +1,45 @@
 import React, { useState, useEffect } from "react";
-import { categories } from 'src/constants/contant';
+import { categories, ThongtinCoBan_ , Product} from 'src/constants/contant';
 
-const ThongtinCoBan: React.FC = () => {
+
+
+const ThongtinCoBan: React.FC<{ updateFormDataProduct: (data: Partial<Product>) => void }> = ({ updateFormDataProduct }) => {
+
+
+
   const [imagePreviews, setImagePreviews] = useState<string[]>([]);
   const [video, setVideo] = useState<File | null>(null);
+  const [imgs, setImgs] = useState<File[] | null>(null);
   const [productName, setProductName] = useState<string>('');
   const [productDescription, setProductDescription] = useState<string>('');
   const [showModal, setShowModal] = useState<boolean>(false);
   const [selectedCategory, setSelectedCategory] = useState<string>('');
   const [selectedSubcategory, setSelectedSubcategory] = useState<string>('');
   const [selectedItem, setSelectedItem] = useState<string>('');
-  const [selectedSubcategorys, setSelectedSubcategorys] = useState<any>();
+  const [selectedSubcategorys, setSelectedSubcategorys] = useState<any>({});
   const [selectedItems, setSelectedItems] = useState<string[]>([]);
+
+  const [formData, setFormData] = useState<ThongtinCoBan_>({
+    name: '',
+    shortDescription: '',
+    category: '',
+    images: [],
+    videourl: null
+  });
 
   const selectFiles = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files) {
+      const selectedFiles: File[] = Array.from(event.target.files); // Chuyển HTMLCollection thành mảng File
+      setImgs(selectedFiles); // Cập nhật state imgs với danh sách các file đã chọn
+  
       const images: string[] = [];
-      for (let i = 0; i < event.target.files.length; i++) {
-        images.push(URL.createObjectURL(event.target.files[i]));
+      for (let i = 0; i < selectedFiles.length; i++) {
+        images.push(URL.createObjectURL(selectedFiles[i]));
       }
       setImagePreviews(images);
     }
   };
+  
 
   const handleVideoChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files) {
@@ -53,6 +71,8 @@ const ThongtinCoBan: React.FC = () => {
   const handleSubcategoryChange = (subcategory: string) => {
     setSelectedSubcategory(subcategory);
     setSelectedItems(categories[selectedCategory][subcategory]);
+    setSelectedItem('');
+
   };
   
 
@@ -65,6 +85,81 @@ const ThongtinCoBan: React.FC = () => {
     setShowModal(false)
   };
 
+  useEffect(() => {
+    setFormData((prevFormData) => ({
+      ...prevFormData,
+      name: productName,
+    }));
+  }, [productName]);
+  
+  useEffect(() => {
+    setFormData((prevFormData) => ({
+      ...prevFormData,
+      shortDescription: productDescription,
+    }));
+  }, [productDescription]);
+  
+  useEffect(() => {
+    setFormData((prevFormData) => ({
+      ...prevFormData,
+      category: `${selectedCategory} - ${selectedSubcategory} - ${selectedItem}`,
+    }));
+  }, [selectedCategory, selectedSubcategory, selectedItem]);
+  
+  useEffect(() => {
+    setFormData((prevFormData) => ({
+      ...prevFormData,
+      images: imgs || [],
+    }));
+  }, [imgs]);
+  
+  useEffect(() => {
+    setFormData((prevFormData) => ({
+      ...prevFormData,
+      videourl: video,
+    }));
+  }, [video]);
+  
+
+  const handleClick = () => {
+
+    if (
+      !productName.trim() ||
+      !productDescription.trim() ||
+      !selectedCategory.trim() ||
+      !selectedSubcategory.trim() ||
+      !selectedItem.trim() ||
+      !imgs ||
+      !video
+    ) {
+      // Hiển thị cảnh báo nếu có trường nào đó rỗng, null hoặc trống
+      alert("Vui lòng điền đầy đủ thông tin sản phẩm!");
+      return;
+    }
+
+
+    setFormData({
+      name: productName,
+      shortDescription: productDescription,
+      category: `${selectedCategory} - ${selectedSubcategory} - ${selectedItem}`,
+      images: imgs || [], // Sử dụng imgs nếu có, nếu không sử dụng mảng rỗng
+      videourl: video,
+    });
+
+    updateFormDataProduct({
+      name: productName,
+      shortDescription: productDescription,
+      category: `${selectedCategory} - ${selectedSubcategory} - ${selectedItem}`,
+      imgs: imgs || [], // Sử dụng imgs nếu có, nếu không sử dụng mảng rỗng
+      video: video,
+  });
+
+
+    console.log(formData);
+
+  };
+
+  // console.log(categories  )
   return (
     <>
       <div className="m-4 p-4">
@@ -173,7 +268,7 @@ const ThongtinCoBan: React.FC = () => {
         <h1 className="text-red-500 text-xl font-semibold mb-4">Ngành hàng sản phẩm</h1>
         <div className="row m-4 p-4">
           <div className="cursor-pointer text-xl" onClick={() => setShowModal(true)}>Click Chọn nhành hàng</div>
-          <div>{selectedSubcategory} - {selectedSubcategory} - {selectedItem}</div>
+          <div>{selectedCategory} - {selectedSubcategory} - {selectedItem}</div>
         </div>
       </div>
 
@@ -239,6 +334,14 @@ const ThongtinCoBan: React.FC = () => {
           <div className="opacity-25 fixed inset-0 z-40 bg-black"></div>
         </>
       ) : null}
+
+                  <button
+                    className="bg-emerald-500 text-white active:bg-emerald-600 font-bold uppercase px-6 py-3 rounded shadow hover:shadow-lg outline-none focus:outline-none mr-1 mb-1 ease-linear transition-all duration-150"
+                    type="button"
+                    onClick={handleClick}
+                  >
+                    Save
+                  </button>
     </>
   );
 };
