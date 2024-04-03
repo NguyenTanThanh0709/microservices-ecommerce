@@ -22,6 +22,7 @@ export default function ProductList() {
     keepPreviousData: true,
     staleTime: 3 * 60 * 1000
   })
+  console.log(queryConfig)
 
   // Product list use query to get data from server
   const { data: categoriesData } = useQuery({

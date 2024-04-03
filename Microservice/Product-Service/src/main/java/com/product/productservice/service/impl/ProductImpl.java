@@ -75,19 +75,42 @@ public class ProductImpl implements IProduct {
     }
 
     @Override
-    public ProductReponse findAll(Pageable pageable) {
+    public ProductReponse findAll(Pageable pageable, String name, String category,
+                                  int price_min, int price_max) {
         ProductReponse productReponse = new ProductReponse();
         productReponse.setMessage("Lấy các sản phẩm thành công");
-
         Pagination pagination = new Pagination();
         pagination.setPage(pagination.getPage());
         pagination.setPage_size(pagination.getPage_size());
         pagination.setLimit(pagination.getLimit());
 
         ProductData productData  = new ProductData();
+
+
+
+        if(name != null && !name.isEmpty() && category != null && !category.isEmpty() ){
+            productData.setProducts(productRepository.findByNameContainingIgnoreCaseAndCategoryContainingIgnoreCase(name,category,pageable).getContent());
+            productData.setPagination(pagination);
+            productReponse.setData(productData);
+            return  productReponse;
+        }
+
+        if(category != null && !category.isEmpty() ){
+            productData.setProducts(productRepository.findByCategoryContainingIgnoreCase(category,pageable).getContent());
+            productData.setPagination(pagination);
+            productReponse.setData(productData);
+            return  productReponse;
+        }
+
+        if(name != null && !name.isEmpty()){
+            productData.setProducts(getAllByLikeName(name,pageable));
+            productData.setPagination(pagination);
+            productReponse.setData(productData);
+            return  productReponse;
+        }
+
         productData.setProducts(productRepository.findAll(pageable).getContent());
         productData.setPagination(pagination);
-
         productReponse.setData(productData);
         return productReponse;
     }

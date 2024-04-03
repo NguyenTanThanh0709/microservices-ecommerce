@@ -97,7 +97,7 @@ export default function AsideFilter({ categories, queryConfig }: Props) {
       <div className='mt-4 mb-2 h-[1px] bg-gray-300' />
       <ul className='pl-2'>
         {categories.map((categoryItem) => {
-          const isActive = categoryItem._id === category
+          const isActive = categoryItem.name == category
           return (
             <li key={categoryItem._id} className='py-2'>
               <Link
@@ -107,7 +107,7 @@ export default function AsideFilter({ categories, queryConfig }: Props) {
                   // spread properties of queryConfig( it have query params exits)
                   search: createSearchParams({
                     ...queryConfig,
-                    category: categoryItem._id
+                    category: categoryItem.name
                   }).toString()
                 }}
                 className={clsx('relative flex items-center px-2', {

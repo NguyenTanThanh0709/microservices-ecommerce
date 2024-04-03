@@ -16,6 +16,8 @@ public interface ProductRepository extends JpaRepository<ProductEntity, Long> {
     Page<ProductEntity> findAll(Pageable pageable);
     List<ProductEntity> findByPhoneOwner(Long phoneOwner);
     Page<ProductEntity> findByNameContainingIgnoreCase(String name, Pageable pageable);
+    Page<ProductEntity> findByCategoryContainingIgnoreCase(String category, Pageable pageable);
+    Page<ProductEntity> findByNameContainingIgnoreCaseAndCategoryContainingIgnoreCase(String name, String category, Pageable pageable);
 
     @Query(value = "SELECT p FROM ProductEntity p WHERE LOWER(p.name) LIKE %:productName% " +
             "AND (p.brand.name IN :brandName OR (:brandName is null OR :brandName = '')) " +

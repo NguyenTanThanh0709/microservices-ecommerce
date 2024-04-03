@@ -13,8 +13,7 @@ import java.util.List;
 
 public interface IProduct {
     ProductEntity addProduct(ProductDTO productDTO, List<MultipartFile> files, MultipartFile file);
-    public ProductReponse findAll(Pageable pageable);
-
+    public ProductReponse findAll(Pageable pageable, String name, String category, int price_min, int price_max);
     List<ProductEntity> getAllByBrand(Long idBrand);
     List<ProductEntity> getAllByPhoneOwner(Long idOwner);
     List<ProductEntity> getAllByLikeName(String name, Pageable pageable);
