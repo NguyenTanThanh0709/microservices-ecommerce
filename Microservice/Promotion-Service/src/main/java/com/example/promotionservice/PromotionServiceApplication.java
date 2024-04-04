@@ -16,9 +16,5 @@ public class PromotionServiceApplication {
 	public static void main(String[] args) {
 		SpringApplication.run(PromotionServiceApplication.class, args);
 	}
-	@Bean
-	@LoadBalanced
-	public RestTemplate restTemplate(){
-		return new RestTemplate();
-	}
+
 }

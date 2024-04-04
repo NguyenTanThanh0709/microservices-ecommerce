@@ -2,6 +2,7 @@ package com.example.promotionservice.controller;
 
 import com.example.commonservice.DTO.PromotionDTO;
 import com.example.promotionservice.entity.DiscountAppEntity;
+import com.example.promotionservice.entity.DiscountCodeEntity;
 import com.example.promotionservice.service.IDiscountCode;
 import com.example.promotionservice.service.impl.PromitonImpl;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,9 +21,9 @@ public class PromotionAPI {
     @Autowired
     private IDiscountCode discountCode;
 
-    @GetMapping("/hello1")
-    public String string(){
-        return "null112121";
+    @GetMapping("/user/{userId}")
+    public List<DiscountCodeEntity> getDiscountCodesByUserId(@PathVariable("userId") Long userId) {
+        return discountCode.findDiscountCodesByUserId(userId);
     }
 
     @PostMapping("/")
@@ -35,9 +36,25 @@ public class PromotionAPI {
         }
     }
 
+    @PutMapping("/{id}")
+    public ResponseEntity<?> updatePromotion(@PathVariable Long id, @RequestBody PromotionDTO promotionDTO) {
+        promotionDTO.setId(id); // Set id cho PromotionDTO từ đường dẫn URL
+        List<DiscountAppEntity> updatedDiscounts = promiton.updateDiscount(promotionDTO);
+        if (updatedDiscounts == null) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to update promotion.");
+        } else {
+            return ResponseEntity.ok(updatedDiscounts);
+        }
+    }
+
     @GetMapping("/product/{idProduct}")
     public List<DiscountAppEntity> getDiscountAppsByProductId(@PathVariable Long idProduct) {
         return promiton.findByProductId(idProduct);
+    }
+
+    @GetMapping("/{id}")
+    public DiscountCodeEntity    getDiscountAppsById(@PathVariable Long id) {
+        return promiton.findById(id);
     }
 
     @GetMapping("/product-between-day/{idProduct}")

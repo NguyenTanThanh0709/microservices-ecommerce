@@ -171,6 +171,25 @@ export const categories: Categories = {
     address: string;
   }
 
+  export interface DiscountCode {
+    id: number;
+    name: string;
+    description: string;
+    code: string;
+    isActive: boolean;
+    startDate: string;
+    endDate: string;
+    discountValue: number;
+    idUser: number;
+    discountApps: DiscountApp[];
+}
+
+interface DiscountApp {
+    id: number;
+    idProduct: number;
+}
+
+
 
   // Các hằng số categories
 // export const categories: Categories = {

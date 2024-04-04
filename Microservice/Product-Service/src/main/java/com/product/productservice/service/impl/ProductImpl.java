@@ -77,7 +77,7 @@ public class ProductImpl implements IProduct {
     @Override
     public ProductReponse findAll(Pageable pageable, String name, String category,
                                   Double price_min, Double price_max,
-                                  String  sort_by,String order) {
+                                  String  sort_by,String order, Integer rating_filter) {
         ProductReponse productReponse = new ProductReponse();
         productReponse.setMessage("Lấy các sản phẩm thành công");
         Pagination pagination = new Pagination();
@@ -87,7 +87,7 @@ public class ProductImpl implements IProduct {
 
         ProductData productData  = new ProductData();
 
-        productData.setProducts(productRepository.findAllWithFiltersAndSorting(name,category,price_min,price_max,sort_by,order,pageable).getContent());
+        productData.setProducts(productRepository.findAllWithFiltersAndSorting(name,category,price_min,price_max,sort_by,order,rating_filter,pageable).getContent());
         productData.setPagination(pagination);
         productReponse.setData(productData);
         return productReponse;

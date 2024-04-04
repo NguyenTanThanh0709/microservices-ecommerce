@@ -1,5 +1,6 @@
 package com.example.promotionservice.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -15,10 +16,9 @@ public class DiscountAppEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
     @ManyToOne
     @JoinColumn(name = "discount_code_id", referencedColumnName = "id")
+    @JsonIgnore
     private DiscountCodeEntity discountCode;
-
     private Long IdProduct;
 }

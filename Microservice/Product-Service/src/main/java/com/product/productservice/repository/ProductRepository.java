@@ -23,6 +23,7 @@ public interface ProductRepository extends JpaRepository<ProductEntity, Long> {
             "WHERE (:name IS NULL OR lower(p.name) LIKE %:name%) " +
             "AND (:category IS NULL OR lower(p.category) LIKE %:category%) " +
             "AND (:price_min IS NULL OR p.price >= :price_min) " +
+            "AND (:rating_filter IS NULL OR p.rating >= :rating_filter) " +
             "AND (:price_max IS NULL OR p.price <= :price_max) " +
             "ORDER BY " +
             "CASE " +
@@ -41,6 +42,7 @@ public interface ProductRepository extends JpaRepository<ProductEntity, Long> {
                                                      @Param("price_max") Double price_max,
                                                      @Param("sortBy") String sortBy,
                                                      @Param("order") String order,
+                                                     @Param("rating_filter") Integer rating_filter,
                                                      Pageable pageable);
 
 

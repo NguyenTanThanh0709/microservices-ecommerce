@@ -32,6 +32,7 @@ const purchaseApi = {
       data: purchaseIds
     })
   }
+  
 }
 
 export default purchaseApi

@@ -39,10 +39,11 @@ public class ProductController {
                                     @RequestParam(required = false) Double price_min,
                                     @RequestParam(required = false) Double price_max,
                                     @RequestParam(required = false) String sort_by,
-                                    @RequestParam(required = false) String order
+                                    @RequestParam(required = false) String order,
+                                    @RequestParam(required = false) Integer rating_filter
                                     ) {
         Pageable pageable = PageRequest.of(page, size);
-        ProductReponse productPage = productimpl.findAll(pageable,name, category, price_min, price_max, sort_by,order);
+        ProductReponse productPage = productimpl.findAll(pageable,name, category, price_min, price_max, sort_by,order, rating_filter);
         return new ResponseEntity<>(productPage, HttpStatus.OK);
     }
 

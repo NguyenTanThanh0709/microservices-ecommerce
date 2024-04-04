@@ -82,6 +82,11 @@ public class PromitonImpl implements IDiscountCode {
     }
 
     @Override
+    public DiscountCodeEntity findById(Long id) {
+        return discountCodeRepository.findById(id).get();
+    }
+
+    @Override
     public List<DiscountAppEntity> findByProductIdBetweenDate(Long idProduct) {
         // Lấy danh sách các DiscountAppEntity theo IdProduct
         List<DiscountAppEntity> list = discountAppRepository.findByProductId(idProduct);
@@ -110,4 +115,54 @@ public class PromitonImpl implements IDiscountCode {
     public void updateDiscountCodeStatus(Long id, boolean isActive) {
         discountCodeRepository.updateDiscountCodeStatus(id, isActive);
     }
+
+    @Override
+    public List<DiscountCodeEntity> findDiscountCodesByUserId(Long idUser) {
+        return discountCodeRepository.findByIdUser(idUser);
+    }
+
+    @Override
+    @Transactional
+    public List<DiscountAppEntity> updateDiscount(PromotionDTO promotionDTO) {
+        if(!promotionDTO.isValid()){
+            return null; // hoặc xử lý tùy thuộc vào logic của bạn
+        }
+
+        // Lấy ra đối tượng DiscountCodeEntity cần cập nhật
+        DiscountCodeEntity existingDiscount = entityManager.find(DiscountCodeEntity.class, promotionDTO.getId());
+        if (existingDiscount == null) {
+            return null; // hoặc xử lý tùy thuộc vào logic của bạn
+        }
+
+        // Cập nhật thông tin từ PromotionDTO vào DiscountCodeEntity
+        existingDiscount.setName(promotionDTO.getName());
+        existingDiscount.setDescription(promotionDTO.getDescription());
+        existingDiscount.setCode(promotionDTO.getCode());
+        existingDiscount.setIsActive(promotionDTO.getIsActive());
+        existingDiscount.setStartDate(promotionDTO.getStartDate());
+        existingDiscount.setEndDate(promotionDTO.getEndDate());
+        existingDiscount.setDiscountValue(promotionDTO.getDiscountValue());
+        existingDiscount.setIdUser(promotionDTO.getIdUser());
+
+        // Xóa các discountAppEntity cũ của đối tượng DiscountCodeEntity
+        entityManager.createQuery("DELETE FROM DiscountAppEntity WHERE discountCode = :discountCode")
+                .setParameter("discountCode", existingDiscount)
+                .executeUpdate();
+
+        // Thêm các discountAppEntity mới từ danh sách idProducts của PromotionDTO
+        List<DiscountAppEntity> discountAppEntities = new ArrayList<>();
+        for(Long idProduct : promotionDTO.getIdProducts()){
+            DiscountAppEntity discountAppEntity = new DiscountAppEntity();
+            discountAppEntity.setDiscountCode(existingDiscount);
+            discountAppEntity.setIdProduct(idProduct);
+            discountAppEntities.add(discountAppEntity);
+        }
+
+        // Lưu lại các thay đổi vào cơ sở dữ liệu
+        entityManager.merge(existingDiscount);
+        saveDiscountAppEntities(discountAppEntities);
+
+        return  discountAppEntities;
+    }
+
 }

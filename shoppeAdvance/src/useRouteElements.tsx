@@ -7,6 +7,8 @@ import MainLayout from './layouts/MainLayout'
 import RegisterLayout from './layouts/RegisterLayout'
 import UserLayout from './pages/User/layouts/UserLayout'
 import ShopInfo from './pages/ShopInfo'
+import Promotion from './pages/SellerPage/Promotion/Promotion'
+import PromotionList from './pages/SellerPage/Promotion/PromotionList'
 
 const Login = lazy(() => import('./pages/Login'))
 const ProductList = lazy(() => import('./pages/ProductList'))
@@ -127,6 +129,18 @@ export default function useRouteElements() {
         <MainLayout>
           <ShopInfo />
         </MainLayout>
+      )
+    },
+    {
+      path: path.pageFormPromotion,
+      element: (
+          <Promotion />
+      )
+    },
+    {
+      path: path.pageListPromotion,
+      element: (
+          <PromotionList />
       )
     },
   ])

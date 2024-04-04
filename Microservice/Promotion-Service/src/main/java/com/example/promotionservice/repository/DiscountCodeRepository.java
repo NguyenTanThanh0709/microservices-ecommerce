@@ -12,6 +12,7 @@ import org.springframework.stereotype.Repository;
 import org.springframework.data.domain.Pageable;
 
 import java.time.ZonedDateTime;
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -33,4 +34,6 @@ public interface DiscountCodeRepository extends JpaRepository<DiscountCodeEntity
     @Modifying
     @Query("UPDATE DiscountCodeEntity d SET d.isActive = :isActive WHERE d.id = :id")
     void updateDiscountCodeStatus(Long id, boolean isActive);
+
+    List<DiscountCodeEntity> findByIdUser(Long idUser);
 }

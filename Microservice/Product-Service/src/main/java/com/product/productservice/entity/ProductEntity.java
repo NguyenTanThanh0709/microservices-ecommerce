@@ -42,6 +42,7 @@ public class ProductEntity {
     private Double thetich_rong;
     private Double thetich_cao;
     private String colors;
+    private int rating;
 
     @Column(columnDefinition = "TIMESTAMP")
     private LocalDateTime createdAt;

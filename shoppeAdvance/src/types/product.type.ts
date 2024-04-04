@@ -8,6 +8,7 @@ export interface Product {
   stockQuantity: number;
   sold: number;
   view: number;
+  rating: number;
   urlVideo: string;
   category: string;
   cannangdonggoi: number;

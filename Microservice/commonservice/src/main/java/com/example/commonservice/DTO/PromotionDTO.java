@@ -19,6 +19,7 @@ public class PromotionDTO {
     private ZonedDateTime startDate;
     private ZonedDateTime endDate;
     private double discountValue; // Giá trị ưu đãi
+    private Long idUser;
     @ElementCollection
     private List<Long> idProducts;
 

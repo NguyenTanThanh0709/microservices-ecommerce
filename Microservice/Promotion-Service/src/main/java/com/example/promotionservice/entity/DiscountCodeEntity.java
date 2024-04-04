@@ -24,8 +24,8 @@ public class DiscountCodeEntity {
     private ZonedDateTime startDate;
     private ZonedDateTime endDate;
     private double discountValue; // Giá trị ưu đãi
+    private Long idUser;
 
     @OneToMany(mappedBy = "discountCode", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonIgnore
     private List<DiscountAppEntity> discountApps;
 }

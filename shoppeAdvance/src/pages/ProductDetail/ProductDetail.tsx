@@ -226,7 +226,7 @@ export default function ProductDetail() {
                 <div className='flex items-center'>
                   <span className='mr-1 border-b border-b-orange text-orange'>{product.view}</span>
                   <ProductRating
-                    rating={product.view}
+                    rating={product.rating}
                     activeClassname='fill-orange text-orange h-4 w-4'
                     nonActiveClassname='fill-gray-300 text-gray-300 h-4 w-4'
                   />
