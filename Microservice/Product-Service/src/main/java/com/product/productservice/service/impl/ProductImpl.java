@@ -76,7 +76,8 @@ public class ProductImpl implements IProduct {
 
     @Override
     public ProductReponse findAll(Pageable pageable, String name, String category,
-                                  int price_min, int price_max) {
+                                  Double price_min, Double price_max,
+                                  String  sort_by,String order) {
         ProductReponse productReponse = new ProductReponse();
         productReponse.setMessage("Lấy các sản phẩm thành công");
         Pagination pagination = new Pagination();
@@ -86,30 +87,7 @@ public class ProductImpl implements IProduct {
 
         ProductData productData  = new ProductData();
 
-
-
-        if(name != null && !name.isEmpty() && category != null && !category.isEmpty() ){
-            productData.setProducts(productRepository.findByNameContainingIgnoreCaseAndCategoryContainingIgnoreCase(name,category,pageable).getContent());
-            productData.setPagination(pagination);
-            productReponse.setData(productData);
-            return  productReponse;
-        }
-
-        if(category != null && !category.isEmpty() ){
-            productData.setProducts(productRepository.findByCategoryContainingIgnoreCase(category,pageable).getContent());
-            productData.setPagination(pagination);
-            productReponse.setData(productData);
-            return  productReponse;
-        }
-
-        if(name != null && !name.isEmpty()){
-            productData.setProducts(getAllByLikeName(name,pageable));
-            productData.setPagination(pagination);
-            productReponse.setData(productData);
-            return  productReponse;
-        }
-
-        productData.setProducts(productRepository.findAll(pageable).getContent());
+        productData.setProducts(productRepository.findAllWithFiltersAndSorting(name,category,price_min,price_max,sort_by,order,pageable).getContent());
         productData.setPagination(pagination);
         productReponse.setData(productData);
         return productReponse;

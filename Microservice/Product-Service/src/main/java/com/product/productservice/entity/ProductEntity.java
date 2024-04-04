@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.ColumnDefault;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -40,9 +41,10 @@ public class ProductEntity {
     private Double thetich_dai;
     private Double thetich_rong;
     private Double thetich_cao;
-
     private String colors;
 
+    @Column(columnDefinition = "TIMESTAMP")
+    private LocalDateTime createdAt;
 
 
     @OneToMany(mappedBy = "product", fetch = FetchType.LAZY, cascade = CascadeType.ALL)

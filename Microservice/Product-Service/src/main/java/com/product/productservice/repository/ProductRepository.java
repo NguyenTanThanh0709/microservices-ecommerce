@@ -19,6 +19,31 @@ public interface ProductRepository extends JpaRepository<ProductEntity, Long> {
     Page<ProductEntity> findByCategoryContainingIgnoreCase(String category, Pageable pageable);
     Page<ProductEntity> findByNameContainingIgnoreCaseAndCategoryContainingIgnoreCase(String name, String category, Pageable pageable);
 
+    @Query("SELECT p FROM ProductEntity p " +
+            "WHERE (:name IS NULL OR lower(p.name) LIKE %:name%) " +
+            "AND (:category IS NULL OR lower(p.category) LIKE %:category%) " +
+            "AND (:price_min IS NULL OR p.price >= :price_min) " +
+            "AND (:price_max IS NULL OR p.price <= :price_max) " +
+            "ORDER BY " +
+            "CASE " +
+            "  WHEN :sortBy = 'view' THEN p.view " +
+            "  WHEN :sortBy = 'sold' THEN p.sold " +
+            "  WHEN :sortBy = 'price' THEN " +
+            "    CASE " +
+            "      WHEN :order = 'desc' THEN -1 " +
+            "      ELSE 1 " +
+            "    END " +
+            "  ELSE 0 " +
+            "END")
+    Page<ProductEntity> findAllWithFiltersAndSorting(@Param("name") String name,
+                                                     @Param("category") String category,
+                                                     @Param("price_min") Double price_min,
+                                                     @Param("price_max") Double price_max,
+                                                     @Param("sortBy") String sortBy,
+                                                     @Param("order") String order,
+                                                     Pageable pageable);
+
+
     @Query(value = "SELECT p FROM ProductEntity p WHERE LOWER(p.name) LIKE %:productName% " +
             "AND (p.brand.name IN :brandName OR (:brandName is null OR :brandName = '')) " +
             "AND p.isPublished = TRUE ")
