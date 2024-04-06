@@ -10,7 +10,6 @@ import QuantityController from 'src/components/QuantityController'
 import { purchasesStatus } from 'src/constants/purchase'
 import { Product as ProductType, ProductListConfig } from 'src/types/product.type'
 import { formatCurrency, formatNumberToSocialStyle, getIdFromNameId, rateSale } from 'src/utils/utils'
-import Product from '../ProductList/components/Product'
 import path from 'src/constants/path'
 import { Helmet } from 'react-helmet-async'
 import { convert } from 'html-to-text'
@@ -122,15 +121,18 @@ export default function ProductDetail() {
     )
   }
 
-  // const buyNow = async () => {
-  //   const res = await addToCartMutation.mutateAsync({ buy_count: buyCount, product_id:  product?.id as number  })
-  //   const purchase = res.data.data
-  //   navigate(path.cart, {
-  //     state: {
-  //       purchaseId: purchase._id
-  //     }
-  //   })
-  // }
+  const buyNow = async () => {
+    const customerId = parseInt(localStorage.getItem('id') || '0', 10);
+    const res = await addToCartMutation.mutateAsync({ customerId:customerId as number, productId: product?.id as number, quantity: buyCount },)
+    const purchase = res.data
+    console.log(purchase)
+    navigate(path.cart, {
+      state: {
+        purchaseId: purchase.id.toString()
+      }
+    })
+    
+  }
 
   const [selectedProductId, setSelectedProductId] = useState<number | null>(null);
   const handleItemClick = (productId: number) => {
@@ -303,7 +305,7 @@ export default function ProductDetail() {
                   Thêm vào giỏ hàng
                 </button>
                 <button
-                  // onClick={buyNow}
+                  onClick={buyNow}
                   className='fkex ml-4 h-12 min-w-[5rem] items-center justify-center rounded-sm bg-orange px-5 capitalize text-white shadow-sm outline-none hover:bg-orange/90'
                 >
                   Mua ngay

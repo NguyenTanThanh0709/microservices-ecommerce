@@ -105,6 +105,11 @@ public class CartImpl implements ICart {
         return null;
     }
 
+    @Override
+    public void deleteCartItemById(Long id) {
+        cartItemRepository.deleteById(id);
+    }
+
 
     @Override
     public List<CartReponse> findCartByUserHave(Long idUser, String token) {
@@ -188,6 +193,11 @@ public class CartImpl implements ICart {
             return optionalCartItemEntity.get();
         }
         return null;
+    }
+
+    @Override
+    public void updateQuantityById(Long id, int quantity) {
+         cartItemRepository.updateQuantityById(id, quantity);
     }
 
 

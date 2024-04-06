@@ -13,7 +13,7 @@ import java.util.Set;
 public interface ICart {
     CartEntity createCartIExitsAddProduct(CartDTO cartDTO);
     CartEntity findCartByUser(Long iduser);
-
+    void deleteCartItemById(Long id);
     List<CartReponse> findCartByUserHave(Long idUser, String token);
 
     CartReponseWithMessage getCartWithMessage(Long idUser, String token);
@@ -24,4 +24,6 @@ public interface ICart {
     Set<CartItemEntity> findAllByCart(CartEntity cart);
 
     CartItemEntity findByCartIdAndProductId(Long cartId, Long productId);
+
+    void updateQuantityById(Long id, int quantity);
 }

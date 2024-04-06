@@ -1,3 +1,4 @@
+
 export const orderContant = {
   delivery: {
     fast: 'FAST',
@@ -13,6 +14,22 @@ export interface BrandData {
   name: string;
   slug: string;
   urlBrand: string;
+}
+
+export interface PromotionReponse {
+  id: number;
+  discountCode: {
+      id: number;
+      name: string;
+      description: string;
+      code: string;
+      isActive: boolean;
+      startDate: string;
+      endDate: string;
+      discountValue: number;
+      idUser: number;
+  };
+  idProduct: number;
 }
 
 export interface Product {

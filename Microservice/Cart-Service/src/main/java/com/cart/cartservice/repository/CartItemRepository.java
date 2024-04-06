@@ -4,6 +4,7 @@ import com.cart.cartservice.entity.CartEntity;
 import com.cart.cartservice.entity.CartItemEntity;
 import jakarta.transaction.Transactional;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
@@ -21,4 +22,9 @@ public interface CartItemRepository extends JpaRepository<CartItemEntity, Long> 
     void deleteByCartIdAndProductIdIn(Long cartId, List<Long> productIds);
     @Query("select sum(ci.quantity) from CartItemEntity ci where ci.cart.id = ?1")
     Long countItemInCart(Long cartId);
+
+    @Modifying
+    @Transactional
+    @Query("UPDATE CartItemEntity c SET c.quantity = :quantity WHERE c.id = :id")
+    void updateQuantityById(Long id, int quantity);
 }

@@ -18,6 +18,8 @@ public class OrderItemsEntity {
     @JoinColumn(name = "orderId", referencedColumnName = "id")
     @JsonIgnore
     private OrderEntity orderId;
+
+    private String note;
     private Long productId;
     private int quantity;
     private Double price;

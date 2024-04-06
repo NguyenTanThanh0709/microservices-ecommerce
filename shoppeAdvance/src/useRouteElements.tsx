@@ -9,6 +9,7 @@ import UserLayout from './pages/User/layouts/UserLayout'
 import ShopInfo from './pages/ShopInfo'
 import Promotion from './pages/SellerPage/Promotion/Promotion'
 import PromotionList from './pages/SellerPage/Promotion/PromotionList'
+import Payment from './pages/Payment'
 
 const Login = lazy(() => import('./pages/Login'))
 const ProductList = lazy(() => import('./pages/ProductList'))
@@ -66,6 +67,14 @@ export default function useRouteElements() {
           element: (
             <CartLayout>
               <Cart />
+            </CartLayout>
+          )
+        },
+        {
+          path: path.Payment,
+          element: (
+            <CartLayout>
+              <Payment />
             </CartLayout>
           )
         },

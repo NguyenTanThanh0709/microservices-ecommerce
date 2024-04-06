@@ -18,7 +18,6 @@ public class DiscountAppEntity {
     private Long id;
     @ManyToOne
     @JoinColumn(name = "discount_code_id", referencedColumnName = "id")
-    @JsonIgnore
     private DiscountCodeEntity discountCode;
     private Long IdProduct;
 }

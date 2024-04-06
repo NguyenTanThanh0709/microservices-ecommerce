@@ -9,6 +9,12 @@ const path = {
   logout: '/logout',
   productDetail: ':nameId',
   cart: '/cart',
+  Payment:'/payment',
+
+
+
+
+
   adminhome:'/admin-home',
   pageShop:'/admin-shop',
   pageFormPromotion:'/admin-promiton/:promotionId',

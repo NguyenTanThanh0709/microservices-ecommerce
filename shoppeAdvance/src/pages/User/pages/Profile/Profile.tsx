@@ -77,6 +77,7 @@ type FormDataError = Omit<FormData, 'date_of_birth'> & {
 }
 const profileSchema = userSchema.pick(['name', 'address',  'date_of_birth', 'avatar'])
 
+
 // Flow 1:
 // Nhấn upload: upload lên server luôn => server trả về url ảnh
 // Nhấn submit thì gửi url ảnh cộng với data lên server

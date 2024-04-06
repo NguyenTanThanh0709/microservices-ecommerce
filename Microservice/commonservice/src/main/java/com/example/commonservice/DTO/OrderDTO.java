@@ -12,22 +12,22 @@ import java.util.List;
 @NoArgsConstructor
 @Builder
 public class OrderDTO {
+
     private String phoneNumber;
     private String address;
     private String statusDelivery;
     private String statusOrder;
-    private String note;
 
-    @JsonProperty("productIdsQuantitys")
     private HashMap<Long, Integer> productIdsQuantitys;
     private HashMap<Long, Double> productIdsPrices;
+    private HashMap<Long, String> productIdsNotes;
+
 
     public boolean isValid() {
         return isPhoneNumberValid(this.phoneNumber)
                 && isAddressValid(this.address)
                 && isStatusValid(this.statusDelivery)
                 && isStatusValid(this.statusOrder)
-                && isNoteValid(this.note)
                 && isProductIdsQuantitysValid(this.productIdsQuantitys)
                 && isProductIdsQPricesValid(this.productIdsPrices);
     }
@@ -51,8 +51,10 @@ public class OrderDTO {
     private boolean isProductIdsQuantitysValid(HashMap<Long, Integer> productIdsQuantitys) {
         return productIdsQuantitys != null && !productIdsQuantitys.isEmpty();
     }
-
     private boolean isProductIdsQPricesValid(HashMap<Long, Double> productIdsQuantitys) {
+        return productIdsQuantitys != null && !productIdsQuantitys.isEmpty();
+    }
+    private boolean isProductIdsQNodeValid(HashMap<Long, String> productIdsQuantitys) {
         return productIdsQuantitys != null && !productIdsQuantitys.isEmpty();
     }
 

@@ -18,18 +18,6 @@ import java.util.Optional;
 @Repository
 public interface DiscountCodeRepository extends JpaRepository<DiscountCodeEntity, Long > {
 
-
-    @Query("SELECT p FROM DiscountCodeEntity p " +
-            "WHERE p.name LIKE %:name% " +
-            "AND p.code LIKE %:couponCode% " +
-            "AND p.startDate >= :startDate " +
-            "AND p.endDate <= :endDate")
-    Page<DiscountCodeEntity> findPromotions(@Param("name") String name,
-                                            @Param("couponCode") String couponCode,
-                                            @Param("startDate") ZonedDateTime startDate,
-                                            @Param("endDate") ZonedDateTime endDate,
-                                            Pageable pageable);
-
     @Transactional
     @Modifying
     @Query("UPDATE DiscountCodeEntity d SET d.isActive = :isActive WHERE d.id = :id")

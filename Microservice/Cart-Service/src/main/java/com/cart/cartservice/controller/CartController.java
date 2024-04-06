@@ -4,6 +4,7 @@ import com.cart.cartservice.entity.CartEntity;
 import com.cart.cartservice.entity.CartItemEntity;
 import com.cart.cartservice.reponse.CartReponse;
 import com.cart.cartservice.reponse.CartReponseWithMessage;
+import com.cart.cartservice.reponse.CartUpdateQuantiry;
 import com.cart.cartservice.service.ICart;
 import com.cart.cartservice.service.impl.CartImpl;
 import com.example.commonservice.DTO.CartDTO;
@@ -97,5 +98,16 @@ public class CartController {
         }
     }
 
+    @DeleteMapping("/cart-item/{id}")
+    public ResponseEntity<String> deleteCartItemById(@PathVariable Long id) {
+        cartService.deleteCartItemById(id);
+        return ResponseEntity.ok("CartItemEntity with ID " + id + " has been successfully deleted.");
+    }
+
+
+    @PutMapping("/update-purchase")
+    public void updateQuantity(@RequestBody CartUpdateQuantiry cartUpdateQuantiry) {
+        cartService.updateQuantityById(cartUpdateQuantiry.getProduct_id(), cartUpdateQuantiry.getBuy_count());
+    }
 
 }

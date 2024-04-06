@@ -34,27 +34,48 @@ public class OrderImpl implements IOrder {
     @Transactional
     public OrderEntity createOder(OrderDTO orderDTO) {
         OrderEntity orderEntity = new OrderEntity();
+
         orderEntity.setPhoneNumber(orderDTO.getPhoneNumber());
         orderEntity.setAddress(orderDTO.getAddress());
         orderEntity.setStatusDelivery(orderDTO.getStatusDelivery());
         orderEntity.setStatusOrder(orderDTO.getStatusOrder());
-        orderEntity.setNote(orderDTO.getNote());
 
         // Tạo danh sách các mặt hàng của đơn hàng từ thông tin trong OrderDTO
         List<OrderItemsEntity> orderItemsEntityList = new ArrayList<>();
+
         for (Map.Entry<Long, Integer> entry : orderDTO.getProductIdsQuantitys().entrySet()) {
             Long productId = entry.getKey();
             Integer quantity = entry.getValue();
-            Double price = orderDTO.getProductIdsPrices().get(productId); // Lấy giá của sản phẩm từ HashMap giá
+
             OrderItemsEntity orderItemsEntity = new OrderItemsEntity();
             orderItemsEntity.setProductId(productId);
             orderItemsEntity.setQuantity(quantity);
-            orderItemsEntity.setPrice(price); // Gán giá của sản phẩm
             orderItemsEntity.setOrderId(orderEntity); // Gán orderEntity cho mỗi mặt hàng
+
             orderItemsEntityList.add(orderItemsEntity);
         }
 
-        // Gán danh sách mặt hàng cho đơn hàng
+
+        for (Map.Entry<Long, Double> entry : orderDTO.getProductIdsPrices().entrySet()) {
+            Long productId = entry.getKey();
+            Double prices = entry.getValue();
+            for(OrderItemsEntity orderItems : orderItemsEntityList){
+                if(productId.equals(orderItems.getProductId())){
+                    orderItems.setPrice(prices);
+                }
+            }
+        }
+
+        for (Map.Entry<Long, String> entry : orderDTO.getProductIdsNotes().entrySet()) {
+            Long productId = entry.getKey();
+            String notes = entry.getValue();
+            for(OrderItemsEntity orderItems : orderItemsEntityList){
+                if(productId.equals(orderItems.getProductId())){
+                    orderItems.setNote(notes);
+                }
+            }
+        }
+
         orderEntity.setOrderItems(orderItemsEntityList);
 
         // Lưu OrderEntity và các OrderItemsEntity vào cơ sở dữ liệu

@@ -6,6 +6,7 @@ import Button from 'src/components/Button'
 import QuantityController from 'src/components/QuantityController'
 import path from 'src/constants/path'
 import { purchasesStatus } from 'src/constants/purchase'
+import { Product } from 'src/types/product.type'
 
 import { formatCurrency, generateNameId } from 'src/utils/utils'
 import produce from 'immer'
@@ -15,6 +16,14 @@ import { AppContext } from 'src/contexts/app.context'
 import noproduct from 'src/assets/images/no-product.png'
 import { Purchase } from 'src/types/purchase.type'
 import PaymentPage from './PaymentPage'
+import { useNavigate } from 'react-router-dom';
+
+ interface orderTemp {
+  idProduct: Product  ;
+  priceProduct: number;
+  quantityProdcut:number;
+}
+
 
 export default function Cart() {
 
@@ -31,7 +40,7 @@ export default function Cart() {
   const updatePurchaseMutation = useMutation({
     mutationFn: purchaseApi.updatePurchase,
     onSuccess: () => {
-      refetch()
+      refetch();
     }
   })
   const buyProductsMutation = useMutation({
@@ -118,7 +127,8 @@ export default function Cart() {
     )
   }
 
-  const handleQuantity = (purchaseIndex: number, value: number, enable: boolean) => {
+  const handleQuantity = (idupdate:string,purchaseIndex: number, value: number, enable: boolean) => {
+
     if (enable) {
       const purchase = extendedPurchases[purchaseIndex]
       setExtendedPurchases(
@@ -126,28 +136,52 @@ export default function Cart() {
           draft[purchaseIndex].disabled = true
         })
       )
-      updatePurchaseMutation.mutate({ product_id: purchase.product.id.toString(), buy_count: value })
+      updatePurchaseMutation.mutate({ product_id: idupdate, buy_count: value })
     }
   }
 
-  const handleDelete = (purchaseIndex: number) => () => {
-    const purchaseId = extendedPurchases[purchaseIndex]._id
 
-    deletePurchasesMutation.mutate([purchaseId])
-  }
+  
+  //onClick={handleDelete(purchase._id, purchase.product.id)}
+
+  const handleDelete = (purchaseid: string, productid: number) => async () => {
+    try {
+      await deletePurchasesMutation.mutateAsync([purchaseid]);
+      toast.success('Purchase deleted successfully', {
+        position: 'top-center',
+        autoClose: 1000
+      });
+    } catch (error) {
+      toast.error('Failed to delete purchase', {
+        position: 'top-center',
+        autoClose: 1000
+      });
+    }
+  };
+  
 
   const handleDeleteManyPurchases = () => {
     const purchasesIds = checkedPurchases.map((purchase) => purchase._id)
     deletePurchasesMutation.mutate(purchasesIds)
   }
-
+  const navigate = useNavigate();
   const handleBuyPurchases = () => {
-    if (checkedPurchases.length > 0) {
-      const body = checkedPurchases.map((purchase) => ({
-        product_id: purchase.product.id.toString(),
-        buy_count: purchase.buy_count
-      }))
-      buyProductsMutation.mutate(body)
+    const orderTempArray: orderTemp[] = [];
+    for (const item of extendedPurchases) {
+      if(item.checked){
+        const order: orderTemp = {
+          idProduct: item.product,
+          priceProduct: item.price_before_discount,
+          quantityProdcut: item.buy_count,
+        };
+        orderTempArray.push(order);
+      }
+    }
+    // console.log(orderTempArray)
+    if(orderTempArray.length != 0){
+      navigate('/payment', { state: { orderTempArray } });
+    }else{
+      alert("Vui lòng chọn sản phẩm để thanh toán")
     }
   }
 
@@ -240,13 +274,14 @@ export default function Cart() {
                                 value={purchase.buy_count}
                                 classNameWrapper='flex items-center'
                                 onIncrease={(value) => {
-                                  console.log(value, purchase.product.stockQuantity)
-                                  handleQuantity(index, value, value <= purchase.product.stockQuantity)
+                                  console.log(value, purchase.product.stockQuantity, purchase)
+                                  handleQuantity(purchase._id,index, value, value <= purchase.product.stockQuantity)
                                 }}
-                                onDecrease={(value) => handleQuantity(index, value, value >= 1)}
+                                onDecrease={(value) => handleQuantity( purchase._id,index, value, value >= 1)}
                                 onType={handleTypeQuantity(index)}
                                 onFocusOut={(value) =>
                                   handleQuantity(
+                                    purchase._id,
                                     index,
                                     value,
                                     value >= 1 &&
@@ -264,7 +299,7 @@ export default function Cart() {
                             </div>
                             <div className='col-span-1'>
                               <button
-                                onClick={handleDelete(index)}
+                                onClick={handleDelete(purchase._id, purchase.product.id)}
                                 className='bg-none text-black transition-colors hover:text-orange'
                               >
                                 Xóa

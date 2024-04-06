@@ -27,5 +27,6 @@ public class DiscountCodeEntity {
     private Long idUser;
 
     @OneToMany(mappedBy = "discountCode", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
     private List<DiscountAppEntity> discountApps;
 }

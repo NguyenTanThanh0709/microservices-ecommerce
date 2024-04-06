@@ -21,7 +21,6 @@ public class OrderEntity {
     private String address;
     private String statusDelivery;
     private String statusOrder;
-    private String note;
 
     @OneToMany(mappedBy = "orderId", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     List<OrderItemsEntity> orderItems;
