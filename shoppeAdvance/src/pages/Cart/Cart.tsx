@@ -5,7 +5,6 @@ import purchaseApi from 'src/apis/purchase.api'
 import Button from 'src/components/Button'
 import QuantityController from 'src/components/QuantityController'
 import path from 'src/constants/path'
-import { purchasesStatus } from 'src/constants/purchase'
 import { Product } from 'src/types/product.type'
 
 import { formatCurrency, generateNameId } from 'src/utils/utils'
@@ -15,13 +14,14 @@ import { toast } from 'react-toastify'
 import { AppContext } from 'src/contexts/app.context'
 import noproduct from 'src/assets/images/no-product.png'
 import { Purchase } from 'src/types/purchase.type'
-import PaymentPage from './PaymentPage'
 import { useNavigate } from 'react-router-dom';
 
  interface orderTemp {
   idProduct: Product  ;
   priceProduct: number;
   quantityProdcut:number;
+  message :string;
+  discount:number;
 }
 
 
@@ -96,11 +96,7 @@ export default function Cart() {
     })
   }, [purchasesInCart, choosenPurchaseIdFromLocation, setExtendedPurchases])
 
-  useEffect(() => {
-    return () => {
-      history.replaceState(null, '')
-    }
-  }, [])
+
 
   const handleCheck = (purchaseIndex: number) => (event: React.ChangeEvent<HTMLInputElement>) => {
     setExtendedPurchases(
@@ -173,6 +169,9 @@ export default function Cart() {
           idProduct: item.product,
           priceProduct: item.price_before_discount,
           quantityProdcut: item.buy_count,
+          message :'lời nhắn: ',
+          discount:0,
+          
         };
         orderTempArray.push(order);
       }
@@ -314,7 +313,6 @@ export default function Cart() {
               </div>
             </div>
 
-            <PaymentPage/>                      
 
             <div className='sticky bottom-0 z-10 mt-8 flex flex-col rounded-sm border border-gray-100 bg-white p-5 shadow sm:flex-row sm:items-center'>
               <div className='flex items-center'>

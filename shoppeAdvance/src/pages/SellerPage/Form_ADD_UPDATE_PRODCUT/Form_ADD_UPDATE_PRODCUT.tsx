@@ -139,7 +139,7 @@ export default function Form_ADD_UPDATE_PRODCUT() {
                     timeout: 20000 // Tăng thời gian chờ lên 15 giây (15000ms)
                 });
                 // updateFormDataProduct({ imgsurl: response.data });
-                formDataProduct.imgsurl = response.data;
+                formDataProduct.imgsurl = response.data; 
                 console.log(formDataProduct)
                 await fetchUpProduct();
                 console.log(response)

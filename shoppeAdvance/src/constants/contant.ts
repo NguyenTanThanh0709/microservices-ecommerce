@@ -16,6 +16,16 @@ export interface BrandData {
   urlBrand: string;
 }
 
+export interface OrderRequest{
+  phoneNumber: string;
+  address: string;
+  statusDelivery: string;
+  statusOrder: string;
+  productIdsQuantitys: { [productId: string]: number };
+  productIdsPrices: { [productId: string]: number };
+  productIdsNotes: { [productId: string]: string };
+}
+
 export interface PromotionReponse {
   id: number;
   discountCode: {

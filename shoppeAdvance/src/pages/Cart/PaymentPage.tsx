@@ -1,6 +1,7 @@
 import { Form, Radio } from 'antd';
 import React, { useEffect, useState, useMemo } from 'react';
 import { Label, WrapperInfo, WrapperLeft, WrapperRadio, WrapperRight } from './style';
+import { RadioChangeEvent } from 'antd';
 
 const PaymentPage = () => {
   const [delivery, setDelivery] = useState('fast');
@@ -92,6 +93,15 @@ const PaymentPage = () => {
     }
   };
 
+// Handle delivery method change
+const handleDeliveryChange = (e: RadioChangeEvent) => {
+  setDelivery(e.target.value);
+};
+
+// Handle payment method change
+const handlePaymentChange = (e: RadioChangeEvent) => {
+  setPayment(e.target.value);
+};
 
 
 
@@ -102,11 +112,11 @@ const PaymentPage = () => {
         <WrapperInfo>
           <div>
             <Label>Chọn phương thức giao hàng</Label>
-            <WrapperRadio  value={delivery}>
-              <Radio value="fast">
+            <WrapperRadio value={delivery}>
+              <Radio value="fast" onChange={handleDeliveryChange}>
                 <span style={{ color: '#ea8500', fontWeight: 'bold' }}>FAST</span> Giao hàng tiết kiệm
               </Radio>
-              <Radio value="gojek">
+              <Radio value="gojek" onChange={handleDeliveryChange}>
                 <span style={{ color: '#ea8500', fontWeight: 'bold' }}>GO_JEK</span> Giao hàng tiết kiệm
               </Radio>
             </WrapperRadio>
@@ -115,9 +125,10 @@ const PaymentPage = () => {
         <WrapperInfo>
           <div>
             <Label>Chọn phương thức thanh toán</Label>
-            <WrapperRadio  value={payment}>
-              <Radio value="later_money"> Thanh toán tiền mặt khi nhận hàng</Radio>
-              <Radio value="paypal"> Thanh toán tiền bằng paypal</Radio>
+            <WrapperRadio value={payment}>
+              <Radio value="later_money" onChange={handlePaymentChange}> Thanh toán tiền mặt khi nhận hàng</Radio>
+              <Radio value="paypal" onChange={handlePaymentChange}> Thanh toán tiền bằng paypal</Radio>
+              <Radio value="vnpay" onChange={handlePaymentChange}> Thanh toán tiền bằng VNPAY</Radio>
             </WrapperRadio>
           </div>
         </WrapperInfo>

@@ -116,6 +116,9 @@ public class CartImpl implements ICart {
         CartEntity cartEntity = findCartByUser(idUser);
         List<CartReponse> cartReponseList = new ArrayList<>();
 
+        if(cartEntity == null){
+            return  cartReponseList;
+        }
         // Tạo request entity với headers
         for(CartItemEntity cartItem : cartEntity.getCartItems()){
             CartReponse cartReponse = new CartReponse();

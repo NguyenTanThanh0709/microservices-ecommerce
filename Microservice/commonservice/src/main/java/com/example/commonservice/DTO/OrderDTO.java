@@ -17,6 +17,7 @@ public class OrderDTO {
     private String address;
     private String statusDelivery;
     private String statusOrder;
+    private Double totalMoney;
 
     private HashMap<Long, Integer> productIdsQuantitys;
     private HashMap<Long, Double> productIdsPrices;
