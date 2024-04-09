@@ -6,17 +6,7 @@ exports.addPayment = async (req, res) => {
         // Extract data from the request body
         const { amount, orderid, paymentMethod } = req.body;
 
-        // Create a new payment instance
-        const payment = new Payment({
-            amount,
-            orderid,
-            paymentMethod,
-            paymentStatus: 'PENDING' // Default payment status
-        });
-
-        // Save the payment to the database
-        await payment.save();
-
+        const payment = await paymentService.addPayment(amount, orderid, paymentMethod);
         // Return success response
         res.status(201).json({ success: true, message: 'Payment added successfully', data: payment });
     } catch (error) {
@@ -34,7 +24,7 @@ exports.updatePaymentStatus = async (req, res) => {
         const { paymentStatus } = req.body;
 
         // Find the payment by ID and update the payment status
-        const payment = await Payment.findByIdAndUpdate(id, { paymentStatus }, { new: true });
+        const payment = await paymentService.updatePaymentStatus(id, paymentStatus);
 
         if (!payment) {
             return res.status(404).json({ success: false, message: 'Payment not found' });

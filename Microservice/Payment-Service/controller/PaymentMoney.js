@@ -22,7 +22,9 @@ exports.createPayment = async (req, res) => {
     let returnUrl = config.get('vnp_ReturnUrl');
     let orderId = moment(date).format('DDHHmmss');
 
-    let amount = req.body.totalMoney;
+    let amount = req.body.amount;
+    let paymentMethod = req.body.paymentMethod;
+    let orderid = req.body.orderid;
     let bankCode = 'VNBANK';
 
 
@@ -39,7 +41,7 @@ exports.createPayment = async (req, res) => {
         vnp_Params['vnp_BankCode'] = bankCode;
     }
 
-    vnp_Params['vnp_OrderInfo'] = 'Thanh toan cho ma GD:' + orderId ;
+    vnp_Params['vnp_OrderInfo'] = 'Thanh toan cho ma GD ' + '_' +  orderid  + '_' + paymentMethod;
     vnp_Params['vnp_Version'] = '2.1.0';
     vnp_Params['vnp_Command'] = 'pay';
     vnp_Params['vnp_TmnCode'] = tmnCode;
@@ -86,7 +88,10 @@ exports.returnPayment = async (req, res) => {
 
     if(secureHash === signed){
         let responseCode = vnp_Params['vnp_ResponseCode'];
+        let vnp_OrderInfo = vnp_Params['vnp_OrderInfo'];
         console.log(responseCode)
+        console.log(vnp_OrderInfo)
+        
         if(responseCode === '00') {
             // Giao dịch thành công, bạn có thể xử lý ở đây
 

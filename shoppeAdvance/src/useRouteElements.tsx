@@ -10,6 +10,7 @@ import ShopInfo from './pages/ShopInfo'
 import Promotion from './pages/SellerPage/Promotion/Promotion'
 import PromotionList from './pages/SellerPage/Promotion/PromotionList'
 import Payment from './pages/Payment'
+import PaymentResult from './pages/PaymentResult'
 
 const Login = lazy(() => import('./pages/Login'))
 const ProductList = lazy(() => import('./pages/ProductList'))
@@ -108,6 +109,14 @@ export default function useRouteElements() {
       element: (
         <MainLayout>
           <ProductDetail />
+        </MainLayout>
+      )
+    },
+    {
+      path: path.PaymentResult,
+      element: (
+        <MainLayout>
+          <PaymentResult />
         </MainLayout>
       )
     },

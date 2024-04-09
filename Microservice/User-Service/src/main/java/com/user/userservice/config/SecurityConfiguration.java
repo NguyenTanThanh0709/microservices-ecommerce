@@ -34,7 +34,8 @@ public class SecurityConfiguration {
     private static final String[] WHITE_LIST_URL = {
             "/api/v1/users/register",
             "/api/v1/users/authenticate",
-            "/api/v1/users/refresh-token"
+            "/api/v1/users/refresh-token",
+            "/api/v1/payments/**"
     };
 
     @Bean

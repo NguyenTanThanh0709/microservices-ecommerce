@@ -10,6 +10,7 @@ const path = {
   productDetail: ':nameId',
   cart: '/cart',
   Payment:'/payment',
+  PaymentResult :'/payment-result',
 
 
 

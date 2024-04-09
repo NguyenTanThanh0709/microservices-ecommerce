@@ -3,9 +3,15 @@ import React, { useEffect, useState, useMemo } from 'react';
 import { Label, WrapperInfo, WrapperLeft, WrapperRadio, WrapperRight } from './style';
 import { RadioChangeEvent } from 'antd';
 
-const PaymentPage = () => {
-  const [delivery, setDelivery] = useState('fast');
-  const [payment, setPayment] = useState('later_money');
+interface PaymentProps {
+  delivery: string;
+  payment: string;
+  onDeliveryChange: (e: RadioChangeEvent) => void; // Change type to RadioChangeEvent
+  onPaymentChange: (e: RadioChangeEvent) => void; // Change type to RadioChangeEvent
+}
+
+const PaymentPage: React.FC<PaymentProps> = ({ delivery, payment, onDeliveryChange, onPaymentChange }) => {
+  
   const [isOpenModalUpdateInfo, setIsOpenModalUpdateInfo] = useState(false);
   const [stateUserDetails, setStateUserDetails] = useState({
     name: '',
@@ -93,17 +99,6 @@ const PaymentPage = () => {
     }
   };
 
-// Handle delivery method change
-const handleDeliveryChange = (e: RadioChangeEvent) => {
-  setDelivery(e.target.value);
-};
-
-// Handle payment method change
-const handlePaymentChange = (e: RadioChangeEvent) => {
-  setPayment(e.target.value);
-};
-
-
 
 
   return (
@@ -113,10 +108,10 @@ const handlePaymentChange = (e: RadioChangeEvent) => {
           <div>
             <Label>Chọn phương thức giao hàng</Label>
             <WrapperRadio value={delivery}>
-              <Radio value="fast" onChange={handleDeliveryChange}>
+              <Radio value="fast" onChange={onDeliveryChange}>
                 <span style={{ color: '#ea8500', fontWeight: 'bold' }}>FAST</span> Giao hàng tiết kiệm
               </Radio>
-              <Radio value="gojek" onChange={handleDeliveryChange}>
+              <Radio value="gojek" onChange={onDeliveryChange}>
                 <span style={{ color: '#ea8500', fontWeight: 'bold' }}>GO_JEK</span> Giao hàng tiết kiệm
               </Radio>
             </WrapperRadio>
@@ -126,9 +121,9 @@ const handlePaymentChange = (e: RadioChangeEvent) => {
           <div>
             <Label>Chọn phương thức thanh toán</Label>
             <WrapperRadio value={payment}>
-              <Radio value="later_money" onChange={handlePaymentChange}> Thanh toán tiền mặt khi nhận hàng</Radio>
-              <Radio value="paypal" onChange={handlePaymentChange}> Thanh toán tiền bằng paypal</Radio>
-              <Radio value="vnpay" onChange={handlePaymentChange}> Thanh toán tiền bằng VNPAY</Radio>
+              <Radio value="later_money" onChange={onPaymentChange}> Thanh toán tiền mặt khi nhận hàng</Radio>
+              <Radio value="paypal" onChange={onPaymentChange}> Thanh toán tiền bằng paypal</Radio>
+              <Radio value="vnpay" onChange={onPaymentChange}> Thanh toán tiền bằng VNPAY</Radio>
             </WrapperRadio>
           </div>
         </WrapperInfo>
@@ -137,5 +132,4 @@ const handlePaymentChange = (e: RadioChangeEvent) => {
     </div>
   );
 };
-
 export default PaymentPage;

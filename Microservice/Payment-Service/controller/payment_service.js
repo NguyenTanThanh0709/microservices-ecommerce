@@ -2,42 +2,38 @@ const Payment = require('../models/Payment');
 
 
 // Service to add a new payment
-exports.addPayment = async (req, res) => {
+exports.addPayment = async (amount,orderid, paymentMethod ) => {
     try {
-        // Extract data from the request body
-        const { amount, paymentMethod } = req.body;
-
         // Call the service to add a new payment
-        const payment = await paymentService.addPayment(amount, paymentMethod);
+        const payment = new Payment({
+            amount,
+            orderid,
+            paymentMethod,
+            paymentStatus: 'PENDING' // Default payment status
+        });
 
-        // Return success response
-        res.status(201).json({ success: true, message: 'Payment added successfully', data: payment });
+        // Save the payment to the database
+        await payment.save();
+        return payment
     } catch (error) {
-        // Handle errors
-        console.error('Error adding payment:', error);
-        res.status(500).json({ success: false, message: 'Failed to add payment', error: error.message });
+        return null
     }
 };
 
 // Controller to update payment status
-exports.updatePaymentStatus = async (req, res) => {
+exports.updatePaymentStatus = async (id, paymentStatus) => {
     try {
-        // Extract data from the request body
-        const { id } = req.params;
-        const { paymentStatus } = req.body;
-
         // Call the service to update payment status by ID
-        const updatedPayment = await paymentService.updatePaymentStatusById(id, paymentStatus);
+        const payment = await Payment.findByIdAndUpdate(id, { paymentStatus }, { new: true });
 
-        if (!updatedPayment) {
-            return res.status(404).json({ success: false, message: 'Payment not found' });
+        if (!payment) {
+            return null;
         }
 
         // Return success response
-        res.json({ success: true, message: 'Payment status updated successfully', data: updatedPayment });
+        return payment
     } catch (error) {
-        // Handle errors
-        console.error('Error updating payment status:', error);
-        res.status(500).json({ success: false, message: 'Failed to update payment status', error: error.message });
+        return null;
     }
 };
+

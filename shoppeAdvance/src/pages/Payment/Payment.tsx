@@ -7,8 +7,10 @@ import { faTicket } from '@fortawesome/free-solid-svg-icons';
 import React, { useState, useEffect } from 'react';
 import axiosClient from 'src/apis/axiosClient'
 import { useLocation } from 'react-router-dom';
-import PaymentPage from '../Cart/PaymentPage';
 import { Product } from 'src/types/product.type'
+import PaymentPage from '../Cart/PaymentPage';
+import { RadioChangeEvent } from 'antd/es/radio';
+import axiosInstance from 'src/apis/axiosClient'; 
 
 interface orderTemp {
   idProduct: Product  ;
@@ -106,11 +108,19 @@ export default function Payment() {
 
   };
 
-  const handleOrderDetailsClick = () => {
-    console.log('Order Details:', inputValues); // Log the orderTempArray when the button is clicked
-    console.log(profile)
+  const [delivery, setDelivery] = useState<string>('fast');
+  const [payment, setPayment] = useState<string>('later_money');
 
-      // Initialize an empty object to store product IDs and quantities
+  // Hàm xử lý sự kiện thay đổi phương thức giao hàng
+  const handleDeliveryChange = (e: RadioChangeEvent) => {
+    setDelivery(e.target.value);
+  };
+  
+  const handlePaymentChange = (e: RadioChangeEvent) => {
+    setPayment(e.target.value);
+  };
+
+  const handleOrderDetailsClick = () => {
     const productIdsQuantitys: { [productId: string]: number } = {};
     // Iterate through inputValues to populate productIdsQuantitys
     inputValues.forEach((item: orderTemp) => {
@@ -140,7 +150,62 @@ export default function Payment() {
       idPayment :0
     }
     console.log(data)
+    console.log(delivery,payment)
+
+    
+
+    if(payment === 'later_money'){
+
+
+    }else if(payment === 'paypal'){
+      const dataPayment = {
+        amount : totalMoney,
+        paymentMethod: "PayPal",
+        orderid: 1
+      }
+      handlePaymentPayPal(dataPayment)
+    }else if(payment === 'vnpay'){
+      const dataPayment = {
+        amount : totalMoney,
+        paymentMethod: "VNPAY",
+        orderid: 1
+  
+      }
+      handlePaymentVNPAY(dataPayment)
+    }
   };
+
+  const handlePaymentVNPAY = async (data:any) => { 
+
+    try {
+      const response = await axiosInstance.post('api/v1/payments/create_payment_url', data)
+      console.log(response.data)
+      if(response){
+        window.location.href = response.data
+      }else{
+        alert('Không thể thực hiện chức năng thanh toán. Vui lòng thử lại sau!');
+      }
+    } catch (error) {
+        console.error('Error handling payment:', error);
+    }
+
+  }
+
+  const handlePaymentPayPal = async (data:any) => { 
+
+    try {
+      const response = await axiosInstance.post('api/v1/payments/pay-pal', data)
+      console.log(response)
+      if(response.status === 200){
+        window.location.href = response.data.link;
+      }else{
+        alert('Không thể thực hiện chức năng thanh toán. Vui lòng thử lại sau!');
+      }
+    } catch (error) {
+        console.error('Error handling payment:', error);
+    }
+
+  }
 
   return (
     <div className='bg-neutral-100 py-16'>
@@ -231,7 +296,9 @@ export default function Payment() {
             </button>
           </div>
           <div className='mt-4'>
-            <PaymentPage />
+            <PaymentPage  delivery={delivery} payment={payment} 
+               onDeliveryChange={handleDeliveryChange}
+               onPaymentChange={handlePaymentChange}/>
           </div>
         </div>
 
