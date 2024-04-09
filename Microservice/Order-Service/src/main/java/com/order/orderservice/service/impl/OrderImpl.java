@@ -39,6 +39,7 @@ public class OrderImpl implements IOrder {
         orderEntity.setAddress(orderDTO.getAddress());
         orderEntity.setStatusDelivery(orderDTO.getStatusDelivery());
         orderEntity.setStatusOrder(orderDTO.getStatusOrder());
+        orderEntity.setTotalMoney(orderDTO.getTotalMoney());
 
         // Tạo danh sách các mặt hàng của đơn hàng từ thông tin trong OrderDTO
         List<OrderItemsEntity> orderItemsEntityList = new ArrayList<>();

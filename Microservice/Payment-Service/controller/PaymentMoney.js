@@ -2,6 +2,7 @@ const config = require('config');
 const moment = require('moment');
 const querystring = require('qs');
 const crypto = require('crypto');
+const paymentService  = require('./payment_service');
 
 // Your code here
 
@@ -41,7 +42,7 @@ exports.createPayment = async (req, res) => {
         vnp_Params['vnp_BankCode'] = bankCode;
     }
 
-    vnp_Params['vnp_OrderInfo'] = 'Thanh toan cho ma GD ' + '_' +  orderid  + '_' + paymentMethod;
+    vnp_Params['vnp_OrderInfo'] = orderid  + '_' + paymentMethod;
     vnp_Params['vnp_Version'] = '2.1.0';
     vnp_Params['vnp_Command'] = 'pay';
     vnp_Params['vnp_TmnCode'] = tmnCode;
@@ -91,12 +92,29 @@ exports.returnPayment = async (req, res) => {
         let vnp_OrderInfo = vnp_Params['vnp_OrderInfo'];
         console.log(responseCode)
         console.log(vnp_OrderInfo)
+        let data =  vnp_OrderInfo.split('_');
+        let orderid = parseInt(data[0]);
+        let paymentMethod = data[1];
         
-        if(responseCode === '00') {
+        if(responseCode == '00') {
             // Giao dịch thành công, bạn có thể xử lý ở đây
+            const payment = await paymentService.addPayment(0, orderid, paymentMethod, 'COMPLETED');
+            console.log('Payment successful:', payment);
+            if(payment){
 
+                res.redirect(`http://localhost:3000/payment-result?vnp_ResponseCode=00&vnp_TransactionStatus=00&vnp_OrderInfo=${vnp_OrderInfo}`);
+            }
+            
         } else {
+
             // Giao dịch không thành công, chuyển hướng đến trang thông báo lỗi
+            const payment = await paymentService.addPayment(0, orderid, paymentMethod, 'CANCELLED');
+            console.log('Payment CANCELLED:', payment);
+
+            if(payment){
+
+                res.redirect(`http://localhost:3000/payment-result?vnp_ResponseCode=01&vnp_TransactionStatus=01&vnp_OrderInfo=${vnp_OrderInfo}`);
+            }
             
         }
     } else{

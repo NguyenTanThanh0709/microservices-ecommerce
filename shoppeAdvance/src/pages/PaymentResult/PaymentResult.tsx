@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import axiosClient from 'src/apis/axiosClient'
 
 export default function PaymentResult() {
   const [showSuccessIcon, setShowSuccessIcon] = useState(false);
@@ -9,6 +10,7 @@ export default function PaymentResult() {
     const searchParams = new URLSearchParams(location.search);
     const vnp_ResponseCode = searchParams.get('vnp_ResponseCode');
     const vnp_TransactionStatus = searchParams.get('vnp_TransactionStatus');
+    const vnp_OrderInfo = searchParams.get('vnp_OrderInfo');
 
     useEffect(() => {
       // Kiểm tra vnp_ResponseCode và vnp_TransactionStatus để quyết định hiển thị biểu tượng tương ứng
@@ -16,10 +18,35 @@ export default function PaymentResult() {
           setShowSuccessIcon(true);
           setShowFailedIcon(false);
       } else {
+
+          let data = vnp_OrderInfo?.split('_');
+          if(data && data.length > 0) {
+            if(data[1] == 'PAYPAL'){
+
+              let data_ = {
+                amount: 0,
+                orderid: parseInt(data[0]),
+                paymentMethod : 'PAYPAL',
+                paymentStatus : 'CANCELLED'
+              }
+              AddPayment(data_);
+
+            }
+          }
+
           setShowSuccessIcon(false);
           setShowFailedIcon(true);
       }
   }, [vnp_ResponseCode, vnp_TransactionStatus]);
+
+
+  const AddPayment = async (data: any) => {
+    try {
+      const response = await axiosClient.post('/api/v1/payments/', data);
+    } catch (error) {
+      console.error('Error uploading images:', error);
+    }
+  }
 
   const handleGoBack = () => {
     // Hàm xử lý khi nút "GO BACK" được nhấp

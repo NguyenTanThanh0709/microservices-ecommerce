@@ -19,8 +19,9 @@ public class OrderEntity {
     private Long id;
     private String phoneNumber;
     private String address;
-    private String statusDelivery;
-    private String statusOrder;
+    private String statusDelivery; // Đóng hàng, Lấy hàng, giao hàng, đã giao
+    private String statusOrder; // Chờ thanh toán, Vận chuyển, Chờ giao hàng, Hoàn thành, Đã hủy, Trả hàng/Hoàn tiền
+    private Double totalMoney;
 
     @OneToMany(mappedBy = "orderId", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     List<OrderItemsEntity> orderItems;

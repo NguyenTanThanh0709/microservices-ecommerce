@@ -150,30 +150,41 @@ export default function Payment() {
       idPayment :0
     }
     console.log(data)
-    console.log(delivery,payment)
-
-    
-
-    if(payment === 'later_money'){
-
-
-    }else if(payment === 'paypal'){
-      const dataPayment = {
-        amount : totalMoney,
-        paymentMethod: "PayPal",
-        orderid: 1
-      }
-      handlePaymentPayPal(dataPayment)
-    }else if(payment === 'vnpay'){
-      const dataPayment = {
-        amount : totalMoney,
-        paymentMethod: "VNPAY",
-        orderid: 1
-  
-      }
-      handlePaymentVNPAY(dataPayment)
-    }
+    handleAddOrder(data)    
   };
+
+  const handleAddOrder = async (data: any) => {
+    try {
+      const response = await axiosInstance.post('api/v1/orders/', data)
+      if(response.status == 201 || response.status == 200){
+
+        if(payment === 'later_money'){
+
+
+        }else if(payment === 'paypal'){
+          const dataPayment = {
+            amount : totalMoney,
+            paymentMethod: "PAYPAL",
+            orderid: response.data.id
+          }
+          handlePaymentPayPal(dataPayment)
+        }else if(payment === 'vnpay'){
+          const dataPayment = {
+            amount : totalMoney,
+            paymentMethod: "VNPAY",
+            orderid: response.data.id
+      
+          }
+          handlePaymentVNPAY(dataPayment)
+        }
+
+      }else{
+
+      }
+    } catch (error) {
+        console.error('Error handling order:', error);
+    }
+  }
 
   const handlePaymentVNPAY = async (data:any) => { 
 

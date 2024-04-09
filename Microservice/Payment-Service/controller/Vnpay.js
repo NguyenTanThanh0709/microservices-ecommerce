@@ -1,4 +1,5 @@
 const paypal = require('paypal-rest-sdk')
+const paymentService  = require('./payment_service');
 
 paypal.configure({
     'mode': 'sandbox', //sandbox or live
@@ -72,18 +73,27 @@ exports.result = async (req, res) => {
             }]
         };
 
-        paypal.payment.execute(paymentId, execute_payment_json, function (error, payment) {
+        paypal.payment.execute(paymentId, execute_payment_json, async  function (error, payment) {
             if (error) {
-                console.log(error.response);
-                throw error;
+                let data =  vnp_OrderInfo.split('_');
+                let orderid = parseInt(data[0]);
+                let paymentMethod = data[1];
+                const payment = await paymentService.addPayment(money, orderid, 'PAYPAL', 'CANCELLED');
+                if(payment){
+
+                    res.redirect(`http://localhost:3000/payment-result?vnp_ResponseCode=01&vnp_TransactionStatus=01&vnp_OrderInfo=${vnp_OrderInfo}`);
+                }
             } else {
                 console.log(vnp_OrderInfo)
                 let data =  vnp_OrderInfo.split('_');
-                let orderid = data[0];
+                let orderid = parseInt(data[0]);
                 let paymentMethod = data[1];
                 // Update the payment status in the database or perform any
-                
-                res.redirect(`http://localhost:3000/payment-result?vnp_ResponseCode=00&vnp_TransactionStatus=00&vnp_OrderInfo=${vnp_OrderInfo}`);
+                const payment = await paymentService.addPayment(money, orderid, 'PAYPAL', 'COMPLETED');
+                if(payment){
+
+                    res.redirect(`http://localhost:3000/payment-result?vnp_ResponseCode=00&vnp_TransactionStatus=00&vnp_OrderInfo=${vnp_OrderInfo}`);
+                }
             }
         });
     } catch (error) {

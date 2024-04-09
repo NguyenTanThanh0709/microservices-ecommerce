@@ -4,9 +4,9 @@ const paymentService  = require('./payment_service');
 exports.addPayment = async (req, res) => {
     try {
         // Extract data from the request body
-        const { amount, orderid, paymentMethod } = req.body;
+        const { amount, orderid, paymentMethod, paymentStatus } = req.body;
 
-        const payment = await paymentService.addPayment(amount, orderid, paymentMethod);
+        const payment = await paymentService.addPayment(amount, orderid, paymentMethod, paymentStatus);
         // Return success response
         res.status(201).json({ success: true, message: 'Payment added successfully', data: payment });
     } catch (error) {
