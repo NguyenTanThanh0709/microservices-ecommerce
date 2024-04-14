@@ -14,6 +14,7 @@ import path from 'src/constants/path'
 import { Helmet } from 'react-helmet-async'
 import { convert } from 'html-to-text'
 import { Head } from 'src/components/head'
+import axiosInstance from 'src/apis/axiosClient'; 
 
 export default function ProductDetail() {
 
@@ -58,8 +59,22 @@ export default function ProductDetail() {
   useEffect(() => {
     if (product && product.productImages.length > 0) {
       setActiveImage(product.productImages[0].urlimg)
+      fetchUpViewProduct(product.id);
     }
+
+
+
   }, [product])
+
+
+  const fetchUpViewProduct = async (id:number) => {
+    try {
+        // Example POST request
+        const response = await axiosInstance.put(`/api/v1/products/${id}/views/increment`);
+    } catch (error) {
+        console.error('Error fetching data:', error);
+    }
+};
 
   const next = () => {
     if (currentIndexImages[1] < (product as ProductType).productImages.length) {

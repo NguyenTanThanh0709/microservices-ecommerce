@@ -156,4 +156,62 @@ public class ProductImpl implements IProduct {
             return  null;
         }
     }
+
+    @Override
+    @Transactional
+    public void updateStockAndSoldQuantity(String content) {
+        // Split the content by "-" to get individual items
+
+        if(content.contains("-")){
+        String[] items = content.split("-");
+        log.error(content);
+        for (String item : items){
+            // Split each item by ":" to get product ID and quantity
+            String[] i = item.split(":");
+            if (i.length != 2) {
+                // Skip invalid items
+                continue;
+            }
+            long id;
+            long quantity;
+            try {
+                // Parse product ID and quantity from string to long
+                id = Long.parseLong(i[0]);
+                quantity = Long.parseLong(i[1]);
+            } catch (NumberFormatException e) {
+                // Log and skip invalid items
+                log.error("Invalid ID or quantity format: " + item);
+                continue;
+            }
+            // Update stock and sold quantity for the product
+            productRepository.updateStockAndSoldQuantity(id, quantity);
+        }
+    }
+        else {
+            // Split each item by ":" to get product ID and quantity
+            String[] i = content.split(":");
+            if (i.length != 2) {
+                return;
+            }
+            long id;
+            long quantity;
+            try {
+                // Parse product ID and quantity from string to long
+                id = Long.parseLong(i[0]);
+                quantity = Long.parseLong(i[1]);
+            } catch (NumberFormatException e) {
+                // Log and skip invalid items
+                log.error("Invalid ID or quantity format: " + content);
+                return;
+            }
+            // Update stock and sold quantity for the product
+            productRepository.updateStockAndSoldQuantity(id, quantity);
+        }
+    }
+
+    @Override
+    @Transactional
+    public void incrementProductView(Long productId) {
+        productRepository.incrementViewCount(productId);
+    }
 }

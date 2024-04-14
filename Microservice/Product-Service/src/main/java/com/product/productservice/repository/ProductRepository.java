@@ -2,7 +2,9 @@ package com.product.productservice.repository;
 
 import com.product.productservice.entity.Brand;
 import com.product.productservice.entity.ProductEntity;
+import jakarta.transaction.Transactional;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -16,8 +18,17 @@ public interface ProductRepository extends JpaRepository<ProductEntity, Long> {
     Page<ProductEntity> findAll(Pageable pageable);
     List<ProductEntity> findByPhoneOwner(Long phoneOwner);
     Page<ProductEntity> findByNameContainingIgnoreCase(String name, Pageable pageable);
-    Page<ProductEntity> findByCategoryContainingIgnoreCase(String category, Pageable pageable);
-    Page<ProductEntity> findByNameContainingIgnoreCaseAndCategoryContainingIgnoreCase(String name, String category, Pageable pageable);
+
+
+    @Modifying
+    @Transactional
+    @Query("UPDATE ProductEntity p SET p.view = p.view + 1 WHERE p.id = :productId")
+    void incrementViewCount(Long productId);
+
+    @Modifying
+    @Transactional
+    @Query("UPDATE ProductEntity p SET p.stockQuantity = p.stockQuantity - :quantity, p.sold = p.sold + :quantity WHERE p.id = :productId")
+    void updateStockAndSoldQuantity(@Param("productId") Long productId, @Param("quantity") Long quantity);
 
     @Query("SELECT p FROM ProductEntity p " +
             "WHERE (:name IS NULL OR lower(p.name) LIKE %:name%) " +

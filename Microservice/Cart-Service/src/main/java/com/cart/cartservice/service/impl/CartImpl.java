@@ -139,7 +139,7 @@ public class CartImpl implements ICart {
         // Wait for all asynchronous operations to complete
         while (cartReponseList.size() < cartEntity.getCartItems().size()) {
             try {
-                Thread.sleep(100); // Wait for 100 milliseconds
+                Thread.sleep(200); // Wait for 100 milliseconds
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
                 throw new RuntimeException("Thread interrupted while waiting for product responses", e);

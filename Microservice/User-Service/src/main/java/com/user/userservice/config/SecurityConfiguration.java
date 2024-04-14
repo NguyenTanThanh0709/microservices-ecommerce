@@ -35,7 +35,8 @@ public class SecurityConfiguration {
             "/api/v1/users/register",
             "/api/v1/users/authenticate",
             "/api/v1/users/refresh-token",
-            "/api/v1/payments/**"
+            "/api/v1/payments/**",
+            "/api/v1/products/**"
     };
 
     @Bean

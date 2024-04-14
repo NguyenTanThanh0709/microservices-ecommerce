@@ -149,13 +149,25 @@ export default function Payment() {
       totalMoney: totalMoney,
       idPayment :0
     }
-    console.log(data)
     handleAddOrder(data)    
   };
 
   const handleAddOrder = async (data: any) => {
+    console.log(typeof(data.productIdsQuantitys))
+    let result = '';
+    for (const key in data.productIdsQuantitys) {
+      if (data.productIdsQuantitys.hasOwnProperty(key)) {
+          result += `${key}:${data.productIdsQuantitys[key]}-`;
+      }
+  }
+    
+    // Loại bỏ ký tự "-" cuối cùng nếu có
+    result = result.slice(0, -1);
+    console.log(result)
+    
     try {
       const response = await axiosInstance.post('api/v1/orders/', data)
+      
       if(response.status == 201 || response.status == 200){
 
         if(payment === 'later_money'){
@@ -165,15 +177,16 @@ export default function Payment() {
           const dataPayment = {
             amount : totalMoney,
             paymentMethod: "PAYPAL",
-            orderid: response.data.id
+            orderid: response.data.id,
+            dataupdate:result
           }
           handlePaymentPayPal(dataPayment)
         }else if(payment === 'vnpay'){
           const dataPayment = {
             amount : totalMoney,
             paymentMethod: "VNPAY",
-            orderid: response.data.id
-      
+            orderid: response.data.id,
+            dataupdate:result      
           }
           handlePaymentVNPAY(dataPayment)
         }

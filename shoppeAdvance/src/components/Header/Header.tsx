@@ -13,6 +13,7 @@ import { formatCurrency, getAvatarUrl } from 'src/utils/utils'
 import Popover from '../Popover'
 import { locales } from 'src/i18n/i18n'
 import { useTranslation } from 'react-i18next'
+import { useNavigate } from 'react-router-dom';
 
 const MAX_PURCHASES = 5
 export default function Header() {
@@ -39,20 +40,23 @@ export default function Header() {
     enabled: isAuthenticated
   })
   const purchasesInCart = purchasesInCartData?.data?.data
+  const navigate = useNavigate();
 
-  const logoutMutation = useMutation(authApi.logoutAccount)
+
+  // const logoutMutation = useMutation(authApi.logoutAccount)
   // handle logout mutate
   const handleLogout = () => {
-    logoutMutation.mutate(undefined, {
-      onSuccess: () => {
-        setIsAuthenticated(false)
-        setProfile(null)
-        toast.success('Logout success')
-        // case : when logout then remove all queries. if not, although logout but still have data in cache at the Cart
-        // The removeQueries method can be used to remove queries from the cache based on their query keys or any other functionally accessible property/state of the query.
-        queryClient.removeQueries(['purchases', { status: purchasesStatus.inCart }])
-      }
-    })
+    toast.success('Logout success')
+
+    localStorage.removeItem('accessToken')
+    localStorage.removeItem('refreshToken')
+    localStorage.removeItem('email')
+    localStorage.removeItem('loginState')
+    localStorage.removeItem('phone')
+    localStorage.removeItem('id')
+    localStorage.removeItem('profile')
+    window.location.href = '/login';
+
   }
   const changeLanguage = (lng: 'en' | 'vi') => {
     console.log('change')

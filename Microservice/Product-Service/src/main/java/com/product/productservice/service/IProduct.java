@@ -21,6 +21,8 @@ public interface IProduct {
     ProductEntity updateProduct(ProductDTO productDTO);
     public ProductReponSingle findOneById(Long id);
     ProductEntity findOneByIdone(Long id);
+    public void updateStockAndSoldQuantity(String content);
+    void incrementProductView(Long productId);
 
 
 

@@ -95,6 +95,9 @@ export class Http {
           console.log('did logout')
           this.accessToken = ''
           this.refreshToken = ''
+          this.id = ''
+          this.email = ''
+          this.phone = ''
           clearLS()
         }
         return response

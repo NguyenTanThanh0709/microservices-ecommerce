@@ -43,6 +43,10 @@ export default function Product({ product }: Props) {
               <span className='text-xs'>{formatNumberToSocialStyle(product.sold)}</span>
               <span className='ml-1 text-xs'>sold</span>
             </div>
+            <div className='ml-2'>
+              <span className='text-xs'>{formatNumberToSocialStyle(product.view)}</span>
+              <span className='ml-1 text-xs'>view</span>
+            </div>
           </div>
         </div>
       </div>

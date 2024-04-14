@@ -13,7 +13,9 @@ public class RouteValidator {
             "/api/v1/users/register",
             "/api/v1/users/authenticate",
             "/api/v1/users/refresh-token",
-            "/api/v1/payments/**"
+            "/api/v1/payments/**",
+            "/api/v1/users/logout",
+            "/api/v1/products/**"
     );
 
     public Predicate<ServerHttpRequest> isSecured =

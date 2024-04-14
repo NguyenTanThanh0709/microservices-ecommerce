@@ -23,6 +23,7 @@ export const clearLS = () => {
   localStorage.removeItem('accessToken')
   localStorage.removeItem('refreshToken')
   localStorage.removeItem('email')
+  localStorage.removeItem('loginState')
   localStorage.removeItem('phone')
   localStorage.removeItem('id')
   localStorage.removeItem('profile')

@@ -1,8 +1,9 @@
 const express = require('express');
 const router = express.Router();
-const { createPayment, returnPayment } = require('../controller/PaymentMoney');
+const { createPayment, returnPayment, refund } = require('../controller/PaymentMoney');
 const {addPaymentVNPAY, result}  = require('../controller/Vnpay')
 router.post('/create_payment_url', createPayment);
+router.post('/refund', refund);
 router.get('/vnpay_return', returnPayment);
 
 router.post('/pay-pal', addPaymentVNPAY)

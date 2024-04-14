@@ -83,4 +83,9 @@ public class ProductController {
     public ResponseEntity<?> updateProduct(@PathVariable Long id, @RequestBody ProductDTO productDTO ){
         return new ResponseEntity<>(productimpl.updateProduct(productDTO), HttpStatus.OK);
     }
+
+    @PutMapping("/{productId}/views/increment")
+    public void incrementProductView(@PathVariable Long productId) {
+        productimpl.incrementProductView(productId);
+    }
 }

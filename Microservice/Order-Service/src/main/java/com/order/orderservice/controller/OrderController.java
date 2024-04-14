@@ -2,6 +2,7 @@ package com.order.orderservice.controller;
 
 import com.example.commonservice.DTO.OrderDTO;
 import com.order.orderservice.entity.OrderEntity;
+import com.order.orderservice.event.EventProducer;
 import com.order.orderservice.service.IOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -17,6 +18,9 @@ public class OrderController {
     @Autowired
     private IOrder iOrder;
 
+    @Autowired
+    private EventProducer eventProducer;
+
 
     @PostMapping("/")
     public ResponseEntity<?> createOrder(@RequestBody OrderDTO orderDTO) {
@@ -30,6 +34,17 @@ public class OrderController {
 
         // Kiểm tra nếu đơn hàng đã được tạo thành công
         if (createdOrder != null) {
+            eventProducer.send("demokafka", "message")
+                    .subscribe(
+                            result -> {
+                                // Xử lý kết quả nếu cần
+                                System.out.println("Message sent successfully: " + result);
+                            },
+                            error -> {
+                                // Xử lý lỗi nếu gửi message không thành công
+                                System.err.println("Error sending message to Kafka: " + error.getMessage());
+                            }
+                    );
             return ResponseEntity.status(HttpStatus.CREATED).body(createdOrder);
         } else {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to create order");
