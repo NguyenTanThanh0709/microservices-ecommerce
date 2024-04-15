@@ -13,8 +13,7 @@ import java.util.List;
 @Repository
 public interface OrderRepository extends JpaRepository<OrderEntity, Long> {
     // Lấy đơn hàng bằng số điện thoại
-    List<OrderEntity> findByPhoneNumber(String phoneNumber);
-
+    List<OrderEntity> findByPhoneNumberAndStatusOrder(String phoneNumber, String statusOrder);
     @Modifying
     @Query("UPDATE OrderEntity o SET o.statusDelivery = :statusDelivery WHERE o.id = :orderId")
     int updateStatusDelivery(@Param("orderId") Long orderId, @Param("statusDelivery") String statusDelivery);

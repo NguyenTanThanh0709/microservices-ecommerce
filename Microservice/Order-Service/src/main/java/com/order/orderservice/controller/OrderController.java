@@ -3,6 +3,7 @@ package com.order.orderservice.controller;
 import com.example.commonservice.DTO.OrderDTO;
 import com.order.orderservice.entity.OrderEntity;
 import com.order.orderservice.event.EventProducer;
+import com.order.orderservice.reponse.OrderReponse;
 import com.order.orderservice.service.IOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -63,9 +64,9 @@ public class OrderController {
         return ResponseEntity.ok().build();
     }
 
-    @GetMapping("/user/{phoneNumber}")
-    public ResponseEntity<?> getOrdersByUser(@PathVariable String phoneNumber) {
-        List<OrderEntity> orders = iOrder.getOrderByUser(phoneNumber);
+    @GetMapping("/user/{phoneNumber}/{status}")
+    public ResponseEntity<?> getOrdersByUser(@PathVariable String phoneNumber,@PathVariable String status, @RequestHeader("Authorization") String token) {
+        List<OrderReponse> orders = iOrder.getOrderByUser(phoneNumber,status, token);
         return ResponseEntity.ok(orders);
     }
 

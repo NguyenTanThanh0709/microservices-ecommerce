@@ -10,6 +10,7 @@ const chatService = require('./controller/chatController');
 
 const chatRouter = require('./router/chatrouter.js');
 const mailRouter = require('./router/mailRouter.js');
+const ratingRouter = require('./router/ratingRouter.js');
 
 const app = express()
 const server = http.createServer(app);
@@ -22,6 +23,7 @@ const port = process.env.PORT || 5000
 // Sử dụng router cho dịch vụ chat
 app.use('/api/v1/communicate/chat', chatRouter);
 app.use('/api/v1/communicate/mail', mailRouter);
+app.use('/api/v1/communicate/rating', ratingRouter);
 
 
 // Bắt sự kiện kết nối từ client
@@ -55,62 +57,3 @@ app.listen(port, async() => {
 })
 
 eurekaHelper.registerWithEureka('communicate-service', port);
-
-
-
-// const { Kafka } = require('kafkajs');
-
-// // Create Kafka instance
-// const kafka = new Kafka({
-//   clientId: 'my-nodejs-app', // Client ID
-//   brokers: ['localhost:29092'], // Kafka bootstrap servers
-// });
-
-// // Create Kafka producer
-// const producer = kafka.producer();
-
-// // Create Kafka consumer
-// const consumer = kafka.consumer({ groupId: 'Product-groupId' });
-
-// // Connect producer and consumer to Kafka
-// async function connectToKafka() {
-//   await producer.connect();
-//   await consumer.connect();
-// }
-
-// // Function to send message to Kafka
-// async function sendMessage(topic, message) {
-//   await producer.send({
-//     topic,
-//     messages: [{ value: message }],
-//   });
-// }
-
-// // Middleware to handle Kafka processing
-// async function kafkaMiddleware(req, res, next) {
-//   try {
-//     // Process Kafka messages here if needed
-//     await consumer.run({
-//       eachMessage: async ({ topic, partition, message }) => {
-//         console.log({
-//           value: message.value.toString(), // Message value
-//           topic,
-//           partition,
-//         });
-//       },
-//     });
-
-//     // Pass control to the next middleware
-//     next();
-//   } catch (error) {
-//     console.error('Error processing Kafka messages:', error);
-//     next(error);
-//   }
-// }
-
-// module.exports = {
-//   connectToKafka,
-//   sendMessage,
-//   kafkaMiddleware,
-// };
-

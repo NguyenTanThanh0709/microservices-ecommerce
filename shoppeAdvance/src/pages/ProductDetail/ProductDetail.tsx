@@ -16,7 +16,62 @@ import { convert } from 'html-to-text'
 import { Head } from 'src/components/head'
 import axiosInstance from 'src/apis/axiosClient'; 
 
+
+
+
+// Định nghĩa interface cho đánh giá sản phẩm
+interface ProductRating {
+  _id: string;
+  id: string;
+  product_id: string;
+  user_id: string;
+  rating: number;
+  comment: string;
+  created_at: string;
+  __v: number;
+  user: {
+      message: string;
+      data: {
+          _id: string;
+          roles: string[];
+          email: string;
+          address: string;
+          phone: string;
+      }
+  }
+}
+
+
 export default function ProductDetail() {
+
+  // Khởi tạo state với một mảng các đánh giá sản phẩm
+  const [productRatings, setProductRatings] = useState<ProductRating[]>([]);
+  // Hàm để thực hiện việc cập nhật đánh giá sản phẩm
+  const updateProductRatings = (newRatings: ProductRating[]) => {
+      setProductRatings(newRatings);
+  };
+
+  const fetchUpProduct = async (idproduct:number) => {
+    try {
+        // Example POST request
+        const response = await axiosInstance.get(`/api/v1/communicate/rating/product-rating/get?product_id=${idproduct}`);
+        if(response.status === 200) {
+          updateProductRatings(response.data);
+        }
+
+    } catch (error) {
+        console.error('Error fetching data:', error);
+    }
+};
+
+const fetchUpProductDeleteRating = async (idproduct:string, idu:string) => {
+  try {
+      // Example POST request
+      const response = await axiosInstance.delete(`/api/v1/communicate/rating/product-rating/${idproduct}/${idu}/delete`);
+  } catch (error) {
+      console.error('Error fetching data:', error);
+  }
+};
 
 
   const navigate = useNavigate()
@@ -56,10 +111,32 @@ export default function ProductDetail() {
   })
   const addToCartMutation = useMutation(purchaseApi.addToCart)
 
+  const handleDeleteRating = async (userId: string, productId:string) => {
+    try {
+      // Gọi API để xóa đánh giá sản phẩm
+      await fetchUpProductDeleteRating(productId, userId);
+      // Sau khi xóa thành công, cập nhật danh sách đánh giá sản phẩm mới
+      await fetchUpProduct(parseInt(productId));
+      // Hiển thị thông báo xóa thành công
+      toast.success('Đánh giá đã được xóa thành công', {
+        position: 'top-center',
+        autoClose: 1000
+      });
+    } catch (error) {
+      console.error('Lỗi khi xóa đánh giá sản phẩm:', error);
+      toast.error('Đã xảy ra lỗi khi xóa đánh giá sản phẩm', {
+        position: 'top-center',
+        autoClose: 1000
+      });
+    }
+  };
+  
+
   useEffect(() => {
     if (product && product.productImages.length > 0) {
       setActiveImage(product.productImages[0].urlimg)
       fetchUpViewProduct(product.id);
+      fetchUpProduct(product.id);
     }
 
 
@@ -119,6 +196,8 @@ export default function ProductDetail() {
   const handleBuyCount = (value: number) => {
     setBuyCount(value)
   }
+
+  var idu = localStorage.getItem('id') || '0'
 
   const addToCart = () => {
     // Retrieve customerId from localStorage
@@ -361,6 +440,41 @@ export default function ProductDetail() {
               />
           ))}
             </div>
+          </div>
+        </div>
+      </div>
+
+      <div className='mt-8'>
+        <div className='container'>
+          <div className='uppercase text-gray-400'>Các đánh giá sản phẩm</div>
+          <div className="grid grid-cols-3 gap-4 mt-4">
+
+          {productRatings.map((rating, index) => (
+        <div className="relative" key={index}>
+          {/* Nút X để xóa đánh giá */}
+          {rating.user_id == idu && (
+            <span className="text-red-500 cursor-pointer absolute top-0 right-0" 
+            onClick={() => handleDeleteRating(rating.user_id, rating.product_id)}
+            >X</span>
+          )}
+          <div className='flex'>
+            <div>
+              {/* Hiển thị ảnh đại diện của người đánh giá */}
+              <img src='https://ps.w.org/user-avatar-reloaded/assets/icon-256x256.png?rev=2540745' alt="Avatar" className="w-12 h-12 rounded-full mr-4" />
+            </div>
+            <div>
+              {/* Hiển thị tên người đánh giá */}
+              <span>{rating.user.data.email}</span>
+              {/* Hiển thị đánh giá về sản phẩm */}
+              <ProductRating rating={rating.rating} />
+              {/* Hiển thị thời gian đánh giá */}
+              <span>{rating.created_at}</span>
+              {/* Hiển thị nội dung đánh giá */}
+              <p> <span>NỘI DUNG ĐÁNH GIÁ SẢN PHẨM:</span> {rating.comment}</p>
+            </div>
+          </div>
+        </div>
+      ))}
           </div>
         </div>
       </div>

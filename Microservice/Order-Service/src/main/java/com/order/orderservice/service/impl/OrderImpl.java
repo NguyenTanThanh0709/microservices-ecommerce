@@ -1,21 +1,29 @@
 package com.order.orderservice.service.impl;
 
 import com.example.commonservice.DTO.OrderDTO;
+import com.example.commonservice.DTO.ProductReponse;
 import com.order.orderservice.entity.OrderEntity;
 import com.order.orderservice.entity.OrderItemsEntity;
+import com.order.orderservice.reponse.OrderReponse;
+import com.order.orderservice.reponse.ProductOrderReponse;
 import com.order.orderservice.repository.OrderRepository;
 import com.order.orderservice.service.IOrder;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
+import org.modelmapper.ModelMapper;
+import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Mono;
 import reactor.kafka.sender.KafkaSender;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -27,8 +35,13 @@ public class OrderImpl implements IOrder {
     @Autowired
     private OrderRepository orderRepository;
 
+    @Autowired
+    private ModelMapper mapper;
     @PersistenceContext
     private EntityManager entityManager;
+
+    @Autowired
+    private WebClient webClient;
 
     @Override
     @Transactional
@@ -98,9 +111,56 @@ public class OrderImpl implements IOrder {
 
 
     @Override
-    public List<OrderEntity> getOrderByUser(String phoneNumber) {
-        return orderRepository.findByPhoneNumber(phoneNumber);
+    public List<OrderReponse> getOrderByUser(String phoneNumber, String status, String token) {
+        String query = getStatusQuery(status);
+
+        List<OrderEntity> orderEntities = orderRepository.findByPhoneNumberAndStatusOrder(phoneNumber, query);
+        List<OrderReponse> orderReponses = mapper.map(orderEntities, new TypeToken<List<OrderReponse>>() {}.getType());
+
+        // Map each product asynchronously
+        List<Mono<Void>> productMonos = orderReponses.stream()
+                .flatMap(orderResponse -> orderResponse.getOrderItems().stream())
+                .map(productOrderResponse -> getProductResponse(productOrderResponse.getProductId().toString(), token)
+                        .doOnNext(productResponse -> {
+                            productOrderResponse.setName(productResponse.getName());
+                            productOrderResponse.setImg(productResponse.getProductImages().get(0).getUrlimg());
+                        })
+                        .then())
+                .collect(Collectors.toList());
+
+        // Wait for all async calls to complete
+        Mono.when(productMonos).block();
+
+        return orderReponses;
     }
+
+    private String getStatusQuery(String status) {
+        switch (status) {
+            case "1":
+                return "Chờ xác nhận";
+            case "2":
+                return "Chờ lấy hàng";
+            case "3":
+                return "Đang giao";
+            case "4":
+                return "Đã giao";
+            case "5":
+                return "Đã hủy";
+            case "6":
+                return "Trả hàng";
+            default:
+                return "";
+        }
+    }
+
+    private Mono<ProductReponse> getProductResponse(String productId, String token) {
+        return webClient.get()
+                .uri("http://localhost:8222/api/v1/products/one/" + productId)
+                .headers(headers -> headers.setBearerAuth(token.substring(7)))
+                .retrieve()
+                .bodyToMono(ProductReponse.class);
+    }
+
 
     @Override
     public OrderEntity getOneOder(Long idOrder) {

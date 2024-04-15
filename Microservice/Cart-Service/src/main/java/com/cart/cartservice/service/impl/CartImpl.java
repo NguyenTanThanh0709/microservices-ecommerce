@@ -116,37 +116,38 @@ public class CartImpl implements ICart {
         CartEntity cartEntity = findCartByUser(idUser);
         List<CartReponse> cartReponseList = new ArrayList<>();
 
-        if(cartEntity == null){
-            return  cartReponseList;
-        }
-        // Tạo request entity với headers
-        for(CartItemEntity cartItem : cartEntity.getCartItems()){
-            CartReponse cartReponse = new CartReponse();
-            cartReponse.set_id(cartItem.getId().toString());
-            cartReponse.setBuy_count(cartItem.getQuantity());
-            cartReponse.setStatus(-1);
-            cartReponse.setUser(cartEntity.getCustomerId().toString());
-            getProductResponse(cartItem.getProductId().toString(), token)
-                    .subscribe(productResponse -> {
-                        cartReponse.setProduct(productResponse);
-                        cartReponse.setPrice(productResponse.getPrice());
-                        cartReponse.setPrice_before_discount(productResponse.getPrice());
-                        cartReponseList.add(cartReponse);
-                    });
+        if (cartEntity == null) {
+            return cartReponseList;
         }
 
+        List<Mono<CartReponse>> productMonos = cartEntity.getCartItems().stream()
+                .map(cartItem -> getProductResponse(cartItem.getProductId().toString(), token)
+                        .map(productResponse -> {
+                            CartReponse cartReponse = new CartReponse();
+                            cartReponse.set_id(cartItem.getId().toString());
+                            cartReponse.setBuy_count(cartItem.getQuantity());
+                            cartReponse.setStatus(-1);
+                            cartReponse.setUser(cartEntity.getCustomerId().toString());
+                            cartReponse.setProduct(productResponse);
+                            cartReponse.setPrice(productResponse.getPrice());
+                            cartReponse.setPrice_before_discount(productResponse.getPrice());
+                            return cartReponse;
+                        }))
+                .collect(Collectors.toList());
 
-        // Wait for all asynchronous operations to complete
-        while (cartReponseList.size() < cartEntity.getCartItems().size()) {
-            try {
-                Thread.sleep(200); // Wait for 100 milliseconds
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-                throw new RuntimeException("Thread interrupted while waiting for product responses", e);
-            }
-        }
+        Flux.merge(productMonos)
+                .collectList()
+                .block(); // Wait for all asynchronous calls to complete
 
-        return  cartReponseList;
+        return cartReponseList;
+    }
+
+    private  Mono<ProductReponse> getProductResponse(String productId, String token) {
+        return webClient.get()
+                .uri("http://localhost:8222/api/v1/products/one/" + productId)
+                .headers(headers -> headers.setBearerAuth(token.substring(7)))
+                .retrieve()
+                .bodyToMono(ProductReponse.class);
     }
 
     @Override
@@ -161,13 +162,7 @@ public class CartImpl implements ICart {
         return  null;
     }
 
-    private  Mono<ProductReponse> getProductResponse(String productId, String token) {
-        return webClient.get()
-                .uri("http://localhost:8222/api/v1/products/one/" + productId)
-                .headers(headers -> headers.setBearerAuth(token.substring(7)))
-                .retrieve()
-                .bodyToMono(ProductReponse.class);
-    }
+
 
     @Override
     public void deleteByCartIdAndProductId(Long cartId, Long productId) {

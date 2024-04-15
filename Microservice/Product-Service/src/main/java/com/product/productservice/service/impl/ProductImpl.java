@@ -214,4 +214,32 @@ public class ProductImpl implements IProduct {
     public void incrementProductView(Long productId) {
         productRepository.incrementViewCount(productId);
     }
+
+    @Override
+    public void recalculateAndSetAverageRating(Long productId, int newRating) {
+        // Lấy trung bình của các đánh giá hiện có
+        Integer averageRating = productRepository.getFirstRatingByProductId(productId);
+
+        // Nếu không có đánh giá nào trước đó, sử dụng đánh giá mới làm trung bình
+        if (averageRating == null) {
+            averageRating = (Integer) newRating;
+        } else {
+            // Tính toán trung bình mới với đánh giá mới
+            averageRating = (averageRating + newRating) / 2;
+        }
+
+        // Cập nhật đánh giá trung bình mới cho sản phẩm
+        productRepository.updateRatingById(productId, averageRating.intValue());
+    }
+
+    @Override
+    public void subtractAndSetAverageRating(Long productId, int deletedRating) {
+        if(deletedRating >= 4){
+            productRepository.updateRatingById(productId, 4);
+        }else {
+            productRepository.updateRatingById(productId, 2);
+
+        }
+    }
+
 }

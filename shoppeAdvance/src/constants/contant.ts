@@ -42,6 +42,25 @@ export interface PromotionReponse {
   idProduct: number;
 }
 
+export interface OrderItem {
+  note: string;
+  productId: number;
+  name: string;
+  img: string;
+  quantity: number;
+  price: number;
+}
+
+export interface Order {
+  id: number;
+  phoneNumber: string;
+  address: string;
+  statusDelivery: string;
+  statusOrder: string;
+  totalMoney: number;
+  orderItems: OrderItem[];
+}
+
 export interface Product {
   name: string;
   shortDescription: string;

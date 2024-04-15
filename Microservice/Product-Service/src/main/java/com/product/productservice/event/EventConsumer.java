@@ -23,6 +23,28 @@ public class EventConsumer {
     public EventConsumer(ReceiverOptions<String,String> receiverOptions){
         KafkaReceiver.create(receiverOptions.subscription(Collections.singleton(Constant.payment_topic)))
                 .receive().subscribe(this::demoKafka);
+
+        KafkaReceiver.create(receiverOptions.subscription(Collections.singleton(Constant.rating_add_topic)))
+                .receive().subscribe(this::handleRatingAddEvent);
+
+        KafkaReceiver.create(receiverOptions.subscription(Collections.singleton(Constant.rating_sub_topic)))
+                .receive().subscribe(this::handleRatingAddEvent1);
+    }
+
+    public void handleRatingAddEvent(ReceiverRecord<String,String> receiverRecord){
+        log.info("Rating add event received: " + receiverRecord.value());
+        String[] split = receiverRecord.value().split("-");
+        Long idp = Long.parseLong(split[0]);
+        int rating = Integer.parseInt(split[1]);
+        iProduct.recalculateAndSetAverageRating(idp,rating);
+    }
+
+    public void handleRatingAddEvent1(ReceiverRecord<String,String> receiverRecord){
+        log.info("Rating add event received: " + receiverRecord.value());
+        String[] split = receiverRecord.value().split("-");
+        Long idp = Long.parseLong(split[0]);
+        int rating = Integer.parseInt(split[1]);
+        iProduct.subtractAndSetAverageRating(idp,rating);
     }
 
     public void demoKafka(ReceiverRecord<String,String> receiverRecord){

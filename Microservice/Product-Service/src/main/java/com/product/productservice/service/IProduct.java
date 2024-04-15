@@ -23,7 +23,8 @@ public interface IProduct {
     ProductEntity findOneByIdone(Long id);
     public void updateStockAndSoldQuantity(String content);
     void incrementProductView(Long productId);
-
+    void recalculateAndSetAverageRating(Long productId, int newRating);
+    void subtractAndSetAverageRating(Long productId, int deletedRating);
 
 
 }

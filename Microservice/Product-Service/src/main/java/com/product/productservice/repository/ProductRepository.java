@@ -18,6 +18,12 @@ public interface ProductRepository extends JpaRepository<ProductEntity, Long> {
     Page<ProductEntity> findAll(Pageable pageable);
     List<ProductEntity> findByPhoneOwner(Long phoneOwner);
     Page<ProductEntity> findByNameContainingIgnoreCase(String name, Pageable pageable);
+    @Modifying
+    @Query("UPDATE ProductEntity p SET p.rating = :newRating WHERE p.id = :productId")
+    void updateRatingById(@Param("productId") Long productId, @Param("newRating") int newRating);
+
+    @Query("SELECT p.rating FROM ProductEntity p WHERE p.id = :productId ORDER BY p.createdAt ASC")
+    Integer getFirstRatingByProductId(@Param("productId") Long productId);
 
 
     @Modifying

@@ -151,21 +151,19 @@ exports.refund = async (req, res) => {
     process.env.TZ = 'Asia/Ho_Chi_Minh';
     let date = new Date();
 
-    const config = require('config');
-    const moment = require('moment');
-    const request = require('request'); // Import request library here
-    const crypto = require("crypto");
+    let config = require('config');
+    let crypto = require("crypto");
    
     let vnp_TmnCode = config.get('vnp_TmnCode');
     let secretKey = config.get('vnp_HashSecret');
     let vnp_Api = config.get('vnp_Api');
     
+    let vnp_CreateBy = req.body.user;
     let vnp_TxnRef = req.body.orderId;
     let vnp_TransactionDate = req.body.transDate;
-
-    let vnp_Amount = req.body.amount * 100;
-    let vnp_CreateBy = req.body.user;
-    let vnp_TransactionType = "03";         
+    let vnp_Amount = req.body.amount *100;
+    let vnp_TransactionType = '03';
+            
     let currCode = 'VND';
     
     let vnp_RequestId = moment(date).format('HHmmss');
@@ -181,13 +179,13 @@ exports.refund = async (req, res) => {
     
     let vnp_CreateDate = moment(date).format('YYYYMMDDHHmmss');
     
-    let vnp_TransactionNo = '';
+    let vnp_TransactionNo = 'other';
     
     let data = vnp_RequestId + "|" + vnp_Version + "|" + vnp_Command + "|" + vnp_TmnCode + "|" + vnp_TransactionType + "|" + vnp_TxnRef + "|" + vnp_Amount + "|" + vnp_TransactionNo + "|" + vnp_TransactionDate + "|" + vnp_CreateBy + "|" + vnp_CreateDate + "|" + vnp_IpAddr + "|" + vnp_OrderInfo;
     let hmac = crypto.createHmac("sha512", secretKey);
     let vnp_SecureHash = hmac.update(new Buffer(data, 'utf-8')).digest("hex");
     
-    let dataObj = {
+     let dataObj = {
         'vnp_RequestId': vnp_RequestId,
         'vnp_Version': vnp_Version,
         'vnp_Command': vnp_Command,
@@ -200,27 +198,21 @@ exports.refund = async (req, res) => {
         'vnp_OrderInfo': vnp_OrderInfo,
         'vnp_TransactionDate': vnp_TransactionDate,
         'vnp_CreateDate': vnp_CreateDate,
-        'vnp_IpAddr': vnp_IpAddr,
+        'vnp_IpAddr': '127.0.0.1',
         'vnp_SecureHash': vnp_SecureHash
     };
-
-    console.log(dataObj);
     
     // Make the HTTP request using request library
+
+    console.log('Refund request:', dataObj);
     request({
         url: vnp_Api,
         method: "POST",
         json: true,   
         body: dataObj
-    }, function (error, response, body) {
-        if (error) {
-            console.error('Error in refund request:', error);
-            res.status(500).json({ error: 'Internal server error' });
-        } else {
-            console.log('Refund response:', body);
-            res.status(200).json({ vnp_ResponseCode: body.vnp_ResponseCode }); // Respond with the refund response code
-        }
-    });
+            }, function (error, response, body){
+                console.log(response);
+            });
 };
 
 
