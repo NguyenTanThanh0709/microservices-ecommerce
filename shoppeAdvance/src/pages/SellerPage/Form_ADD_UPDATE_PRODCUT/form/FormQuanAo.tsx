@@ -2,8 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { Col, Container } from 'react-bootstrap';
 import { ThongtinChiTiet_, BrandData, BrandReponse, Product } from 'src/constants/contant';
 import axiosInstance from 'src/apis/axiosClient'; 
-import { u } from 'msw/lib/glossary-de6278a9';
-import { set } from 'lodash';
 
 
 interface FormData {
@@ -97,23 +95,19 @@ const FormQuanAo: React.FC<{ updateFormDataProduct: (data: Partial<Product>) => 
   
 
   const handleClick = () => {
-    if (isFormDataNull(formData)) {
-      alert('Please fill in all fields!');
-    } else {
+    
       
-      console.log(formthongtinchitiet);
+      // console.log(formthongtinchitiet);
       updateFormDataProduct({
         description: formthongtinchitiet.description,
         idBrand: formthongtinchitiet.idBrand,
     });
 
-    }
+    alert("Lưu Thành Công")
 
   }
 
   useEffect(() => {
-    console.log(formthongtinchitiet);
-    console.log(formData);
       setFormthongtinchitiet({
         description: formDataToString(formData),
         idBrand: parseInt(formData.brand, 10)
@@ -142,7 +136,7 @@ const FormQuanAo: React.FC<{ updateFormDataProduct: (data: Partial<Product>) => 
     } catch (error) {
         console.error('Error fetching data:', error);
     }
-}
+  }
 
 async function fetchDataPost(data: any) {
   try {
@@ -222,7 +216,7 @@ async function fetchDataPost(data: any) {
             {brands.map(brand => (
                 <option key={brand.id} value={brand.id}>{brand.name}</option>
             ))}
-        </select>
+            </select>
           </div>
 
 

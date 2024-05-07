@@ -10,7 +10,6 @@ const paymentSchema = new mongoose.Schema({
     vnpTxnRef: {type:String},
     createdOn: { type: Date, default: Date.now },
     lastModifiedOn: { type: Date, default: Date.now }
-    
 });
 
 // Create the model

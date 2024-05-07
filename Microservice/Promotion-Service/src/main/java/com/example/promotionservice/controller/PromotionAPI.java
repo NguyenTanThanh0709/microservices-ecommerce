@@ -3,6 +3,7 @@ package com.example.promotionservice.controller;
 import com.example.commonservice.DTO.PromotionDTO;
 import com.example.promotionservice.entity.DiscountAppEntity;
 import com.example.promotionservice.entity.DiscountCodeEntity;
+import com.example.promotionservice.repository.DiscountAppRepository;
 import com.example.promotionservice.service.IDiscountCode;
 import com.example.promotionservice.service.impl.PromitonImpl;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,9 +22,19 @@ public class PromotionAPI {
     @Autowired
     private IDiscountCode discountCode;
 
+    @Autowired
+    private DiscountAppRepository discountAppRepository;
+
+
+
     @GetMapping("/user/{userId}")
     public List<DiscountCodeEntity> getDiscountCodesByUserId(@PathVariable("userId") Long userId) {
         return discountCode.findDiscountCodesByUserId(userId);
+    }
+
+    @GetMapping("/idcode/{userId}")
+    public List<DiscountAppEntity> getDiscountCodesByUserId1(@PathVariable("userId") Long userId) {
+        return discountAppRepository.findByDiscountCodeId(userId);
     }
 
     @PostMapping("/")
@@ -53,7 +64,7 @@ public class PromotionAPI {
     }
 
     @GetMapping("/{id}")
-    public DiscountCodeEntity    getDiscountAppsById(@PathVariable Long id) {
+    public DiscountCodeEntity getDiscountAppsById(@PathVariable Long id) {
         return promiton.findById(id);
     }
 

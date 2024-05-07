@@ -71,10 +71,10 @@ export default function PaymentResult() {
 
         <div className="text-center">
         {showSuccessIcon && (
-                        <h3 className="md:text-2xl text-base text-gray-900 font-semibold text-center">Thanh toán học phí thành công</h3>
+                        <h3 className="md:text-2xl text-base text-gray-900 font-semibold text-center">Thanh toán đơn hàng thành công</h3>
                     )}
                     {showFailedIcon && (
-                        <h3 className="md:text-2xl text-base text-gray-900 font-semibold text-center">Thanh toán học phí không thành công</h3>
+                        <h3 className="md:text-2xl text-base text-gray-900 font-semibold text-center">Thanh toán đơn hàng không thành công</h3>
                     )}
           <p className="text-gray-600 my-2">Vui lòng kiểm tra lại lịch sử thanh toán! chúc bạn ngày tốt lành!</p>
           <p>Have a great day!</p>

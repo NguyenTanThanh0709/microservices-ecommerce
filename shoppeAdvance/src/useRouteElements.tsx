@@ -11,6 +11,7 @@ import Promotion from './pages/SellerPage/Promotion/Promotion'
 import PromotionList from './pages/SellerPage/Promotion/PromotionList'
 import Payment from './pages/Payment'
 import PaymentResult from './pages/PaymentResult'
+import Register_ from './pages/Register copy'
 
 const Login = lazy(() => import('./pages/Login'))
 const ProductList = lazy(() => import('./pages/ProductList'))
@@ -101,6 +102,15 @@ export default function useRouteElements() {
             },
 
           ]
+        }
+        ,
+        {
+          path: path.RegisterShop,
+          element: (
+            <RegisterLayout>
+              < Register_/>
+            </RegisterLayout>
+          )
         }
       ]
     },

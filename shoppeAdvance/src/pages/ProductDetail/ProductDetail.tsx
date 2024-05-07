@@ -351,7 +351,7 @@ const fetchUpProductDeleteRating = async (idproduct:string, idu:string) => {
               </div>
               <div className='mt-8  items-center bg-gray-50 px-5 py-4'>
                 <h1>Thông tin màu</h1>
-                {product.colors.split("-").map((items, index) => (
+                {product.colors && product.colors.split("-").map((items, index) => (
                   <div key={index}  className={`items-center border-2 cursor-pointer rounded-sm px-4 py-2 mt-2 ${selectColor == items ? 'border-blue-500' : 'border-gray-300'}`}   onClick={() => handleItemClickColor(items)}> 
                   <p>Màu: {items}</p>
                 </div>

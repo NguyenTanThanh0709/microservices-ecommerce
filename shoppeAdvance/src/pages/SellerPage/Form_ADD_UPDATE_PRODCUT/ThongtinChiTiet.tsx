@@ -8,14 +8,24 @@ import {  Product} from 'src/constants/contant';
 
 
 
-const ThongtinChiTiet: React.FC<{ updateFormDataProduct: (data: Partial<Product>) => void }> = ({ updateFormDataProduct }) => {
+interface ThongtinChiTietProps {
+  formDataProduct: any;
+  changeCategory: number;
+  updateFormDataProduct: (data: Partial<Product>) => void;
+}
+
+const ThongtinChiTiet: React.FC<ThongtinChiTietProps> = ({ formDataProduct,changeCategory, updateFormDataProduct }) => {
+  const test = () => {
+    console.log(changeCategory)
+  }
   return (
     <>
-      <FormQuanAo updateFormDataProduct={updateFormDataProduct}/>
-      {/* <FormAoQuan/> */}
-      {/* <FormGiay/> */}
-      {/* <FoodForm/> */}
-      {/* <WatchForm/> */}
+      {changeCategory == 1 && <FormQuanAo updateFormDataProduct={updateFormDataProduct}/>}
+      {changeCategory == 2 && <FormAoQuan updateFormDataProduct={updateFormDataProduct}/>}
+      {changeCategory == 3 && <FormGiay updateFormDataProduct={updateFormDataProduct}/>}
+      {changeCategory == 5 && <FoodForm updateFormDataProduct={updateFormDataProduct}/>}
+      {changeCategory == 4 && <WatchForm updateFormDataProduct={updateFormDataProduct}/>}
+      <div>Thông tin được lưu: {formDataProduct.description}</div>
     </>
   );
 };

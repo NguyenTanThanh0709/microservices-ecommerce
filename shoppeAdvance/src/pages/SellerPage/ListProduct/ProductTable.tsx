@@ -1,18 +1,21 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Product } from 'src/types/product.type';
 
-interface Product {
-  id: number;
-  name: string;
-  price: number;
-  inventory: number;
-  sales: number;
-}
 
 const MaxProductCount = 999;
 
 const ProductTable: React.FC<{ products: Product[] }> = ({ products }) => {
   const [uploadedProducts, setUploadedProducts] = useState<number>(0);
   const [selectedTab, setSelectedTab] = useState<string>('all');
+  const [filteredProducts, setFilteredProducts] = useState<Product[]>(products);
+
+  useEffect(() => {
+    filterProducts(selectedTab);
+    if(selectedTab=== 'all'){
+      setFilteredProducts(products);
+    }
+  }, [products, selectedTab]);
 
   const handleUpload = () => {
     setUploadedProducts(prevCount => prevCount + 1);
@@ -20,16 +23,28 @@ const ProductTable: React.FC<{ products: Product[] }> = ({ products }) => {
 
   const handleTabClick = (tab: string) => {
     setSelectedTab(tab);
+    filterProducts(tab);
+  };
+
+  const filterProducts = (tab: string) => {
+    if (tab === 'outOfStock') {
+      const outOfStockProducts = products.filter(product => product.stockQuantity === 0);
+      setFilteredProducts(outOfStockProducts);
+    } else {
+      setFilteredProducts(products);
+    }
   };
 
   const tabs = [
     { key: 'all', label: 'Tất Cả' },
     { key: 'active', label: 'Đang Hoạt Động' },
     { key: 'outOfStock', label: 'Hết Hàng' },
-    { key: 'pendingApproval', label: 'Chờ Duyệt' },
-    { key: 'violation', label: 'Vi Phạm' },
-    { key: 'hidden', label: 'Đã Ẩn' }
   ];
+
+  const navigate = useNavigate();
+  const handleEditProduct = (productId: number) => {
+    navigate(`/admin-home/1-${productId}`);
+  };
 
   return (
     <>
@@ -88,7 +103,7 @@ const ProductTable: React.FC<{ products: Product[] }> = ({ products }) => {
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
-            {products.map((product) => (
+            {filteredProducts.map((product) => (
               <tr key={product.id || ''}>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div className=" text-gray-900">{product.name || ''}</div>
@@ -97,13 +112,13 @@ const ProductTable: React.FC<{ products: Product[] }> = ({ products }) => {
                   <div className=" text-gray-900">{product.price || ''}</div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
-                  <div className=" text-gray-900">{product.inventory || ''}</div>
+                  <div className=" text-gray-900">{product.stockQuantity}</div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
-                  <div className=" text-gray-900">{product.sales || ''}</div>
+                  <div className=" text-gray-900">{product.sold || ''}</div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-left  ">
-                  <a href="#" className="text-indigo-600 hover:text-indigo-900">Chỉnh sửa</a>
+                  <button onClick={() => handleEditProduct(product.id)} className="text-indigo-600 hover:text-indigo-900">Chỉnh sửa</button>
                 </td>
               </tr>
             ))}

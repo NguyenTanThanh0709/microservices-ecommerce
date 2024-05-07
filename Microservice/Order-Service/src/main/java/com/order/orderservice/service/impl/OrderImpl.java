@@ -53,6 +53,7 @@ public class OrderImpl implements IOrder {
         orderEntity.setStatusDelivery(orderDTO.getStatusDelivery());
         orderEntity.setStatusOrder(orderDTO.getStatusOrder());
         orderEntity.setTotalMoney(orderDTO.getTotalMoney());
+        orderEntity.setIdSeller(orderDTO.getIdSeller());
 
         // Tạo danh sách các mặt hàng của đơn hàng từ thông tin trong OrderDTO
         List<OrderItemsEntity> orderItemsEntityList = new ArrayList<>();
@@ -113,10 +114,8 @@ public class OrderImpl implements IOrder {
     @Override
     public List<OrderReponse> getOrderByUser(String phoneNumber, String status, String token) {
         String query = getStatusQuery(status);
-
         List<OrderEntity> orderEntities = orderRepository.findByPhoneNumberAndStatusOrder(phoneNumber, query);
         List<OrderReponse> orderReponses = mapper.map(orderEntities, new TypeToken<List<OrderReponse>>() {}.getType());
-
         // Map each product asynchronously
         List<Mono<Void>> productMonos = orderReponses.stream()
                 .flatMap(orderResponse -> orderResponse.getOrderItems().stream())
@@ -134,6 +133,28 @@ public class OrderImpl implements IOrder {
         return orderReponses;
     }
 
+    @Override
+    public List<OrderReponse> getOrderBySeller(Long id, String status, String token) {
+        String query = getStatusQuery(status);
+        List<OrderEntity> orderEntities = orderRepository.findByIdSellerAndStatusOrder(id, query);
+        List<OrderReponse> orderReponses = mapper.map(orderEntities, new TypeToken<List<OrderReponse>>() {}.getType());
+        // Map each product asynchronously
+        List<Mono<Void>> productMonos = orderReponses.stream()
+                .flatMap(orderResponse -> orderResponse.getOrderItems().stream())
+                .map(productOrderResponse -> getProductResponse(productOrderResponse.getProductId().toString(), token)
+                        .doOnNext(productResponse -> {
+                            productOrderResponse.setName(productResponse.getName());
+                            productOrderResponse.setImg(productResponse.getProductImages().get(0).getUrlimg());
+                        })
+                        .then())
+                .collect(Collectors.toList());
+
+        // Wait for all async calls to complete
+        Mono.when(productMonos).block();
+
+        return orderReponses;
+    }
+// Chờ xác nhận, Chờ lấy hàng, Chờ giao hàng, Hoàn thành, Đã hủy, Trả hàng/Hoàn tiền
     private String getStatusQuery(String status) {
         switch (status) {
             case "1":
@@ -141,13 +162,13 @@ public class OrderImpl implements IOrder {
             case "2":
                 return "Chờ lấy hàng";
             case "3":
-                return "Đang giao";
+                return "Chờ giao hàng";
             case "4":
-                return "Đã giao";
+                return "Hoàn thành";
             case "5":
                 return "Đã hủy";
             case "6":
-                return "Trả hàng";
+                return "Trả hàng/Hoàn tiền";
             default:
                 return "";
         }

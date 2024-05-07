@@ -11,4 +11,6 @@ import java.util.List;
 public interface DiscountAppRepository extends JpaRepository<DiscountAppEntity, Long> {
     @Query("SELECT da FROM DiscountAppEntity da WHERE da.IdProduct = :idProduct")
     List<DiscountAppEntity> findByProductId(Long idProduct);
+
+    List<DiscountAppEntity> findByDiscountCodeId(Long discountCodeId);
 }

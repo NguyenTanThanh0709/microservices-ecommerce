@@ -176,11 +176,20 @@ export default function Cart() {
         orderTempArray.push(order);
       }
     }
-    // console.log(orderTempArray)
-    if(orderTempArray.length != 0){
-      navigate('/payment', { state: { orderTempArray } });
-    }else{
-      alert("Vui lòng chọn sản phẩm để thanh toán")
+    if (orderTempArray.length !== 0) {
+      // Check if all products have the same phoneOwner
+      const firstPhoneOwner = orderTempArray[0]?.idProduct?.phoneOwner;
+      const allSamePhoneOwner = orderTempArray.every(order => order.idProduct.phoneOwner === firstPhoneOwner);
+      if (allSamePhoneOwner) {
+        // Navigate to the payment page
+        navigate('/payment', { state: { orderTempArray } });
+      } else {
+        // Display an alert if phoneOwner is not the same for all products
+        alert("Tất cả các sản phẩm cần có chủ sở hữu điện thoại giống nhau để thanh toán");
+      }
+    } else {
+      // Display an alert if no products are selected
+      alert("Vui lòng chọn sản phẩm để thanh toán");
     }
   }
 
@@ -251,8 +260,14 @@ export default function Cart() {
                                     className='text-left line-clamp-2'
                                   >
                                     {purchase.product.name}
+                                    <br />
+                                  <span>
+                                    Mã shop: {purchase.product.phoneOwner}
+                                  </span>
                                   </Link>
+                                  
                                 </div>
+                                
                               </div>
                             </div>
                           </div>

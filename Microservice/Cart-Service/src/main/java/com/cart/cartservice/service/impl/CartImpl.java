@@ -39,11 +39,6 @@ public class CartImpl implements ICart {
 
     @Autowired
     private  WebClient webClient;
-
-
-
-
-
     @PersistenceContext
     private EntityManager entityManager;
 
@@ -120,8 +115,8 @@ public class CartImpl implements ICart {
             return cartReponseList;
         }
 
-        List<Mono<CartReponse>> productMonos = cartEntity.getCartItems().stream()
-                .map(cartItem -> getProductResponse(cartItem.getProductId().toString(), token)
+        cartReponseList = Flux.fromIterable(cartEntity.getCartItems())
+                .flatMap(cartItem -> getProductResponse(cartItem.getProductId().toString(), token)
                         .map(productResponse -> {
                             CartReponse cartReponse = new CartReponse();
                             cartReponse.set_id(cartItem.getId().toString());
@@ -133,13 +128,11 @@ public class CartImpl implements ICart {
                             cartReponse.setPrice_before_discount(productResponse.getPrice());
                             return cartReponse;
                         }))
-                .collect(Collectors.toList());
-
-        Flux.merge(productMonos)
                 .collectList()
                 .block(); // Wait for all asynchronous calls to complete
 
         return cartReponseList;
+
     }
 
     private  Mono<ProductReponse> getProductResponse(String productId, String token) {

@@ -38,3 +38,28 @@ exports.updatePaymentStatus = async (req, res) => {
         res.status(500).json({ success: false, message: 'Failed to update payment status', error: error.message });
     }
 };
+
+
+// Controller to get payment by order ID
+exports.getPaymentByOrderId = async (req, res) => {
+    try {
+        const { orderId } = req.params;
+
+        console.log(orderId);
+        
+        // Call the service function to get payment by order ID
+        const payment = await paymentService.getPaymentByOrderId(orderId);
+
+        if (!payment) {
+            // If payment not found, return error response
+            return res.status(404).json({ error: 'Payment not found' });
+        }
+
+        // If payment found, return success response with the payment object
+        return res.status(200).json(payment);
+    } catch (error) {
+        // If any error occurs, return error response
+        console.error('Error getting payment by order ID:', error);
+        return res.status(500).json({ error: 'Internal server error' });
+    }
+};

@@ -26,6 +26,7 @@ public class ProductReponse {
     private double thetich_rong;
     private double thetich_cao;
     private String colors;
+    private String createdAt;
     private List<ProductImage> productImages;
     private List<ProductSize> productSize;
     private List<Object> relatedProducts; // Assuming relatedProducts can be of any type

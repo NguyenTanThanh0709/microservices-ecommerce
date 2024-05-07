@@ -25,6 +25,7 @@ public interface IProduct {
     void incrementProductView(Long productId);
     void recalculateAndSetAverageRating(Long productId, int newRating);
     void subtractAndSetAverageRating(Long productId, int deletedRating);
+    public void addProductImages(ProductEntity product, List<String> imageUrls);
 
 
 }

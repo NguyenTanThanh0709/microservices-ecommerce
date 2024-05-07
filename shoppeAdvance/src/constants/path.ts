@@ -16,10 +16,11 @@ const path = {
 
 
 
-  adminhome:'/admin-home',
+  adminhome:'/admin-home/:status',
   pageShop:'/admin-shop',
   pageFormPromotion:'/admin-promiton/:promotionId',
   pageListPromotion:'/admin-list-promotion',
+  RegisterShop : '/admin-shop-register'
 } as const
 
 export default path

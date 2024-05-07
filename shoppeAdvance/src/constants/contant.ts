@@ -21,6 +21,7 @@ export interface OrderRequest{
   address: string;
   statusDelivery: string;
   statusOrder: string;
+  idSeller: number;
   productIdsQuantitys: { [productId: string]: number };
   productIdsPrices: { [productId: string]: number };
   productIdsNotes: { [productId: string]: string };
@@ -58,6 +59,7 @@ export interface Order {
   statusDelivery: string;
   statusOrder: string;
   totalMoney: number;
+  idSeller: number;
   orderItems: OrderItem[];
 }
 
@@ -65,7 +67,7 @@ export interface Product {
   name: string;
   shortDescription: string;
   description: string;
-  idBrand: number;
+  idBrand: number; 
   category: string;
   price: number;
   stockQuantity: number;
@@ -198,16 +200,7 @@ export const categories: Categories = {
       "Các loại bánh": ["Bánh mì", "Bánh ngọt", "Bánh ngọt", "Bánh mỳ"],
       "Đồ uống có cồn": ["Rượu vang", "Bia", "Rượu mạnh", "Cocktail"],
       "Bộ quà tặng": ["Hộp quà tặng", "Giỏ quà tặng", "Bộ combo", "Bộ quà tặng cao cấp"]
-    },
-      "Điện Thoại & Phụ Kiện": {
-    "Thẻ sim": ["Sim điện thoại", "Sim dữ liệu", "Sim du lịch", "Sim trả trước"],
-    "Máy tính bảng": ["iPad", "Samsung Galaxy Tab", "Microsoft Surface", "Lenovo Tab"],
-    "Điện thoại": ["iPhone", "Samsung Galaxy", "Xiaomi", "Oppo", "Huawei", "Google Pixel"],
-    "Thiết bị đeo thông minh": ["Smartwatch", "Fitbit", "Apple Watch", "Garmin"],
-    "Phụ kiện": ["Ốp lưng điện thoại", "Cáp sạc", "Tai nghe Bluetooth", "Gậy tự sướng"],
-    "Bộ đàm": ["Bộ đàm cầm tay", "Bộ đàm ô tô", "Bộ đàm di động", "Bộ đàm công nghiệp"],
-    "Khác": ["Pin dự phòng", "Cốc sạc không dây", "Đèn selfie", "Gương hậu ô tô"]
-  },
+    }
  
   }
 

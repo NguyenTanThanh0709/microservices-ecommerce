@@ -2,7 +2,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faLocationDot } from '@fortawesome/free-solid-svg-icons';
 import { useMutation, useQuery } from '@tanstack/react-query'
 import userApi from 'src/apis/user.api'
-import { PromotionReponse, OrderRequest } from 'src/constants/contant'
+import { PromotionReponse } from 'src/constants/contant'
 import { faTicket } from '@fortawesome/free-solid-svg-icons';
 import React, { useState, useEffect } from 'react';
 import axiosClient from 'src/apis/axiosClient'
@@ -11,7 +11,7 @@ import { Product } from 'src/types/product.type'
 import PaymentPage from '../Cart/PaymentPage';
 import { RadioChangeEvent } from 'antd/es/radio';
 import axiosInstance from 'src/apis/axiosClient'; 
-
+import { useNavigate } from 'react-router-dom';
 interface orderTemp {
   idProduct: Product  ;
   priceProduct: number;
@@ -24,12 +24,14 @@ export default function Payment() {
 
   const location = useLocation();
   const { orderTempArray } = location.state;
+  const navigate = useNavigate();
 
   const [showModal, setShowModal] = useState<boolean>(false);
   const [voucherCode, setVoucherCode] = useState<string>('');
   const [promotions, setPromotions] = useState<PromotionReponse[]>([]);
   const [inputValues, setInputValues] = useState<orderTemp[]>([]);
   const [totalMoney, setTotalMoney] = useState<number>(0);
+
 
   
 
@@ -84,14 +86,12 @@ export default function Payment() {
 
   const handleApplyVoucher = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    console.log('Áp dụng mã voucher:', voucherCode);
     setShowModal(false);
   };
 
   const getPromotions = async (number: number) => {
     try {
       const response = await axiosClient.get<PromotionReponse[]>(`/api/v1/promotions/product/${number}`);
-      console.log(response.data)
       setPromotions(response.data);
     } catch (error) {
       console.error('Error uploading images:', error);
@@ -141,19 +141,20 @@ export default function Payment() {
     const data = {
       phoneNumber: profile?.phone || "",
       address: profile?.address || "",
-      statusOrder: "Chờ thanh toán", // Chờ thanh toán, Vận chuyển, Chờ giao hàng, Hoàn thành, Đã hủy, Trả hàng/Hoàn tiền
+      statusOrder: "Chờ xác nhận", // Chờ xác nhận, Chờ lấy hàng, Chờ giao hàng, Hoàn thành, Đã hủy, Trả hàng/Hoàn tiền
       statusDelivery: "Đóng hàng", // Đóng hàng, Lấy hàng, giao hàng, đã giao
       productIdsQuantitys: productIdsQuantitys,
       productIdsPrices: productIdsPrices,
       productIdsNotes: productIdsNotes,
       totalMoney: totalMoney,
+      idSeller: orderTempArray[0].idProduct.phoneOwner,
       idPayment :0
     }
     handleAddOrder(data)    
   };
 
   const handleAddOrder = async (data: any) => {
-    console.log(typeof(data.productIdsQuantitys))
+
     let result = '';
     for (const key in data.productIdsQuantitys) {
       if (data.productIdsQuantitys.hasOwnProperty(key)) {
@@ -163,16 +164,20 @@ export default function Payment() {
     
     // Loại bỏ ký tự "-" cuối cùng nếu có
     result = result.slice(0, -1);
-    console.log(result)
-    
+    console.log(data)
     try {
-      const response = await axiosInstance.post('api/v1/orders/', data)
+      let statuspayment = "0";
+      if(payment != 'later_money'){
+        statuspayment = "1"
+      }
+      const response = await axiosInstance.post(`api/v1/orders/${statuspayment}`, data)
       
       if(response.status == 201 || response.status == 200){
 
         if(payment === 'later_money'){
-
-
+          alert("Thanh toán khi nhận hàng")
+          alert("Đặt Hàng Thành Công!")
+          navigate('/user/purchase?status=1')
         }else if(payment === 'paypal'){
           const dataPayment = {
             amount : totalMoney,
@@ -344,7 +349,7 @@ export default function Payment() {
                 <button type='submit' className='bg-green-500 text-white font-bold py-2 px-4 rounded'>Áp dụng</button>
               </form>
               <div className='my-2'>
-                {promotions.map((promotion) => (
+                {promotions && promotions.map((promotion) => (
                   promotion.discountCode.isActive && (
                     <div key={promotion.id} className='my-2 bg-slate-200'>
                       <p className='font-bold'>{promotion.discountCode.name}</p>

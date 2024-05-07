@@ -1,14 +1,41 @@
 import React, { useState, useEffect } from "react";
 import { categories, ThongtinCoBan_ , Product} from 'src/constants/contant';
 
+interface ThongtinCoBanProps {
+  formDataProduct: any;
+  updateFormDataProduct: (data: Partial<Product>) => void;
+  update_Category: (data: Partial<number>) => void;
+}
 
+const ThongtinCoBan: React.FC<ThongtinCoBanProps> = ({ formDataProduct, updateFormDataProduct, update_Category }) => {
+  // console.log(formDataProduct)
+  useEffect(() => {
 
-const ThongtinCoBan: React.FC<{ updateFormDataProduct: (data: Partial<Product>) => void }> = ({ updateFormDataProduct }) => {
+    if (Object.keys(formDataProduct).length !== 0 ) {
+      // Tiến hành xử lý
+
+      if (formDataProduct.productImages && formDataProduct.productImages.length > 0) {
+        // Tạo một mảng hình ảnh mới từ formDataProduct.images
+        const newImages: string[] = formDataProduct.productImages.map((image: any) => {
+            return image.urlimg
+        });
+        setImagePreviews(newImages);
+    }
+
+    setProductName(formDataProduct.name);
+    setProductDescription(formDataProduct.shortDescription);
+    let category = formDataProduct.category.split("-");
+    setSelectedCategory(category[0]);
+    setSelectedSubcategory(category[1]);
+    setSelectedItem(category[2]);
+  }
+
+}, [formDataProduct]);
+
 
 
 
   const [imagePreviews, setImagePreviews] = useState<string[]>([]);
-  const [video, setVideo] = useState<File | null>(null);
   const [imgs, setImgs] = useState<File[] | null>(null);
   const [productName, setProductName] = useState<string>('');
   const [productDescription, setProductDescription] = useState<string>('');
@@ -41,17 +68,8 @@ const ThongtinCoBan: React.FC<{ updateFormDataProduct: (data: Partial<Product>) 
   };
   
 
-  const handleVideoChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    if (event.target.files) {
-      const file = event.target.files[0];
-      setVideo(file);
-    }
-  };
 
-  const handleSubmit = (event: React.FormEvent) => {
-    event.preventDefault();
-    console.log('Uploaded video:', video);
-  };
+
 
   const handleProductNameChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setProductName(event.target.value);
@@ -113,13 +131,7 @@ const ThongtinCoBan: React.FC<{ updateFormDataProduct: (data: Partial<Product>) 
     }));
   }, [imgs]);
   
-  useEffect(() => {
-    setFormData((prevFormData) => ({
-      ...prevFormData,
-      videourl: video,
-    }));
-  }, [video]);
-  
+
 
   const handleClick = () => {
 
@@ -129,8 +141,7 @@ const ThongtinCoBan: React.FC<{ updateFormDataProduct: (data: Partial<Product>) 
       !selectedCategory.trim() ||
       !selectedSubcategory.trim() ||
       !selectedItem.trim() ||
-      !imgs ||
-      !video
+      !imgs
     ) {
       // Hiển thị cảnh báo nếu có trường nào đó rỗng, null hoặc trống
       alert("Vui lòng điền đầy đủ thông tin sản phẩm!");
@@ -143,7 +154,7 @@ const ThongtinCoBan: React.FC<{ updateFormDataProduct: (data: Partial<Product>) 
       shortDescription: productDescription,
       category: `${selectedCategory} - ${selectedSubcategory} - ${selectedItem}`,
       images: imgs || [], // Sử dụng imgs nếu có, nếu không sử dụng mảng rỗng
-      videourl: video,
+      videourl: null,
     });
 
     updateFormDataProduct({
@@ -151,12 +162,27 @@ const ThongtinCoBan: React.FC<{ updateFormDataProduct: (data: Partial<Product>) 
       shortDescription: productDescription,
       category: `${selectedCategory} - ${selectedSubcategory} - ${selectedItem}`,
       imgs: imgs || [], // Sử dụng imgs nếu có, nếu không sử dụng mảng rỗng
-      video: video,
+      video: null,
   });
 
 
     console.log(formData);
 
+    if(selectedCategory.includes('Thời Trang') && (selectedSubcategory.includes('Quần') || selectedSubcategory.includes('Váy'))){
+      update_Category(1)
+    }else{
+      update_Category(2)
+    }
+
+    if( selectedCategory.includes('Giày')){
+      update_Category(3)
+    }
+    if( selectedCategory.includes('Đồng Hồ')){
+      update_Category(4)
+    }
+    if( selectedCategory.includes('Thực Phẩm')){
+      update_Category(5)
+    }
   };
 
   // console.log(categories  )
@@ -197,47 +223,7 @@ const ThongtinCoBan: React.FC<{ updateFormDataProduct: (data: Partial<Product>) 
         )}
       </div>
 
-      <div className="m-4 p-4">
-        <h2 className="text-red-500 text-xl font-semibold">Upload Video</h2>
-        <ul className="divide-y divide-gray-200">
-          <li className="py-2 flex items-start">
-            <span className="h-2 w-2 bg-gray-500 rounded-full mt-1 mr-3"></span>
-            <p className="text-gray-700">Kích thước: Tối đa 30Mb, độ phân giải không vượt quá 1280x1280px</p>
-          </li>
-          <li className="py-2 flex items-start">
-            <span className="h-2 w-2 bg-gray-500 rounded-full mt-1 mr-3"></span>
-            <p className="text-gray-700">Độ dài: 10s-60s</p>
-          </li>
-          <li className="py-2 flex items-start">
-            <span className="h-2 w-2 bg-gray-500 rounded-full mt-1 mr-3"></span>
-            <p className="text-gray-700">Định dạng: MP4 (không hỗ trợ vp9)</p>
-          </li>
-          <li className="py-2 flex items-start">
-            <span className="h-2 w-2 bg-gray-500 rounded-full mt-1 mr-3"></span>
-            <p className="text-gray-700">Lưu ý: sản phẩm có thể hiển thị trong khi video đang được xử lý. Video sẽ tự động hiển thị sau khi đã xử lý thành công.</p>
-          </li>
-        </ul>
-        <form onSubmit={handleSubmit} className='m-4 p-4'>
-          <div className="mb-4">
-            <label htmlFor="video" className="block text-gray-700 font-medium mb-2">Select Video:</label>
-            <input
-              type="file"
-              id="video"
-              accept="video/*"
-              onChange={handleVideoChange}
-              className="border-gray-300 rounded-md py-2 px-4 w-full focus:outline-none focus:border-blue-400"
-            />
-          </div>
-        </form>
-        {video && (
-          <div className="mt-4">
-            <video controls className="w-64 h-64">
-              <source src={URL.createObjectURL(video)} type={video.type} />
-              Your browser does not support the video tag.
-            </video>
-          </div>
-        )}
-      </div>
+
 
       <div className="m-4 p-4">
         <h1 className="text-red-500 text-xl font-semibold mb-4">Chọn tên sản phẩm</h1>

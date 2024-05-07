@@ -32,6 +32,7 @@ export default function ProductList() {
     }
   })
 
+
   console.log(productsData?.data.data)
   return (
     <div className='bg-gray-200 py-6'>

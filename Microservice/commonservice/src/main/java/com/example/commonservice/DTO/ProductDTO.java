@@ -44,7 +44,7 @@ public class ProductDTO {
                 && cannangdonggoi != null && thetich_dai != null
                 && thetich_rong != null && thetich_cao != null
                 && urlVideo != null
-                && imgsurl != null
+//                && imgsurl != null
                 && category != null && idBrand != null;
     }
 }

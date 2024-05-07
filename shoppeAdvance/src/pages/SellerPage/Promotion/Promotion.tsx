@@ -140,8 +140,26 @@ const Promotion: React.FC = () => {
       setStartDate(startDate.toISOString().split('T')[0]); // Chuyển đổi thành định dạng yyyy-MM-dd
 
       setDiscountValue(response.data.discountValue)
-
+      console.log(response.data)
       const products = response.data.discountApps;
+      const productIds: string[] = [];
+      for (let i = 0; i < products.length; i++) {
+        productIds.push(products[i].idProduct.toString());
+      }
+      setIdProducts(productIds);
+      
+    }
+} catch (error) {
+    console.error('Error uploading images:', error);
+}
+ }
+
+ const fecthGetPromotion1 = async (id:number) =>{
+  try {
+
+    const response = await axiosClient.get(`api/v1/promotions/idcode/${id}`);
+    if(response){
+      const products = response.data;
       const productIds: string[] = [];
       for (let i = 0; i < products.length; i++) {
         productIds.push(products[i].idProduct.toString());
@@ -171,8 +189,8 @@ const Promotion: React.FC = () => {
   let { promotionId } = useParams();
   useEffect(() => {
     if(promotionId != '0' && promotionId != null){
-      console.log(promotionId)
       fecthGetPromotion(promotionId)
+      fecthGetPromotion1(parseInt(promotionId))
     }
   }, [])
 

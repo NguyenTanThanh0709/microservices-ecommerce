@@ -29,4 +29,14 @@ public class ProductServiceApplication {
         ));
         return cloudinary;
     }
+
+//    public Cloudinary getCloudinary(){
+//        Cloudinary cloudinary = new Cloudinary(ObjectUtils.asMap(
+//                "cloud_name", "dd2n8zer9",
+//                "api_key", "758986246492856",
+//                "api_secret", "hHMXoCNxUAKxX5DxFFuB9JAWmsw",
+//                "secure", true
+//        ));
+//        return cloudinary;
+//    }
 }

@@ -18,11 +18,11 @@ public class OrderDTO {
     private String statusDelivery;
     private String statusOrder;
     private Double totalMoney;
+    private Long idSeller;
 
     private HashMap<Long, Integer> productIdsQuantitys;
     private HashMap<Long, Double> productIdsPrices;
     private HashMap<Long, String> productIdsNotes;
-
 
     public boolean isValid() {
         return isPhoneNumberValid(this.phoneNumber)

@@ -11,6 +11,7 @@ public interface IOrder {
     void updateStatusOrder(Long orderid, String statusOrder);
     void updateStatusDeliveryOrder(Long orderid, String statusOrderDelivery);
     List<OrderReponse> getOrderByUser(String  phoneNumber, String  status, String token);
+    List<OrderReponse> getOrderBySeller(Long id, String  status, String token);
     OrderEntity getOneOder(Long idOrder);
 
 }

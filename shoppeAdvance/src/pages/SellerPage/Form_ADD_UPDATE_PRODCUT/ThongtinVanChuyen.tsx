@@ -1,14 +1,15 @@
 import exp from 'constants';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {  thongtinvanchuyen, Product } from 'src/constants/contant';
 
 
 interface ThongtinBanHangProps {
+  formDataProduct: any;
   updateFormDataProduct: (data: Partial<thongtinvanchuyen>) => void;
 }
 
 
-const ThongtinVanChuyen: React.FC<ThongtinBanHangProps> = ({ updateFormDataProduct }) => {
+const ThongtinVanChuyen: React.FC<ThongtinBanHangProps> = ({formDataProduct, updateFormDataProduct }) => {
 
 
   const [formData, setFormData] = useState<thongtinvanchuyen>({
@@ -17,6 +18,18 @@ const ThongtinVanChuyen: React.FC<ThongtinBanHangProps> = ({ updateFormDataProdu
     thetich_rong:0,
     thetich_cao:0,
   });
+
+  useEffect(() => {
+    if (formDataProduct) {
+      setFormData({
+        cannangdonggoi: formDataProduct.cannangdonggoi,
+        thetich_dai: formDataProduct.thetich_dai,
+        thetich_rong: formDataProduct.thetich_rong,
+        thetich_cao: formDataProduct.thetich_cao,
+      });
+    }
+
+  }, [formDataProduct]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;

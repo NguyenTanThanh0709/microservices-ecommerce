@@ -79,6 +79,7 @@ public class PromitonImpl implements IDiscountCode {
     @Override
     public List<DiscountAppEntity> findByProductId(Long idProduct) {
         List<DiscountAppEntity> list = discountAppRepository.findByProductId(idProduct);
+
         ZonedDateTime currentTime = ZonedDateTime.now();
         List<DiscountAppEntity> listTemp = new ArrayList<>();
 

@@ -14,6 +14,7 @@ import Popover from '../Popover'
 import { locales } from 'src/i18n/i18n'
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom';
+import axiosInstance from'src/apis/axiosClient';
 
 const MAX_PURCHASES = 5
 export default function Header() {
@@ -41,6 +42,7 @@ export default function Header() {
   })
   const purchasesInCart = purchasesInCartData?.data?.data
   const navigate = useNavigate();
+  // console.log(purchasesInCart)
 
 
   // const logoutMutation = useMutation(authApi.logoutAccount)
@@ -62,14 +64,42 @@ export default function Header() {
     console.log('change')
     i18n.changeLanguage(lng)
   }
+
+  const handleNavLinkClick = () => {
+    // Handle onClick event here
+    console.log('NavLink clicked');
+    // You can add more logic here if needed
+    fecthShopCheck()
+  };
+
+  const fecthShopCheck = async () => {
+    try {
+        // Example POST request
+        const userId = localStorage.getItem('id');
+        const response = await axiosInstance.get(`/api/v1/users/users/${userId}/shop/exist`);
+        if(response.status === 200) {
+            if(response.data) {
+              // User has a shop
+                navigate('/admin-home/0');
+            } else {
+                // User does not have a shop
+                navigate('/admin-shop-register');
+            }
+        }
+
+    } catch (error) {
+        console.error('Error fetching data:', error);
+    }
+};
+
+
   return (
     <div className='sticky top-0 z-20 bg-[linear-gradient(-180deg,#f53d2d,#f63)] pb-5 pt-2 text-white transition-[transform.2scubic-bezier(.4,0,.2,1)]'>
       <div className='container'>
         <div className='flex items-center justify-between'>
           <div className='flex justify-start gap-x-3'>
-            <NavLink to={path.adminhome}>
-            <p>Seller Center</p>
-            </NavLink>
+          <p className='cursor-pointer' onClick={handleNavLinkClick}>Seller Center</p>
+
             
             <p>Download</p>
             <div className='flex'>

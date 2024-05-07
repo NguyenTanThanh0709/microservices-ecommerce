@@ -30,6 +30,14 @@ interface ProductRatingData {
   comment: string;
 }
 
+interface PaymentData {
+  orderId: string;
+  transDate: string;
+  amount: number;
+  user: string;
+}
+
+
 export default function HistoryPurchase() {
   const queryParams: { status?: string } = useQueryParams()
   const status = Number(queryParams.status) || purchasesStatus.all
@@ -37,9 +45,11 @@ export default function HistoryPurchase() {
   const [orders, setOrders] = useState<Order[]>([]);
   const token = localStorage.getItem('accessToken');
   const tokenus = token !== null ? token :""
+  const phoneOwnerFromLocalStorage = localStorage.getItem('phone');
+  console.log(orders)
 
   useEffect(() => {
-      const phoneOwnerFromLocalStorage = localStorage.getItem('phone');
+      
       if (phoneOwnerFromLocalStorage) {
         fetchUpOrder(phoneOwnerFromLocalStorage, tokenus);
     }
@@ -103,7 +113,43 @@ const handleOpenModal = (productId: string) => {
   setShowModal(true);
 };
 
-  
+
+const fetchPaymentByID = async (id: number): Promise<void> => {
+  try {
+    const response = await axiosInstance.get(`/api/v1/payments/${id}`);
+    if (response.status === 200) {
+      const data: PaymentData = {
+        orderId: response.data.vnpTxnRef,
+        transDate: response.data.vnpPayDate,
+        amount: 10000,
+        user: "2@gmail.com"
+      };
+      await fetchPaymentRefund(data);
+    }
+  } catch (error) {
+    console.error('Error fetching payment data:', error);
+  }
+};
+
+const fetchPaymentRefund = async (data: PaymentData): Promise<void> => {
+  try {
+    const response = await axiosInstance.post(`/api/v1/orders/refund?orderId=${data.orderId}&amountt=${data.amount}&transDate=${data.transDate}&user=${data.user}`);
+    if (response.status === 200) {
+      console.log('Payment refund successful:', response.data);
+    }
+  } catch (error) {
+    console.error('Error refunding payment:', error);
+  }
+};
+
+
+const handleCancelOrder = (orderId: number) => {
+  // Implement cancellation logic here
+  console.log("Order cancelled:", orderId);
+  // You can call any function to handle the cancellation process
+  fetchPaymentByID(orderId);
+};
+
 
 
   const Modal = () => {
@@ -187,7 +233,39 @@ const handleOpenModal = (productId: string) => {
           <div className='sticky top-0 flex rounded-t-sm shadow-sm'>{purchaseTabsLink}</div>
           <div>
             {orders?.map((purchase) => (
-              <div key={purchase.id}>
+              
+              <div key={purchase.id} className='m-4 bg-blue-100 p-2'>
+                <div>
+                Mã Đơn Hàng: {purchase.id}
+                </div>
+                <div>
+                Trạng Thái đơn Hàng: {purchase.statusOrder}
+                </div>
+                <div>
+                Trạng Thái vận chuyển đơn Hàng: {purchase.statusDelivery}
+                </div>
+                <div>
+                    <button className="bg-green-500 mt-2 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                      Xem trạng thái thanh toán
+                    </button>
+                </div>
+                <div>
+                    <button className="bg-pink-500 mt-2 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                      Nhắn tin
+                    </button>
+                </div>
+                    <div>
+                    <button 
+                      className="bg-blue-500 mt-2 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded" 
+                      onClick={() => handleCancelOrder(purchase.id)}
+                    >
+                      Hủy Hàng
+                    </button>
+
+                    </div>
+                <div>
+                Danh sách sản phẩm của Đơn Hàng: 
+                </div>
                 {purchase.orderItems.map((item) => (
 
                   <div key={item.productId} className='mt-4 rounded-sm border-black/10 bg-white p-6 text-gray-800 shadow-sm'>
@@ -211,11 +289,7 @@ const handleOpenModal = (productId: string) => {
                   </Link>
                   <div className='flex justify-end'>
 
-                    <div>
-                    <button className="bg-pink-500 mx-2 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
-                      Nhắn tin
-                    </button>
-                    </div>
+
 
                     <div>
                     <Link
@@ -226,12 +300,6 @@ const handleOpenModal = (productId: string) => {
                       Mua lại 
                     </button>
                     </Link>
-                    </div>
-
-                    <div>
-                    <button className="bg-blue-500 mx-2 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
-                      Hủy Hàng
-                    </button>
                     </div>
 
                     <div>

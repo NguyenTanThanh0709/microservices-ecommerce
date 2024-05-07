@@ -1,18 +1,51 @@
-import React, { useState } from 'react';
-import {  thongtinbanhang, ProductSize } from 'src/constants/contant';
+import React, { useState, useEffect } from 'react';
+import {  thongtinbanhang, ProductSize, Product } from 'src/constants/contant';
 
 interface ThongtinBanHangProps {
+  formDataProduct: any;
+  changeCategory: number;
   updateFormDataProduct: (data: Partial<thongtinbanhang>) => void;
 }
 
 
-const ThongtinBanHang: React.FC<ThongtinBanHangProps> = ({ updateFormDataProduct }) => {
+const ThongtinBanHang: React.FC<ThongtinBanHangProps> = ({ formDataProduct,changeCategory, updateFormDataProduct }) => {
   const [formDatathongtinbanhang, setFormDatathongtinbanhang] = useState<thongtinbanhang>({
     price: 0,
     stockQuantity: 0,
     productSize: [],
     colors: ''
   });
+
+  const updatePrice = (price: number) => {
+    setFormDatathongtinbanhang(prevState => ({
+      ...prevState,
+      price: price
+    }));
+  };
+
+  const updateStockQuantity = (stockQuantity: number) => {
+    setFormDatathongtinbanhang(prevState => ({
+      ...prevState,
+      stockQuantity: stockQuantity
+    }));
+  };
+
+
+
+  console.log(formDataProduct)
+  useEffect(() => {
+    if (formDataProduct) {
+      updatePrice(formDataProduct.price);
+      updateStockQuantity(formDataProduct.stockQuantity);
+      if(formDataProduct.productSize){
+        setProductSizes(formDataProduct.productSize);
+      }
+      if(formDataProduct.colors){
+        setProductColor(formDataProduct.colors.split('-'));
+      }
+    }
+
+  }, [formDataProduct]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -99,15 +132,17 @@ const handleSubmit1 = (e: React.FormEvent<HTMLFormElement>) => {
         />
       </div>
 
+      {changeCategory != 5 && 
+
       <div className="max-w-md mx-auto bg-white rounded-md overflow-hidden shadow-md p-4">
-        <h2 className="text-lg font-semibold text-gray-800 mb-2">Add Product Size</h2>
+        <h2 className="text-lg font-semibold text-gray-800 mb-2">Thêm Size Sản Phẩm</h2>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="flex flex-col">
             <label htmlFor="size" className="text-sm text-gray-600">Size</label>
             <input type="text" id="size" value={size} onChange={e => setSize(e.target.value)} placeholder="Enter size (e.g., S, M, L)" className="border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring focus:ring-blue-200" />
           </div>
           <div className="flex flex-col">
-            <label htmlFor="quantity" className="text-sm text-gray-600">Quantity</label>
+            <label htmlFor="quantity" className="text-sm text-gray-600">Số lượng</label>
             <input type="number" id="quantity" value={quantity} onChange={e => setQuantity(parseInt(e.target.value))} placeholder="Enter quantity" className="border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring focus:ring-blue-200" />
           </div>
           <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition">Add</button>
@@ -121,12 +156,13 @@ const handleSubmit1 = (e: React.FormEvent<HTMLFormElement>) => {
           </ul>
         </div>
       </div>
-
+}
+{changeCategory != 5 && 
       <div className="max-w-md mx-auto bg-white rounded-md overflow-hidden shadow-md p-4 mt-2">
-            <h2 className="text-lg font-semibold text-gray-800 mb-2">Add Product Color</h2>
+            <h2 className="text-lg font-semibold text-gray-800 mb-2">Thêm Màu sản phẩm</h2>
             <form onSubmit={handleSubmit1} className="space-y-4">
                 <div className="flex flex-col">
-                    <label htmlFor="color" className="text-sm text-gray-600">Color</label>
+                    <label htmlFor="color" className="text-sm text-gray-600">Màu</label>
                     <input
                         type="text"
                         id="color"
@@ -146,7 +182,8 @@ const handleSubmit1 = (e: React.FormEvent<HTMLFormElement>) => {
                     ))}
                 </ul>
             </div>
-        </div>
+      </div>
+    }
 
       <button
         className="bg-emerald-500 text-white active:bg-emerald-600 font-bold uppercase px-6 py-3 rounded shadow hover:shadow-lg outline-none focus:outline-none mr-1 mb-1 ease-linear transition-all duration-150"

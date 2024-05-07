@@ -9,6 +9,7 @@ import ThongtinBanHang from './ThongtinBanHang'
 import ThongtinVanChuyen from './ThongtinVanChuyen'
 
 import {  Product } from 'src/constants/contant';
+import { Console } from 'console';
 
 const initialFormData: Product = {
     name: "",
@@ -63,9 +64,50 @@ const override: CSSProperties = {
 }
 
 
-export default function Form_ADD_UPDATE_PRODCUT() {
+export default function Form_ADD_UPDATE_PRODCUT({ productId }: { productId: string }) {
     const [formDataProduct, setFormDataProduct] = useState<Product>(initialFormData);
+    const [formDataProduct_, setFormDataProduct_] = useState<any>({});
+    console.log(formDataProduct_);
+    useEffect(() => {
+        if (productId !== '') {
+            // Nếu productId không rỗng, gọi hàm để fetch dữ liệu từ API
+            fetchProductData(productId);
 
+        }
+    }, [productId]); // useEffect sẽ chạy mỗi khi giá trị của productId thay đổi
+    const fetchProductData = async (productId: string) => {
+        try {
+            // Gọi API để lấy dữ liệu sản phẩm dựa trên productId
+            const response = await axiosInstance.get(`/api/v1/products/one/${productId}`);
+            const productData = response.data;
+            setFormDataProduct_(productData);
+            if(productData.category.includes('Thời Trang') && (productData.category.includes('Quần') || productData.category.includes('Váy'))){
+                setChangeCategory(1)
+              }else{
+                setChangeCategory(2)
+              }
+          
+              if( productData.category.includes('Giày')){
+                setChangeCategory(3)
+              }
+              if( productData.category.includes('Đồng Hồ')){
+                setChangeCategory(4)
+              }
+              if( productData.category.includes('Thực Phẩm')){
+                setChangeCategory(5)
+              }
+        } catch (error) {
+            console.error('Error fetching product data:', error);
+        }
+    };
+
+    const [changeCategory, setChangeCategory] = useState(0);
+    const updateCateGory = (data: number) => {
+        setChangeCategory(data);
+    };
+
+
+    // console.log(formDataProduct)
 
     const updateFormDataProduct = (data: Partial<Product>) => {
         setFormDataProduct(prevData => ({
@@ -86,9 +128,10 @@ export default function Form_ADD_UPDATE_PRODCUT() {
         } else {
             try {
                 setLoading(true);
-                await fetchUpProductImgs();
-                
-            setLoading(false);
+                let id = await fetchUpProduct()
+                console.log(id + '')
+                fetchUpProductImgs(id)
+                 
             } catch (error) {
                 console.error('Error:', error);
             setLoading(false);
@@ -112,12 +155,9 @@ export default function Form_ADD_UPDATE_PRODCUT() {
 
     const fetchUpProduct = async () => {
         try {
-            // Example POST request
-            console.log(formDataProduct);
             const response = await axiosInstance.post('/api/v1/products/seller/', formDataProduct);
             if(response.status === 201) {
-                console.log(response.data);
-                alert('Thêm sản phẩm thành công!');
+                return response.data
             }
 
         } catch (error) {
@@ -126,23 +166,22 @@ export default function Form_ADD_UPDATE_PRODCUT() {
     };
 
 
-    const fetchUpProductImgs = async () => {
+    const fetchUpProductImgs = async (id: string) => {
         try {
             if (formDataProduct.imgs && formDataProduct.imgs.length > 0) { 
                 const formData = new FormData();
+                formData.append('id', id);
                 formDataProduct.imgs.forEach((file, index) => {
                     formData.append('files', file);
                 });
-                console.log(formData);
                 
-                const response = await axiosInstanceFile.post('api/v1/products/seller/files',  formData, {
-                    timeout: 20000 // Tăng thời gian chờ lên 15 giây (15000ms)
-                });
-                // updateFormDataProduct({ imgsurl: response.data });
-                formDataProduct.imgsurl = response.data; 
-                console.log(formDataProduct)
-                await fetchUpProduct();
-                console.log(response)
+                const response = await axiosInstanceFile.post('api/v1/products/seller/files',  formData);
+                if(response.status === 201) {
+                    console.log('Ảnh đã được tải lên:', response.data);
+                    alert("Thêm sản phẩm thành công")
+                    setLoading(false);
+                    return response.data;
+                }
             } else {
                 console.error('No image files selected');
             }
@@ -158,25 +197,25 @@ export default function Form_ADD_UPDATE_PRODCUT() {
         <div className='bg-gray-100 rounded-lg shadow-md p-2'>
             <Col >
                 <h1 className='text-4xl fw-bold'>Thông tin cơ bản</h1>
-                <ThongtinCoBan updateFormDataProduct={updateFormDataProduct}/>
+                <ThongtinCoBan formDataProduct={formDataProduct_} updateFormDataProduct={updateFormDataProduct} update_Category={updateCateGory}/>
             </Col>
         </div>
         <div className='bg-gray-100 rounded-lg shadow-md mt-4 p-2'>
             <Col>
             <h1 className='text-4xl fw-bold'>Thông tin Chi tiết</h1>
-                <ThongtinChiTiet updateFormDataProduct={updateFormDataProduct}/>
+                <ThongtinChiTiet changeCategory= {changeCategory} formDataProduct={formDataProduct_} updateFormDataProduct={updateFormDataProduct}/>
             </Col>
         </div>
         <div className='bg-gray-100 rounded-lg shadow-md mt-4 p-2'>
             <Col>
             <h1 className='text-4xl fw-bold'>Bán Hàng</h1>
-                <ThongtinBanHang updateFormDataProduct={updateFormDataProduct}/>
+                <ThongtinBanHang changeCategory= {changeCategory} formDataProduct={formDataProduct_} updateFormDataProduct={updateFormDataProduct}/>
             </Col>
         </div>
         <div className='bg-gray-100 rounded-lg shadow-md mt-4 p-2'>
             <Col>
             <h1 className='text-4xl fw-bold'>Vận Chuyển</h1>
-            <ThongtinVanChuyen updateFormDataProduct={updateFormDataProduct}/>
+            <ThongtinVanChuyen formDataProduct={formDataProduct_} updateFormDataProduct={updateFormDataProduct}/>
             </Col>
         </div>
         <button className="bg-blue-500 m-4 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-full">

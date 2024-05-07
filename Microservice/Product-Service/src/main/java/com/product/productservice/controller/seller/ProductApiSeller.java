@@ -28,23 +28,20 @@ public class ProductApiSeller {
         if(!product.isValid()){
             return new ResponseEntity<>("Vui lòng điền đầy đủ thông tin của sản phẩm.", HttpStatus.BAD_REQUEST);
         }
-//        if(files.size() == 0 || files == null){
-//            return new ResponseEntity<>("Vui lòng điền đầy đủ thông tin của sản phẩm.", HttpStatus.BAD_REQUEST);
-//        }
         ProductEntity newProduct = productimpl.addProduct(product, null, null);
-        return new ResponseEntity<>(newProduct, HttpStatus.CREATED);
+        return new ResponseEntity<>(newProduct.getId(), HttpStatus.CREATED);
     }
 
 
     @PostMapping("/files")
-    public ResponseEntity<?> addFile(
+    public ResponseEntity<?> addFile(@RequestParam(value = "id", required = false) String id,
                                         @RequestParam(value = "files", required = false) List<MultipartFile> files) {
         if(files.size() == 0 || files == null){
             return new ResponseEntity<>("Vui lòng điền đầy đủ thông tin của sản phẩm.", HttpStatus.BAD_REQUEST);
         }
 
         List<String> listUrlImgs;
-        listUrlImgs = cloudinaryService.upload(files);
+        listUrlImgs = cloudinaryService.upload(files, id);
 
         return new ResponseEntity<>(listUrlImgs, HttpStatus.CREATED);
     }

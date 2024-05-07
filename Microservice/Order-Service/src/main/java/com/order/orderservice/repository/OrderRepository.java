@@ -14,6 +14,7 @@ import java.util.List;
 public interface OrderRepository extends JpaRepository<OrderEntity, Long> {
     // Lấy đơn hàng bằng số điện thoại
     List<OrderEntity> findByPhoneNumberAndStatusOrder(String phoneNumber, String statusOrder);
+    List<OrderEntity> findByIdSellerAndStatusOrder(Long idSeller, String statusOrder);
     @Modifying
     @Query("UPDATE OrderEntity o SET o.statusDelivery = :statusDelivery WHERE o.id = :orderId")
     int updateStatusDelivery(@Param("orderId") Long orderId, @Param("statusDelivery") String statusDelivery);

@@ -6,6 +6,7 @@ import com.product.productservice.DTO.Reponse.ProductReponSingle;
 import com.product.productservice.DTO.Reponse.ProductReponse;
 import com.product.productservice.entity.ProductImage;
 import com.product.productservice.entity.ProductSize;
+import com.product.productservice.repository.ProductImageRepository;
 import com.product.productservice.utils.ProductMapper;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityNotFoundException;
@@ -40,6 +41,8 @@ public class ProductImpl implements IProduct {
     private final ModelMapper mapper;
     @Autowired
     private IBrand iBrand;
+    @Autowired
+    private ProductImageRepository productImageRepository;
 
 
 
@@ -47,22 +50,36 @@ public class ProductImpl implements IProduct {
     private EntityManager entityManager;
 
 
+    public void addProductImages(ProductEntity product, List<String> imageUrls) {
+        for (String imageUrl : imageUrls) {
+            ProductImage productImage = new ProductImage();
+            productImage.setUrlimg(imageUrl);
+            productImage.setProduct(product);
+            productImageRepository.save(productImage);
+        }
+    }
+
+
     @Override
     @Transactional
     public ProductEntity addProduct(ProductDTO productDTO,  List<MultipartFile> files, MultipartFile file) {
         ProductEntity productEntity = mapper.map(productDTO,ProductEntity.class);
 
-        List<ProductImage> productImages = new ArrayList<>();
-        for(String urlimg: productDTO.getImgsurl()){
-            ProductImage productImage = new ProductImage();
-            productImage.setUrlimg(urlimg);
-            productImage.setProduct(productEntity);
-            productImages.add(productImage);
+        if(productDTO.getImgsurl() != null){
+            List<ProductImage> productImages = new ArrayList<>();
+            for(String urlimg: productDTO.getImgsurl()){
+                ProductImage productImage = new ProductImage();
+                productImage.setUrlimg(urlimg);
+                productImage.setProduct(productEntity);
+                productImages.add(productImage);
+            }
+            productEntity.setProductImages(productImages);
         }
-        productEntity.setProductImages(productImages);
 
-        for(ProductSize productSize: productEntity.getProductSize()){
-            productSize.setProduct(productEntity);
+        if(productDTO.getProductSize() != null){
+            for(ProductSize productSize: productEntity.getProductSize()){
+                productSize.setProduct(productEntity);
+            }
         }
 
         Brand brand = iBrand.getById(productDTO.getIdBrand());

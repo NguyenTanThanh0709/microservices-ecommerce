@@ -13,10 +13,9 @@ public class Shop {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private String imgShop;
     private String nameShop;
     private String des;
-
+    private String address;
     @OneToOne
     @JoinColumn(name = "user_id")
     private UserEntity user;

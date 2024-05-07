@@ -1,10 +1,6 @@
 const Payment = require('../models/Payment');
 
 
-// Service to add a new payment
-// Service to add a new payment
-// vnpPayDate, vnpTxnRef
-
 exports.addPayment = async (amount,orderid, paymentMethod, paymentStatus, vnpPayDate, vnpTxnRef ) => {
     try {
         // Call the service to add a new payment
@@ -45,3 +41,17 @@ exports.updatePaymentStatus = async (id, paymentStatus) => {
     }
 };
 
+
+// Service to get payment by order ID
+exports.getPaymentByOrderId = async (orderId) => {
+    try {
+        // Call the Payment model to find payment by order ID
+        const payment = await Payment.findOne({ orderid: orderId });
+        
+        // Return the payment object if found
+        return payment;
+    } catch (error) {
+        console.error('Error fetching payment by order ID:', error);
+        return null;
+    }
+};
