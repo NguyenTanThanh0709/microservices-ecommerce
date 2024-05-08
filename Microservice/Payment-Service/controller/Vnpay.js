@@ -20,7 +20,7 @@ exports.addPaymentVNPAY = async (req, res) => {
                 "payment_method": "paypal"
             },
             "redirect_urls": {
-                "return_url": "http://localhost:8222/api/v1/payments/pay-pal?money="  + money+"&vnp_OrderInfo=" + vnp_OrderInfo,
+                "return_url": "http://localhost:8222/api/v1/payments/pay-pal/21?money="  + money+"&vnp_OrderInfo=" + vnp_OrderInfo,
                 "cancel_url": "http://localhost:3000/payment-result?vnp_ResponseCode=01&vnp_TransactionStatus=01&vnp_OrderInfo=" + vnp_OrderInfo
             },
             "transactions": [{
@@ -79,8 +79,6 @@ exports.result = async (req, res) => {
             if (error) {
                 let data =  vnp_OrderInfo.split('_');
                 let orderid = data[0];
-                let paymentMethod = data[1];
-                let dataupdate = data[2];
                 const payment = await paymentService.addPayment(orderid, 'PAYPAL', 'CANCELLED', 'paypal', 'paypal');
                 if(payment){
                   res.redirect(`http://localhost:3000/payment-result?vnp_ResponseCode=01&vnp_TransactionStatus=01&vnp_OrderInfo=${vnp_OrderInfo}`);
@@ -114,8 +112,11 @@ exports.result = async (req, res) => {
                 }
             }
         });
+        
     } catch (error) {
         console.error('Error processing payment result:', error);
         res.status(500).json({ success: false, message: 'Failed to process payment result', error: error.message });
     }
 }
+
+

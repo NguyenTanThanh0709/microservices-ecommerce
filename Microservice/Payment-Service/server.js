@@ -4,6 +4,7 @@ const eurekaHelper = require('./discover/eureka-helper.js');
 const bodyParser = require('body-parser');
 const paymentRouter = require('./router/paymentRouter.js');
 const orderRouter = require('./router/order.js');
+const orderPayPalRouter = require('./router/orderPayPal.js');
 const cors = require('cors');
 const paymentService  = require('./controller/payment_service');
 
@@ -13,13 +14,9 @@ const port = process.env.PORT || 5000
 app.use(cors({ origin: '*' }));
 
 
-// Sử dụng router cho dịch vụ chat
 app.use('/api/v1/payments', paymentRouter);
 app.use('/api/v1/payments', orderRouter);
-// app.use('/api/v1/payments/mail', mailRouter);
-
-
-
+app.use('/api/v1/payments', orderPayPalRouter);
 
 
 app.listen(port, async() => {
