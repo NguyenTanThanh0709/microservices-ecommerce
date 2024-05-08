@@ -107,6 +107,7 @@ export default function HistoryPurchase() {
 
   const [selectedProductId, setSelectedProductId] = useState<string>("");
   const [showModal, setShowModal] = useState(false);
+  const [showModal1, setShowModal1] = useState<boolean>(false);
 
 const handleOpenModal = (productId: string) => {
   setSelectedProductId(productId);
@@ -226,6 +227,40 @@ const handleCancelOrder = (orderId: number) => {
     </Link>
   ))
 
+
+  const handleButtonClick =  (orderId: number) => {
+    
+    // Xử lý logic khi nhấn vào nút
+    console.log('Clicked on order with ID:', orderId);
+    // Ví dụ: Mở modal hiển thị thông tin chi tiết đơn hàng, gửi yêu cầu API để lấy thông tin chi tiết đơn hàng, v.v.
+    fetchPaymentByID_(orderId)
+    setShowModal1(true);
+
+  }
+
+  const [paymentMethod, setPaymentMethod] = useState('');
+  const [paymentStatus, setPaymentStatus] = useState('');
+  const [createdOn, setCreatedOn] = useState('2024-05-07T17:39:58.259Z');
+  const [lastModifiedOn, setLastModifiedOn] = useState('2024-05-07T17:39:58.259Z');
+
+  const fetchPaymentByID_ = async (id: number):  Promise<void> => {
+    try {
+      const response = await axiosInstance.get(`/api/v1/payments/${id}`);
+      if(response.status === 200) {
+        setPaymentMethod(response.data.paymentMethod);
+        setPaymentStatus(response.data.paymentStatus);
+        setCreatedOn(response.data.createdOn);
+        setLastModifiedOn(response.data.lastModifiedOn);
+
+      }
+    } catch (error) {
+      console.error('Error fetching payment data:', error);
+    }
+  };
+
+  
+
+
   return (
     <div>
       <div className='overflow-x-auto'>
@@ -245,9 +280,12 @@ const handleCancelOrder = (orderId: number) => {
                 Trạng Thái vận chuyển đơn Hàng: {purchase.statusDelivery}
                 </div>
                 <div>
-                    <button className="bg-green-500 mt-2 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
-                      Xem trạng thái thanh toán
-                    </button>
+                <button 
+                  className="bg-green-500 mt-2 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+                  onClick={() => handleButtonClick(purchase.id)}
+                >
+                  Xem trạng thái thanh toán
+                </button>
                 </div>
                 <div>
                     <button className="bg-pink-500 mt-2 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
@@ -331,6 +369,30 @@ const handleCancelOrder = (orderId: number) => {
 
         </div>
       </div>
+
+      {showModal1 && (
+          <div className='fixed top-0 left-0 w-full h-full bg-gray-800 bg-opacity-50 flex items-center justify-center'>
+            <div className='bg-white p-6 rounded-lg'>
+              <h2 className='text-lg font-bold mb-4'>Trạng Thái Thanh Toán Đơn Hàng</h2>
+              <div className="mb-2">
+        <span className="font-semibold">Phương thức thanh toán:</span> {paymentMethod}
+      </div>
+      <div className="mb-2">
+        <span className="font-semibold">Trạng thái thanh toán:</span> {paymentStatus}
+      </div>
+      <div className="mb-2">
+        <span className="font-semibold">Ngày tạo:</span> {new Date(`${createdOn}`).toLocaleString()}
+      </div>
+      <div className="mb-2">
+        <span className="font-semibold">Ngày sửa đổi lần cuối:</span> {new Date(`${lastModifiedOn}`).toLocaleString()}
+      </div>
+
+              <button className='bg-red-500 text-white font-bold py-2 px-4 rounded mt-2' onClick={() => setShowModal1(false)}>
+                Đóng
+              </button>
+            </div>
+          </div>
+        )}
     </div>
   )
 }

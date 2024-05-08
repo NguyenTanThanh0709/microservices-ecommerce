@@ -6,7 +6,7 @@ exports.addPayment = async (req, res) => {
         // Extract data from the request body
         const { amount, orderid, paymentMethod, paymentStatus } = req.body;
 
-        const payment = await paymentService.addPayment(amount, orderid, paymentMethod, paymentStatus);
+        const payment = await paymentService.addPayment(orderid, paymentMethod, paymentStatus,'','');
         // Return success response
         res.status(201).json({ success: true, message: 'Payment added successfully', data: payment });
     } catch (error) {

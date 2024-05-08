@@ -54,9 +54,9 @@ const run = async () => {
         offset: message.offset,
         value: message.value.toString(),
       });
-       let data = parseInt(message.value.toString())
+       let data = message.value.toString()
        console.log(data)
-        const payment = await paymentService.addPayment(0, data, 'COD', 'PENDING', '','');
+        const payment = await paymentService.addPayment( data, 'COD', 'PENDING', '','');
         console.log('Payment created:', payment);
     },
   });

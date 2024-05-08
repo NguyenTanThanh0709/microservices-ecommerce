@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useContext } from 'react'
+import React, { useState, useEffect } from 'react'
 import { Link,NavLink } from 'react-router-dom'
 import { toast } from 'react-toastify'
 import authApi from 'src/apis/auth.api'
@@ -15,6 +16,8 @@ import { locales } from 'src/i18n/i18n'
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom';
 import axiosInstance from'src/apis/axiosClient';
+import { Notification } from 'src/constants/contant'
+import io, { Socket } from 'socket.io-client';
 
 const MAX_PURCHASES = 5
 export default function Header() {
@@ -91,6 +94,49 @@ export default function Header() {
         console.error('Error fetching data:', error);
     }
 };
+const [showModal1, setShowModal1] = useState<boolean>(false);
+const handleClick = () => {
+  fecthThongBao() 
+  setShowModal1(true);
+};
+const [notifications, setNotifications] = useState<Notification[]>([]);
+const fecthThongBao = async () => {
+  try {
+      // Example POST request
+      const userId = localStorage.getItem('phone');
+      const response = await axiosInstance.get(`/api/v1/communicate/noti/customer/${userId}`);
+      if(response.status === 200) {
+        setNotifications(response.data);
+      }
+
+  } catch (error) {
+      console.error('Error fetching data:', error);
+  }
+};
+
+const [socket, setSocket] = useState<Socket | null>(null);
+useEffect(() => {
+  setSocket(io("ws://localhost:8900"));
+}, []);
+
+
+useEffect(() => {
+  if (socket) {
+    socket.on('notipush', (data) => {
+      let phone = localStorage.getItem('phone');
+      if(phone == data.customer) {
+        console.log('Received notification:', data);
+        toast.info(data.description);
+      }
+    });
+  }
+
+  return () => {
+    if (socket) {
+      socket.off('notipush');
+    }
+  };
+}, [socket]);
 
 
   return (
@@ -118,6 +164,23 @@ export default function Header() {
                 />
               </svg>
               <span className='mx-1'>{currentLanguage}</span>
+            </div>
+            <div className='flex cursor-pointer' >
+              <svg
+                xmlns='http://www.w3.org/2000/svg'
+                fill='none'
+                viewBox='0 0 24 24'
+                strokeWidth={1.5}
+                stroke='currentColor'
+                className='h-5 w-5 '
+              >
+                <path
+                  strokeLinecap='round'
+                  strokeLinejoin='round'
+                  d='M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 017.843 4.582M12 3a8.997 8.997 0 00-7.843 4.582m15.686 0A11.953 11.953 0 0112 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0121 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0112 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 013 12c0-1.605.42-3.113 1.157-4.418'
+                />
+              </svg>
+              <span className='mx-1'onClick={handleClick}>Thông Báo</span>
             </div>
           </div>
           <div className='flex justify-end'>
@@ -317,6 +380,27 @@ export default function Header() {
           </div>
         </div>
       </div>
+    
+      {showModal1 && (
+          <div className='fixed top-0 left-0 w-full h-full bg-gray-800 bg-opacity-50 flex items-center justify-center'>
+            <div className='bg-white p-6 rounded-lg text-black'>
+              <h2 className='text-lg font-bold mb-4'>Danh Sách Thông Báo</h2>
+              <ul className="space-y-4">
+              {notifications.map((notification, index) => (
+                  <li key={index} className="flex items-center justify-between bg-slate-400 p-2 m-2 cursor-pointer">
+                      <strong>Mô tả:</strong> {notification.description}<br />
+                      <strong>Ngày:</strong> {new Date(notification.date).toLocaleString()}<br />
+                  </li>
+              ))}
+
+                </ul>
+
+              <button className='bg-red-500 text-white font-bold py-2 px-4 rounded mt-2' onClick={() => setShowModal1(false)}>
+                Đóng
+              </button>
+            </div>
+          </div>
+        )}
     </div>
   )
 }

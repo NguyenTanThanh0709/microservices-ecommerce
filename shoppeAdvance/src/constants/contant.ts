@@ -43,6 +43,15 @@ export interface PromotionReponse {
   idProduct: number;
 }
 
+export interface Notification {
+  description: string;
+  seller: number;
+  customer: string;
+  type: 'TIN NHẮN' | 'ĐƠN HÀNG';
+  id_type?: string;
+  date: Date;
+}
+
 export interface OrderItem {
   note: string;
   productId: number;

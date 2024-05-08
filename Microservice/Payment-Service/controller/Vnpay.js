@@ -60,6 +60,7 @@ exports.addPaymentVNPAY = async (req, res) => {
 
 exports.result = async (req, res) => {
     try {
+        console.log(req)
         const money = req.query.money;
         const vnp_OrderInfo = req.query.vnp_OrderInfo;
         const payerId = req.query.PayerID;
@@ -77,10 +78,10 @@ exports.result = async (req, res) => {
         paypal.payment.execute(paymentId, execute_payment_json, async  function (error, payment) {
             if (error) {
                 let data =  vnp_OrderInfo.split('_');
-                let orderid = parseInt(data[0]);
+                let orderid = data[0];
                 let paymentMethod = data[1];
                 let dataupdate = data[2];
-                const payment = await paymentService.addPayment(money, orderid, 'PAYPAL', 'CANCELLED', 'paypal', 'paypal');
+                const payment = await paymentService.addPayment(orderid, 'PAYPAL', 'CANCELLED', 'paypal', 'paypal');
                 if(payment){
                   res.redirect(`http://localhost:3000/payment-result?vnp_ResponseCode=01&vnp_TransactionStatus=01&vnp_OrderInfo=${vnp_OrderInfo}`);
                 }
@@ -92,14 +93,13 @@ exports.result = async (req, res) => {
                 let dataupdate = data[2];
 
                 // Update the payment status in the database or perform any
-                const payment = await paymentService.addPayment(money, orderid, 'PAYPAL', 'COMPLETED', 'paypal', 'paypal');
+                const payment = await paymentService.addPayment(orderid, 'PAYPAL', 'COMPLETED', 'paypal', 'paypal');
                 if(payment){
                     const producerService = new KafkaProducerService();
                     producerService.connectProducer()
                     .then(() => {
                         // Gửi message tới topic 'payment-topic'
                         const topic = 'payment-topic';
-                        const message = 'Hello Kafka!';
                         producerService.sendMessage(topic, dataupdate);
                     console.log('oko1')
     

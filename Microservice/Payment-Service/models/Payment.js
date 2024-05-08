@@ -2,8 +2,7 @@ const mongoose = require('mongoose');
 
 // Define the schema
 const paymentSchema = new mongoose.Schema({
-    amount: { type: Number, required: true },
-    orderid: { type: Number, required: true },
+    orderid: { type: String, required: true },
     paymentMethod: { type: String, enum: ['COD', 'PAYPAL', 'VNPAY'], required: true },
     paymentStatus: { type: String, enum: ['PENDING', 'COMPLETED', 'CANCELLED'], required: true },
     vnpPayDate: {type:String},

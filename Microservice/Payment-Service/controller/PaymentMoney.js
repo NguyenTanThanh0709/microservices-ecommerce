@@ -102,13 +102,14 @@ exports.returnPayment = async (req, res) => {
         // console.log(responseCode)
         // console.log(vnp_OrderInfo)
         let data =  vnp_OrderInfo.split('_');
-        let orderid = parseInt(data[0]);
+        let orderid = parseInt(data[0].toString());
         let paymentMethod = data[1];
         let dataupdate = data[2];
+        console.log('Payment successful:', orderid, paymentMethod, dataupdate);
         
         if(responseCode == '00') {
             // Giao dịch thành công, bạn có thể xử lý ở đây
-            const payment = await paymentService.addPayment(0, orderid, paymentMethod, 'COMPLETED', vnp_PayDate, vnp_TxnRef);
+            const payment = await paymentService.addPayment(orderid, 'VNPAY', 'COMPLETED', vnp_PayDate, vnp_TxnRef);
             // console.log('Payment successful:', payment);
             if(payment){
 
@@ -131,7 +132,7 @@ exports.returnPayment = async (req, res) => {
         } else {
 
             // Giao dịch không thành công, chuyển hướng đến trang thông báo lỗi
-            const payment = await paymentService.addPayment(0, orderid, paymentMethod, 'CANCELLED','vnpay', 'vnpay');
+            const payment = await paymentService.addPayment(orderid, 'VNPAY', 'CANCELLED','vnpay', 'vnpay');
             console.log('Payment CANCELLED:', payment);
 
             if(payment){

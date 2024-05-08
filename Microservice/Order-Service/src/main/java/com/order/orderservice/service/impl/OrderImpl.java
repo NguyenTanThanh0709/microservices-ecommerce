@@ -101,6 +101,7 @@ public class OrderImpl implements IOrder {
     }
 
     @Override
+    @Transactional
     public void updateStatusOrder(Long orderid, String statusOrder) {
         orderRepository.updateStatusOrder(orderid, statusOrder);
     }

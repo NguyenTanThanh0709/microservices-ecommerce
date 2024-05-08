@@ -1,24 +1,13 @@
 import React, { useState, useEffect } from 'react';
+import axiosInstance from 'src/apis/axiosClient'; 
+import {Order, OrderItem} from 'src/constants/contant'
+import { Notification } from 'src/constants/contant';
+import { io, Socket } from 'socket.io-client';
 
-interface Order {
-  id: number;
-  product: string;
-  totalOrders: number;
-  status: string;
-  shippingProvider: string;
-  refundAmount?: number;
-}
 
-const initialData: Order[] = [
-  { id: 1, product: 'Product A', totalOrders: 10, status: 'Pending', shippingProvider: 'Provider X' },
-  { id: 2, product: 'Product B', totalOrders: 20, status: 'Completed', shippingProvider: 'Provider Y' },
-  { id: 3, product: 'Product C', totalOrders: 15, status: 'In Progress', shippingProvider: 'Provider Z' },
-  // Add more data as needed
-];
 
 const ListOrder: React.FC = () => {
   const tabs = [
-    { key: 'all', label: 'Tất Cả' },
     { key: 'pendingConfirmation', label: 'Chờ Xác Nhận' },
     { key: 'waitingForPickup', label: 'Chờ Lấy Hàng' },
     { key: 'shipping', label: 'Đang Giao' },
@@ -28,24 +17,134 @@ const ListOrder: React.FC = () => {
     { key: 'failedDelivery', label: 'Giao Hàng Không Thành Công' }
   ];
 
-  const [selectedTab, setSelectedTab] = useState('all'); // Ban đầu chọn tab "Tất Cả"
-  const [data, setData] = useState<Order[]>(initialData);
+
+  const [selectedTab, setSelectedTab] = useState('pendingConfirmation'); // Ban đầu chọn tab "Tất Cả"
+
+  const [orders, setOrders] = useState<Order[]>([]);
+  const token = localStorage.getItem('accessToken');
+  const tokenus = token !== null ? token :""
+  const phoneOwnerFromLocalStorage = localStorage.getItem('id');
 
   const handleTabClick = (tab: string) => {
     setSelectedTab(tab);
   };
 
   useEffect(() => {
-    if (selectedTab === 'refund') {
-      const newData = initialData.map(item => {
-        if (item.id === 1) {
-          return { ...item, refundAmount: 100 }; // Thay 100 bằng giá trị thực tế
-        }
-        return item;
-      });
-      setData(newData);
-    }
+    // if (selectedTab === 'refund') {
+    //   const newData = initialData.map(item => {
+    //     if (item.id === 1) {
+    //       return { ...item, refundAmount: 100 }; // Thay 100 bằng giá trị thực tế
+    //     }
+    //     return item;
+    //   });
+    //   setData(newData);
+    // }
+    if (phoneOwnerFromLocalStorage) {
+      let status = 1;
+      if(selectedTab === 'pendingConfirmation') {
+        status = 1;
+      }else if(selectedTab === 'waitingForPickup') {
+        status = 2;
+      } else if(selectedTab === 'shipping') {
+        status = 3;
+      } else if(selectedTab === 'delivered') {
+        status = 4;
+      } else if(selectedTab ===  'cancelled') {
+        status = 5;
+      } else if(selectedTab === 'refund') {
+        status = 6;
+      } else if(selectedTab === 'failedDelivery') {
+        status = 7;
+      }
+      
+      fetchUpOrder(phoneOwnerFromLocalStorage, tokenus, status);
+  }
   }, [selectedTab]);
+  const fetchUpOrder = async (phone: string, token: string, status:number) => {
+    try {
+      const response = await axiosInstance.get(`/api/v1/orders/seller/${phone}/${status}`, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+      setOrders(response.data);
+    } catch (error) {
+      console.error('Error fetching data:', error);
+    }
+  };
+
+  const [showModal, setShowModal] = useState(false);
+  const [ordersItems, setOrdersItems] = useState<OrderItem[]>([]);
+  
+  const handleButtonClick =  (orders: OrderItem[]) => {
+    
+    // Xử lý logic khi nhấn vào nút
+    console.log('Clicked on order with ID:', orders);
+    setOrdersItems(orders);
+    // Ví dụ: Mở modal hiển thị thông tin chi tiết đơn hàng, gửi yêu cầu API để lấy thông tin chi tiết đơn hàng, v.v.
+    setShowModal(true);
+
+  }
+
+  const [socket, setSocket] = useState<Socket | null>(null);
+  useEffect(() => {
+    setSocket(io("ws://localhost:8900"));
+  }, []);
+
+
+
+  const handleClickaddUser = (message: Notification) => {
+    if(socket){
+      socket.emit("notireceive", message);
+    }
+  }
+
+
+
+  const handleButtonClickHuyDown =  (id:number, phoneUser:string) => {
+    
+    // Xử lý logic khi nhấn vào nút
+    console.log('Clicked on order with ID:', id);
+    fetchUpOrderHuyDon(id, 'Đã hủy', phoneUser);
+  }
+
+  const fetchUpOrderHuyDon = async ( orderId:number, status:string, phoneUser:String) => {
+    try {
+      const response = await axiosInstance.put(`/api/v1/orders/update/${orderId}/status?statusOrder=${status}`);
+      if(response.status === 200) {
+        alert("Hủy Đơn Thành Công");
+        if (phoneOwnerFromLocalStorage) {
+          fetchUpOrder(phoneOwnerFromLocalStorage, tokenus, 1);
+          const data: Notification = {
+            description: "Đơn Hàng Của Bạn Đã Bị Hủy! Click để xem chi tiết",
+            seller: parseInt(localStorage.getItem('id') ?? "0"),
+            customer: phoneUser.toString(), // Ensure phoneUser is a string
+            type: 'ĐƠN HÀNG',
+            id_type: orderId.toString(),
+            date: new Date(),
+          };
+
+          fetchAddThongBao(data);
+        }
+
+      }
+    } catch (error) {
+      console.error('Error fetching data:', error);
+    }
+  };
+
+  const fetchAddThongBao = async ( thongbao: Notification) => {
+    try {
+      const response = await axiosInstance.post('/api/v1/communicate/noti/', thongbao);
+      if(response.status === 201) {
+        handleClickaddUser(thongbao)
+      }
+    } catch (error) {
+      console.error('Error fetching data:', error);
+    }
+  };
+
+
 
   return (
     <div className='m-4 p-4'>
@@ -103,32 +202,64 @@ const ListOrder: React.FC = () => {
         <table className="table-auto min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
             <tr>
-              <th scope="col" className="px-6 py-3 text-left font-medium text-gray-500 uppercase tracking-wider">Sản phẩm</th>
-              <th scope="col" className="px-6 py-3 text-left font-medium text-gray-500 uppercase tracking-wider">Tổng đơn hàng</th>
-              <th scope="col" className="px-6 py-3 text-left font-medium text-gray-500 uppercase tracking-wider">Trạng thái</th>
-              <th scope="col" className="px-6 py-3 text-left font-medium text-gray-500 uppercase tracking-wider">Đơn vị vận chuyển</th>
+              <th scope="col" className="px-6 py-3 text-left font-medium text-gray-500 uppercase tracking-wider">Mã Đơn</th>
+              <th scope="col" className="px-6 py-3 text-left font-medium text-gray-500 uppercase tracking-wider">Số điện thoại người mua</th>
+              <th scope="col" className="px-6 py-3 text-left font-medium text-gray-500 uppercase tracking-wider">Địa chỉ</th>
+              <th scope="col" className="px-6 py-3 text-left font-medium text-gray-500 uppercase tracking-wider">Trạng thái vận chuyển</th>
               {selectedTab === 'refund' && <th scope="col" className="px-6 py-3 text-left font-medium text-gray-500 uppercase tracking-wider">Số tiền hoàn</th>}
               <th scope="col" className="px-6 py-3 text-left font-medium text-gray-500 uppercase tracking-wider">Thao tác</th>
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
-            {data.map(item => (
+            {orders.map(item => (
               <tr key={item.id}>
-                <td className="px-6 py-4 whitespace-nowrap">{item.product}</td>
-                <td className="px-6 py-4 whitespace-nowrap">{item.totalOrders}</td>
-                <td className="px-6 py-4 whitespace-nowrap">{item.status}</td>
-                <td className="px-6 py-4 whitespace-nowrap">{item.shippingProvider}</td>
-                {selectedTab === 'refund' && <td className="px-6 py-4 whitespace-nowrap">{item.refundAmount}</td>}
+                <td className="px-6 py-4 whitespace-nowrap">{item.id}</td>
+                <td className="px-6 py-4 whitespace-nowrap">{item.phoneNumber}</td>
+                <td className="px-6 py-4 whitespace-nowrap">{item.address}</td>
+                <td className="px-6 py-4 whitespace-nowrap">{item.statusDelivery}</td>
+                {selectedTab === 'refund' && <td className="px-6 py-4 whitespace-nowrap">100</td>}
                 <td className="px-6 py-4 whitespace-nowrap">
+                  <button className="text-red-500 hover:text-indigo-400 mr-2" onClick={() => handleButtonClick(item.orderItems)}>Xem chi tiết</button>
                   <button className="text-indigo-600 hover:text-indigo-900">Giao hàng và lên đơn</button>
-                  <button className="text-red-600 hover:text-red-900 ml-2">Hủy đơn</button>
+                  <button className="text-red-600 hover:text-red-900 ml-2" onClick={() => handleButtonClickHuyDown(item.id, item.phoneNumber)}>Hủy đơn</button>
                 </td>
               </tr>
             ))}
           </tbody>
         </table>
       </div>
+
+
+      {showModal && (
+          <div className='fixed top-0 left-0 w-full h-full bg-gray-800 bg-opacity-50 flex items-center justify-center'>
+            <div className='bg-white p-6 rounded-lg'>
+              <h2 className='text-lg font-bold mb-4'>Các sản phẩm của đơn hàng</h2>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {ordersItems.map((item, index) => (
+                  <div key={index} className="border rounded-lg overflow-hidden shadow-md">
+                  <img src={item.img} alt={item.name} className="w-16 h-16 object-cover object-center" />
+                  <div className="p-2">
+                    <h3 className="text-lg font-semibold mb-1">{item.name}</h3>
+                    <p className="text-gray-600 mb-1">Quantity: {item.quantity}</p>
+                    <p className="text-gray-600 mb-1">Price: ${item.price.toFixed(2)}</p>
+                    <p className="text-gray-600 mb-1">Note: {item.note}</p>
+                  </div>
+                </div>
+                ))}
+              </div>
+
+
+              <button className='bg-red-500 text-white font-bold py-2 px-4 rounded mt-2' onClick={() => setShowModal(false)}>
+                Đóng
+              </button>
+            </div>
+          </div>
+        )}
+
     </div>
+
+
   );
 }
 

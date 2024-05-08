@@ -1,14 +1,13 @@
 const Payment = require('../models/Payment');
 
 
-exports.addPayment = async (amount,orderid, paymentMethod, paymentStatus, vnpPayDate, vnpTxnRef ) => {
+exports.addPayment = async (orderid, paymentMethod, paymentStatus, vnpPayDate, vnpTxnRef ) => {
     try {
         // Call the service to add a new payment
         const payment = new Payment({
-            amount,
             orderid,
             paymentMethod,
-            paymentStatus: paymentStatus,
+            paymentStatus ,
             vnpPayDate,
             vnpTxnRef
         });
