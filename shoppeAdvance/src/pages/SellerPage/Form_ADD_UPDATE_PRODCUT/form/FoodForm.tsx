@@ -196,6 +196,8 @@ const FoodForm:  React.FC<{ updateFormDataProduct: (data: Partial<Product>) => v
           <div className="mb-4">
             <label htmlFor="brand" className="block font-medium mb-2 text-red-500">Thương hiệu</label>
             <select className="w-full p-2 border rounded-md" onChange={handleBrandChange}>
+            <option  value=''>Chọn Brand</option>
+
             {brands.map(brand => (
                 <option key={brand.id} value={brand.id}>{brand.name}</option>
             ))}

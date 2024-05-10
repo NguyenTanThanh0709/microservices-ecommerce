@@ -22,7 +22,6 @@ export default function ProductList() {
     keepPreviousData: true,
     staleTime: 3 * 60 * 1000
   })
-  console.log(queryConfig)
 
   // Product list use query to get data from server
   const { data: categoriesData } = useQuery({
@@ -32,8 +31,6 @@ export default function ProductList() {
     }
   })
 
-
-  console.log(productsData?.data.data)
   return (
     <div className='bg-gray-200 py-6'>
       <Head title={'Trang chủ | Shopee Clone'} />
@@ -53,9 +50,10 @@ export default function ProductList() {
                   </div>
                 ))}
               </div>
-              <Pagination queryConfig={queryConfig} pageSize={productsData.data.data.pagination.page_size} />
+              <Pagination queryConfig={queryConfig} pageSize={productsData.data.data.pagination.page+1} />
             </div>
           )}
+          
         </div>
       </div>
     </div>

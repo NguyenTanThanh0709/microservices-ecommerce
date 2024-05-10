@@ -11,6 +11,8 @@ export interface Purchase {
   price_before_discount: number
   status: PurchaseStatus
   user: string
+  color:string,
+  size:string,
   product: Product
 }
 

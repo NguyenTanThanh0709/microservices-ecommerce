@@ -61,7 +61,7 @@ export default function Pagination({ queryConfig, pageSize }: Props) {
     return Array(pageSize)
       .fill(0)
       .map((_, index) => {
-        const pageNumber = index + 1
+        const pageNumber = index 
 
         // Điều kiện để return về ...
         if (page <= RANGE * 2 + 1 && pageNumber > page + RANGE && pageNumber < pageSize - RANGE + 1) {

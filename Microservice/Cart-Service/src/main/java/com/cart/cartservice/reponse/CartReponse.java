@@ -18,4 +18,6 @@ public class CartReponse {
     private ProductReponse product;
     private int status;
     private String user;
+    private String color;
+    private String size;
 }

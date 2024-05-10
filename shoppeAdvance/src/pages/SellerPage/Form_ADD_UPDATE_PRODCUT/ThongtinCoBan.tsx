@@ -140,8 +140,7 @@ const ThongtinCoBan: React.FC<ThongtinCoBanProps> = ({ formDataProduct, updateFo
       !productDescription.trim() ||
       !selectedCategory.trim() ||
       !selectedSubcategory.trim() ||
-      !selectedItem.trim() ||
-      !imgs
+      !selectedItem.trim()
     ) {
       // Hiển thị cảnh báo nếu có trường nào đó rỗng, null hoặc trống
       alert("Vui lòng điền đầy đủ thông tin sản phẩm!");

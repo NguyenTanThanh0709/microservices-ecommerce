@@ -9,7 +9,6 @@ import ThongtinBanHang from './ThongtinBanHang'
 import ThongtinVanChuyen from './ThongtinVanChuyen'
 
 import {  Product } from 'src/constants/contant';
-import { Console } from 'console';
 
 const initialFormData: Product = {
     name: "",
@@ -67,7 +66,7 @@ const override: CSSProperties = {
 export default function Form_ADD_UPDATE_PRODCUT({ productId }: { productId: string }) {
     const [formDataProduct, setFormDataProduct] = useState<Product>(initialFormData);
     const [formDataProduct_, setFormDataProduct_] = useState<any>({});
-    console.log(formDataProduct_);
+    // console.log(formDataProduct_);
     useEffect(() => {
         if (productId !== '') {
             // Nếu productId không rỗng, gọi hàm để fetch dữ liệu từ API
@@ -121,6 +120,11 @@ export default function Form_ADD_UPDATE_PRODCUT({ productId }: { productId: stri
     let [color, setColor] = useState("#ff0000");
 
     const handleSave = async () => {
+        if(productId != ''){
+            alert("Cập Nhật Data")
+            fetchUpProductUpdate()
+            return 
+        }
         console.log(formDataProduct);
         if(!isValidProduct(formDataProduct)) {
             alert('Điền đủ thông tin xong và vui lòng ấn save!');
@@ -158,6 +162,29 @@ export default function Form_ADD_UPDATE_PRODCUT({ productId }: { productId: stri
             const response = await axiosInstance.post('/api/v1/products/seller/', formDataProduct);
             if(response.status === 201) {
                 return response.data
+            }
+
+        } catch (error) {
+            console.error('Error fetching data:', error);
+        }
+    };
+
+    const fetchUpProductUpdate = async () => {
+        try {
+            const response = await axiosInstance.put('/api/v1/products/seller/', {
+                name: formDataProduct.name,
+                id: formDataProduct_.id,
+                shortDescription: formDataProduct.shortDescription,
+                price: formDataProduct.price,
+                stockQuantity: formDataProduct.stockQuantity,
+                category: formDataProduct.category,
+                colors: formDataProduct.colors,
+                productSize: formDataProduct.productSize
+            });
+            if(response.status === 201) {
+                alert("Thành Công")
+                return response.data
+
             }
 
         } catch (error) {

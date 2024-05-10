@@ -9,7 +9,7 @@ interface GetPurchasesParams {
 }
 
 const purchaseApi = {
-  addToCart(body: { customerId:number;productId: number; quantity: number }) {
+  addToCart(body: { customerId:number;productId: number; quantity: number, color: string, size: string }) {
     return http.post<SuccessResponse<Purchase>>(`${URL}/create`, body)
   },
   getPurchases(idUser: number, token: string) {

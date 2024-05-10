@@ -15,20 +15,82 @@ import { AppContext } from 'src/contexts/app.context'
 import Button from 'src/components/Button'
 
 type City = {
-  Id: string;
-  Name: string;
-  Districts: District[];
+  ProvinceID: number;
+  ProvinceName: string;
+  CountryID: number;
+  Code: string;
+  NameExtension: string[];
+  IsEnable: number;
+  RegionID: number;
+  RegionCPN: number;
+  UpdatedBy: number;
+  CreatedAt: string;
+  UpdatedAt: string;
+  CanUpdateCOD: boolean;
+  Status: number;
 }
 
 type District = {
-  Id: string;
-  Name: string;
-  Wards: Ward[];
+  DistrictID: number;
+  ProvinceID: number;
+  DistrictName: string;
+  Code: string;
+  Type: number;
+  SupportType: number;
+  NameExtension: string[];
+  IsEnable: number;
+  CanUpdateCOD: boolean;
+  Status: number;
+  PickType: number;
+  DeliverType: number;
+  WhiteListClient: {
+      From: number[];
+      To: number[];
+      Return: number[];
+  };
+  WhiteListDistrict: {
+      From: any;
+      To: any;
+  };
+  ReasonCode: string;
+  ReasonMessage: string;
+  OnDates: any;
+  CreatedIP: string;
+  CreatedEmployee: number;
+  CreatedSource: string;
+  CreatedDate: string;
+  UpdatedEmployee: number;
+  UpdatedDate: string;
 }
 
 type Ward = {
-  Id: string;
-  Name: string;
+  WardCode: string;
+  DistrictID: number;
+  WardName: string;
+  NameExtension: string[];
+  CanUpdateCOD: boolean;
+  SupportType: number;
+  PickType: number;
+  DeliverType: number;
+  WhiteListClient: {
+      From: number[];
+      To: number[];
+      Return: number[];
+  };
+  WhiteListWard: {
+      From: any;
+      To: any;
+  };
+  Status: number;
+  ReasonCode: string;
+  ReasonMessage: string;
+  OnDates: string[];
+  CreatedIP: string;
+  CreatedEmployee: number;
+  CreatedSource: string;
+  CreatedDate: string;
+  UpdatedEmployee: number;
+  UpdatedDate: string;
 }
 
 type FormData = Pick<IAuthSchema, 'email' | 'phoneNumber' | 'password' | 'confirm_password' | 'role' | 'term_of_use'>
@@ -99,8 +161,12 @@ export default function Register() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await axios.get<City[]>('https://raw.githubusercontent.com/kenzouno1/DiaGioiHanhChinhVN/master/data.json');
-        setCities(response.data);
+        const response = await axios.get<any>('https://online-gateway.ghn.vn/shiip/public-api/master-data/province',{
+          headers: {
+            'token': '5b44734c-e7ae-11ee-8529-6a2e06bbae55'
+          }
+        });
+        setCities(response.data.data);
       } catch (error) {
         console.error('Error fetching data:', error);
       }
@@ -110,27 +176,54 @@ export default function Register() {
   }, []);
 
   const handleCityChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const cityId = e.target.value;
-    setSelectedCity(cityId);
-    const selectedCityData = cities.find(city => city.Id === cityId);
-    if (selectedCityData) {
-      setDistricts(selectedCityData.Districts);
-      setSelectedDistrict('');
-      setWards([]);
-      setSelectedWard('');
-    }
+    const cityId = e.target.value.split("_")[1];
+    setSelectedCity(e.target.value);
+    console.log('Selected city:', cityId);
+    fetchDatadistrict(cityId)
+
   };
 
+  const fetchDatadistrict = async (id: any) => {
+    try {
+      const response = await axios.get<any>(
+        'https://online-gateway.ghn.vn/shiip/public-api/master-data/district',
+        {
+          headers: {
+            'token': '5b44734c-e7ae-11ee-8529-6a2e06bbae55'
+          },
+          params: {
+            province_id: id
+          }
+        }
+      );
+      setDistricts(response.data.data);
+    } catch (error) {
+      console.error('Error fetching data:', error);
+    }
+  };
   const handleDistrictChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const districtId = e.target.value;
-    setSelectedDistrict(districtId);
-    const selectedDistrictData = districts.find(district => district.Id === districtId);
-    if (selectedDistrictData) {
-      setWards(selectedDistrictData.Wards);
-      setSelectedWard('');
+    const districtId = e.target.value.split("_")[1];
+    setSelectedDistrict(e.target.value);
+    fetchDataward(districtId)
+  };
+  const fetchDataward = async (id: any) => {
+    try {
+      const response = await axios.get<any>(
+        'https://online-gateway.ghn.vn/shiip/public-api/master-data/ward',
+        {
+          headers: {
+            'token': '5b44734c-e7ae-11ee-8529-6a2e06bbae55'
+          },
+          params: {
+            district_id : id
+          }
+        }
+      );
+      setWards(response.data.data);
+    } catch (error) {
+      console.error('Error fetching data:', error);
     }
   };
-
   const handleWardChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setSelectedWard(e.target.value);
   };
@@ -169,7 +262,7 @@ export default function Register() {
   >
     <option value="">Chọn tỉnh thành</option>
     {cities.map(city => (
-      <option key={city.Id} value={city.Id}>{city.Name}</option>
+      <option key={city.ProvinceID} value={`${city.ProvinceName}_${city.ProvinceID}`}>{city.ProvinceName}</option>
     ))}
   </select>
   <select 
@@ -179,7 +272,7 @@ export default function Register() {
   >
     <option value="">Chọn quận huyện</option>
     {districts.map(district => (
-      <option key={district.Id} value={district.Id}>{district.Name}</option>
+      <option key={district.DistrictID} value={`${district.DistrictName}_${district.DistrictID}`}>{district.DistrictName}</option>
     ))}
   </select>
   <select 
@@ -189,7 +282,7 @@ export default function Register() {
   >
     <option value="">Chọn phường xã</option>
     {wards.map(ward => (
-      <option key={ward.Id} value={ward.Id}>{ward.Name}</option>
+      <option key={ward.WardCode} value={`${ward.WardName}_${ward.WardCode}`}>{ward.WardName}</option>
     ))}
   </select>
   <input 

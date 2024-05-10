@@ -36,7 +36,8 @@ public class SecurityConfiguration {
             "/api/v1/users/authenticate",
             "/api/v1/users/refresh-token",
             "/api/v1/payments/**",
-            "/api/v1/products/**"
+            "/api/v1/products/**",
+            "/api/v1/products/categories"   
     };
 
     @Bean
@@ -48,13 +49,6 @@ public class SecurityConfiguration {
                 .authorizeHttpRequests(req ->
                         req
                                 .requestMatchers(WHITE_LIST_URL).permitAll()
-//                                .requestMatchers("/api/v1/**").hasAnyAuthority("seller")
-//                                .requestMatchers("/api/v1/owner/**").hasAnyAuthority("OWNER","STAFF")
-//                                .requestMatchers("/api/v1/staff/**").hasAnyAuthority("STAFF","USER","OWNER","DRIVER")
-//                                .requestMatchers("/api/v1/driver/**").hasAnyAuthority("DRIVER")
-//                                .requestMatchers("/api/v1/user/**").hasAnyAuthority("USER","DRIVER","OWNER","STAFF","ADMIN")
-//                                .requestMatchers("/api/v1/owner/cars/**").hasAnyAuthority("OWNER","STAFF")
-//                                .requestMatchers("/api/v1/staff/drivertrip/**").hasAnyAuthority("USER","STAFF")
                                 .anyRequest().authenticated()
                 ).sessionManagement(sesson -> sesson.sessionCreationPolicy(STATELESS))
                 .authenticationProvider(authenticationProvider)

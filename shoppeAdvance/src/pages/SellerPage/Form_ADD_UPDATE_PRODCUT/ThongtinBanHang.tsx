@@ -32,7 +32,7 @@ const ThongtinBanHang: React.FC<ThongtinBanHangProps> = ({ formDataProduct,chang
 
 
 
-  console.log(formDataProduct)
+  // console.log(formDataProduct)
   useEffect(() => {
     if (formDataProduct) {
       updatePrice(formDataProduct.price);
@@ -94,7 +94,6 @@ const handleSubmit1 = (e: React.FormEvent<HTMLFormElement>) => {
   };
 
   const handleClick = () => {
-    console.log(formDatathongtinbanhang);
     const formattedProductColor = productColor.join('-'); 
     updateFormDataProduct({
         price: formDatathongtinbanhang.price,
@@ -102,6 +101,7 @@ const handleSubmit1 = (e: React.FormEvent<HTMLFormElement>) => {
         productSize: formDatathongtinbanhang.productSize,
         colors: formattedProductColor,
     });
+    alert("Lưu Thành Công")
   }
 
   return (

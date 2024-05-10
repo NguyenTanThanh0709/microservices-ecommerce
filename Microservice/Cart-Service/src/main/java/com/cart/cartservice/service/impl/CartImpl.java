@@ -76,7 +76,8 @@ public class CartImpl implements ICart {
         CartItemEntity cartItem = new CartItemEntity();
         cartItem.setProductId(cartDTO.getProductId());
         cartItem.setQuantity(cartDTO.getQuantity());
-
+        cartItem.setSize(cartDTO.getSize());
+        cartItem.setColor(cartDTO.getColor());
 
         cart.getCartItems().add(cartItem);
         cartItem.setCart(cart);
@@ -122,6 +123,8 @@ public class CartImpl implements ICart {
                             cartReponse.set_id(cartItem.getId().toString());
                             cartReponse.setBuy_count(cartItem.getQuantity());
                             cartReponse.setStatus(-1);
+                            cartReponse.setColor(cartItem.getColor());
+                            cartReponse.setSize(cartItem.getSize());
                             cartReponse.setUser(cartEntity.getCustomerId().toString());
                             cartReponse.setProduct(productResponse);
                             cartReponse.setPrice(productResponse.getPrice());

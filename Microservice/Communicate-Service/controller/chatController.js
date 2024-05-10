@@ -1,40 +1,37 @@
 const Chat = require('../models/chats'); // Import model của Bảng Chat
 
 // Function để lấy tất cả các tin nhắn giữa hai bên dựa trên sender_id và receiver_id
-async function getChatMessages(user1Id, user2Id) {
+
+
+// Controller để gửi tin nhắn mới
+const sendMessage = async (req, res) => {
     try {
-        const chatMessages = await Chat.find({
-            $or: [
-                { sender_id: user1Id, receiver_id: user2Id },
-                { sender_id: user2Id, receiver_id: user1Id }
-            ]
-        }).sort({ created_at: 1 }); // Sắp xếp theo thời gian tạo tin nhắn (tăng dần)
-
-        return chatMessages;
-    } catch (error) {
-        console.error('Error fetching chat messages:', error);
-        throw error;
-    }
-}
-
-
-async function sendMessage(senderId, receiverId, message) {
-    try {
-        const newChat = new Chat({
-            sender_id: senderId,
-            receiver_id: receiverId,
-            message: message
+        const { customer_id, seller_id, message } = req.body;
+        console.log(req.body)
+        const newMessage = new Chat({
+            customer_id,
+            seller_id,
+            message
         });
-
-        const savedChat = await newChat.save();
-        return savedChat;
+        await newMessage.save();
+        res.status(201).json({ message: 'Message sent successfully' });
     } catch (error) {
         console.error('Error sending message:', error);
-        throw error;
+        res.status(500).json({ error: 'Error sending message' });
     }
-}
+};
 
-module.exports = {
-    sendMessage,
-    getChatMessages
-}
+// Controller để lấy danh sách tin nhắn theo customer_id và seller_id, sắp xếp theo created_at
+const getMessageList = async (req, res) => {
+    try {
+        const { customer_id, seller_id } = req.query;
+        const messages = await Chat.find({ $or: [{ customer_id, seller_id }, { customer_id: seller_id, seller_id: customer_id }] })
+                                    .sort({ created_at: 1 });
+        res.json(messages);
+    } catch (error) {
+        console.error('Error getting message list:', error);
+        res.status(500).json({ error: 'Error getting message list' });
+    }
+};
+
+module.exports = { sendMessage, getMessageList };

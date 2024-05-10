@@ -22,6 +22,16 @@ public class ProductController {
     @Autowired
     private ProductImpl productimpl;
 
+    @PatchMapping("/update-quantity")
+    public ResponseEntity<String> updateQuantity( @RequestParam("ordersize") String ordersize) {
+        try {
+            productimpl.updateQuantityById(ordersize);
+            return new ResponseEntity<>("Quantity updated successfully.", HttpStatus.OK);
+        } catch (RuntimeException e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
+        }
+    }
+
 
     @GetMapping("/brand")
     public ResponseEntity<?> getBYBrand(@RequestParam Long idbrand) {
@@ -33,7 +43,7 @@ public class ProductController {
 
     @GetMapping("/")
     public ResponseEntity<?> getAll(@RequestParam(defaultValue = "0") int page,
-                                    @RequestParam(defaultValue = "30") int size,
+                                    @RequestParam(defaultValue = "5") int size,
                                     @RequestParam(required = false) String name,
                                     @RequestParam(required = false) String category,
                                     @RequestParam(required = false) Double price_min,
@@ -87,5 +97,16 @@ public class ProductController {
     @PutMapping("/{productId}/views/increment")
     public void incrementProductView(@PathVariable Long productId) {
         productimpl.incrementProductView(productId);
+    }
+
+
+    @PostMapping("/update-stock-and-sold-quantity")
+    public ResponseEntity<String> updateStockAndSoldQuantity(@RequestBody String content) {
+        try {
+            productimpl.updateStockAndSoldQuantity(content);
+            return new ResponseEntity<>("Stock and sold quantity updated successfully.", HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>("Failed to update stock and sold quantity: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 }

@@ -3,7 +3,7 @@ import axiosInstance from 'src/apis/axiosClient';
 import {Order, OrderItem} from 'src/constants/contant'
 import { Notification } from 'src/constants/contant';
 import { io, Socket } from 'socket.io-client';
-
+import jsPDF from 'jspdf';
 
 
 const ListOrder: React.FC = () => {
@@ -30,15 +30,6 @@ const ListOrder: React.FC = () => {
   };
 
   useEffect(() => {
-    // if (selectedTab === 'refund') {
-    //   const newData = initialData.map(item => {
-    //     if (item.id === 1) {
-    //       return { ...item, refundAmount: 100 }; // Thay 100 bằng giá trị thực tế
-    //     }
-    //     return item;
-    //   });
-    //   setData(newData);
-    // }
     if (phoneOwnerFromLocalStorage) {
       let status = 1;
       if(selectedTab === 'pendingConfirmation') {
@@ -99,14 +90,18 @@ const ListOrder: React.FC = () => {
     }
   }
 
-
-
   const handleButtonClickHuyDown =  (id:number, phoneUser:string) => {
     
     // Xử lý logic khi nhấn vào nút
     console.log('Clicked on order with ID:', id);
     fetchUpOrderHuyDon(id, 'Đã hủy', phoneUser);
   }
+
+  const handlechat =  (phoneUser:string) => {
+    window.location.href = '/chat/'+phoneUser + '/seller';
+  }
+
+  
 
   const fetchUpOrderHuyDon = async ( orderId:number, status:string, phoneUser:String) => {
     try {
@@ -126,7 +121,6 @@ const ListOrder: React.FC = () => {
 
           fetchAddThongBao(data);
         }
-
       }
     } catch (error) {
       console.error('Error fetching data:', error);
@@ -144,6 +138,66 @@ const ListOrder: React.FC = () => {
     }
   };
 
+  const handleClick = (order: Order) => {
+
+    const pdf = new jsPDF({
+      orientation: 'portrait', // Hoặc 'landscape' tùy thuộc vào bố cục bạn muốn
+      unit: 'mm',
+      format: 'a4',
+    });
+    let y = 20; // Vị trí dòng đầu tiên
+
+    pdf.text(`ORDER BILL FOR DELIVERY`, 10, y);
+      y += 10; // Tăng vị trí dòng
+
+ 
+      pdf.text(`Order ID: ${order.id}`, 10, y);
+      y += 10; // Tăng vị trí dòng
+
+      pdf.text(`Phone Number Customer: ${order.phoneNumber}`, 10, y);
+      y += 10;
+
+      pdf.text(`Address: ${order.address}`, 10, y);
+      y += 10;
+
+      pdf.text(`Total Money: ${order.totalMoney}`, 10, y);
+      y += 10;
+
+      pdf.text(`Seller ID: ${order.idSeller} VNĐ`, 10, y);
+      y += 10;
+
+      pdf.text('Order Items:', 10, y);
+      y += 10;
+
+      pdf.text('------------------------------------------------------------------------------------',10,y);
+      y += 10;
+
+      pdf.text('Order Items:', 10, y);
+      y += 10;
+      
+      pdf.text(`- Product Name: Quantity x Price`, 20, y);
+      y += 10;
+      order.orderItems.forEach(item => {
+        pdf.text(`- ${item.name}: ${item.quantity} x ${item.price}`, 20, y);
+        y += 10;
+      });
+
+      // Tạo một dòng trống giữa các đơn hàng
+      y += 10;
+    pdf.save('orders.pdf');
+    fetchUpOrderStatus(order.id, 'Chờ lấy hàng');
+  };
+
+  const fetchUpOrderStatus = async ( orderId:number, status:string) => {
+    try {
+      const response = await axiosInstance.put(`/api/v1/orders/update/${orderId}/status?statusOrder=${status}`);
+      if(response.status === 200) {
+        alert("Cập Nhật Thành Công! vui lòng lên đơn để shipper đến lấy");
+      }
+    } catch (error) {
+      console.error('Error fetching data:', error);
+    }
+  };
 
 
   return (
@@ -220,8 +274,9 @@ const ListOrder: React.FC = () => {
                 {selectedTab === 'refund' && <td className="px-6 py-4 whitespace-nowrap">100</td>}
                 <td className="px-6 py-4 whitespace-nowrap">
                   <button className="text-red-500 hover:text-indigo-400 mr-2" onClick={() => handleButtonClick(item.orderItems)}>Xem chi tiết</button>
-                  <button className="text-indigo-600 hover:text-indigo-900">Giao hàng và lên đơn</button>
+                  <button className="text-indigo-600 hover:text-indigo-900" onClick={() => handleClick(item)}>Giao hàng và lên đơn</button>
                   <button className="text-red-600 hover:text-red-900 ml-2" onClick={() => handleButtonClickHuyDown(item.id, item.phoneNumber)}>Hủy đơn</button>
+                  <button className="text-indigo-600 hover:text-red-900 ml-2" onClick={() => handlechat(item.phoneNumber)}>Nhắn tin</button>
                 </td>
               </tr>
             ))}

@@ -47,6 +47,8 @@ const ThongtinVanChuyen: React.FC<ThongtinBanHangProps> = ({formDataProduct, upd
       thetich_rong: formData.thetich_rong,
       thetich_cao: formData.thetich_cao,
     });
+    alert("Lưu Thành Công")
+
   }
 
 

@@ -11,6 +11,16 @@ const io = require("socket.io")(8900, {
   
     socket.on("notireceive", (message) => {
       console.log(message)
-      io.emit("notipush", message);
+      io.emit("notipush", message); 
+    });
+
+    socket.on("thongbaochocustomer", (message) => {
+      console.log(message)
+      io.emit("thongbaochocustomeremit", message); 
+    });
+
+    socket.on("thongbaochoseller", (message) => {
+      console.log(message)
+      io.emit("thongbaochoselleremit", message); 
     });
   });

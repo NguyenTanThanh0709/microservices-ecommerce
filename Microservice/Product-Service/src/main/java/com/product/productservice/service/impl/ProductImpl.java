@@ -4,9 +4,11 @@ import com.product.productservice.DTO.Reponse.Pagination;
 import com.product.productservice.DTO.Reponse.ProductData;
 import com.product.productservice.DTO.Reponse.ProductReponSingle;
 import com.product.productservice.DTO.Reponse.ProductReponse;
+import com.product.productservice.DTO.UPDATE.ProductDTOu;
 import com.product.productservice.entity.ProductImage;
 import com.product.productservice.entity.ProductSize;
 import com.product.productservice.repository.ProductImageRepository;
+import com.product.productservice.repository.ProductSizeRepository;
 import com.product.productservice.utils.ProductMapper;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityNotFoundException;
@@ -34,7 +36,7 @@ import java.util.Optional;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class ProductImpl implements IProduct {
+public  class ProductImpl implements IProduct {
     @Autowired
     private ProductRepository productRepository;
     @Autowired
@@ -43,6 +45,8 @@ public class ProductImpl implements IProduct {
     private IBrand iBrand;
     @Autowired
     private ProductImageRepository productImageRepository;
+    @Autowired
+    private ProductSizeRepository productSizeRepository;
 
 
 
@@ -57,6 +61,65 @@ public class ProductImpl implements IProduct {
             productImage.setProduct(product);
             productImageRepository.save(productImage);
         }
+    }
+
+    @Override
+    public void updateQuantityById(String ordersize) {
+        String[] orders = ordersize.split("_");
+        for (String item : orders) {
+            String[] orderInfo = item.split("-");
+            Long id = Long.parseLong(orderInfo[0]);
+            Integer count = Integer.parseInt(orderInfo[1]);
+            ProductSize productSize = productSizeRepository.findById(id)
+                    .orElseThrow(() -> new RuntimeException("ProductSize not found with id: " + id));
+            int oldQuantity = productSize.getQuantity();
+            productSize.setQuantity(oldQuantity - count);
+            productSizeRepository.save(productSize);
+        }
+    }
+
+    @Override
+    public void update(ProductDTOu productDTOu) {
+        ProductEntity product = productRepository.findById(productDTOu.getId())
+                .orElseThrow(() -> new EntityNotFoundException("Product not found with id: " + productDTOu.getId()));
+
+        if (productDTOu.getName() != null && !productDTOu.getName().isEmpty()) {
+            product.setName(productDTOu.getName());
+        }
+
+        if (productDTOu.getShortDescription() != null && !productDTOu.getShortDescription().isEmpty()) {
+            product.setShortDescription(productDTOu.getShortDescription());
+        }
+
+        if (productDTOu.getPrice() != null && productDTOu.getPrice() > 0) {
+            product.setPrice(productDTOu.getPrice());
+        }
+
+        if (productDTOu.getStockQuantity() != null && productDTOu.getStockQuantity() > 0) {
+            product.setStockQuantity(productDTOu.getStockQuantity());
+        }
+
+        if (productDTOu.getCategory() != null && !productDTOu.getCategory().isEmpty()) {
+            product.setCategory(productDTOu.getCategory());
+        }
+
+        if (productDTOu.getProductSize() != null && !productDTOu.getProductSize().isEmpty()) {
+            List<ProductSize> productSizes = new ArrayList<>();
+            for (com.example.commonservice.DTO.ProductSize p : productDTOu.getProductSize()) {
+                ProductSize productSize = new ProductSize();
+                productSize.setSize(p.getSize());
+                productSize.setQuantity(p.getQuantity());
+                productSize.setProduct(product);
+                productSizes.add(productSize);
+            }
+            product.setProductSize(productSizes);
+        }
+
+        if (productDTOu.getColors() != null && !productDTOu.getColors().isEmpty()) {
+            product.setColors(productDTOu.getColors());
+        }
+
+        productRepository.save(product);
     }
 
 
@@ -98,9 +161,9 @@ public class ProductImpl implements IProduct {
         ProductReponse productReponse = new ProductReponse();
         productReponse.setMessage("Lấy các sản phẩm thành công");
         Pagination pagination = new Pagination();
-        pagination.setPage(pagination.getPage());
-        pagination.setPage_size(pagination.getPage_size());
-        pagination.setLimit(pagination.getLimit());
+        pagination.setPage(pageable.getPageNumber());
+        pagination.setPage_size(pageable.getPageSize());
+        pagination.setLimit(0);
 
         ProductData productData  = new ProductData();
 
@@ -179,12 +242,12 @@ public class ProductImpl implements IProduct {
     public void updateStockAndSoldQuantity(String content) {
         // Split the content by "-" to get individual items
 
-        if(content.contains("-")){
-        String[] items = content.split("-");
+        if(content.contains("y")){
+        String[] items = content.split("y");
         log.error(content);
         for (String item : items){
             // Split each item by ":" to get product ID and quantity
-            String[] i = item.split(":");
+            String[] i = item.split("t");
             if (i.length != 2) {
                 // Skip invalid items
                 continue;
@@ -201,12 +264,12 @@ public class ProductImpl implements IProduct {
                 continue;
             }
             // Update stock and sold quantity for the product
-            productRepository.updateStockAndSoldQuantity(id, quantity);
+            updateStockAndSoldQuantity(id, quantity);
         }
     }
         else {
             // Split each item by ":" to get product ID and quantity
-            String[] i = content.split(":");
+            String[] i = content.split("t");
             if (i.length != 2) {
                 return;
             }
@@ -222,7 +285,7 @@ public class ProductImpl implements IProduct {
                 return;
             }
             // Update stock and sold quantity for the product
-            productRepository.updateStockAndSoldQuantity(id, quantity);
+            updateStockAndSoldQuantity(id, quantity);
         }
     }
 
@@ -246,17 +309,34 @@ public class ProductImpl implements IProduct {
         }
 
         // Cập nhật đánh giá trung bình mới cho sản phẩm
-        productRepository.updateRatingById(productId, averageRating.intValue());
+        updateRatingById_(productId, averageRating);
     }
 
     @Override
     public void subtractAndSetAverageRating(Long productId, int deletedRating) {
-        if(deletedRating >= 4){
-            productRepository.updateRatingById(productId, 4);
+        if(deletedRating >= 4){ 
+            updateRatingById_(productId, 3);
         }else {
-            productRepository.updateRatingById(productId, 2);
+            updateRatingById_(productId, 4);
 
         }
+    }
+
+    public void updateStockAndSoldQuantity(Long productId, Long quantity) {
+        ProductEntity product = productRepository.findById(productId)
+                .orElseThrow(() -> new RuntimeException("Product not found with id: " + productId));
+
+        product.setStockQuantity(product.getStockQuantity() - quantity);
+        product.setSold(product.getSold() + quantity.intValue());
+
+        productRepository.save(product);
+    }
+
+    public ProductEntity updateRatingById_(Long id, int newRating) {
+        ProductEntity product = productRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Product not found with id: " + id));
+        product.setRating(newRating);
+        return productRepository.save(product);
     }
 
 }

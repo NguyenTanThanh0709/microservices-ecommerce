@@ -1,7 +1,10 @@
 import React from 'react'
 import Navbar from './navbar'
-
+import { useParams } from 'react-router-dom';
 export default function ShopInfo() {
+  const { id } = useParams();
+  const shopId = id ? parseInt(id) : 0;
+  console.log(id)
   return (
     <div className='bg-gray-200 py-6'>
               <div className='mt-8'>
@@ -93,7 +96,7 @@ export default function ShopInfo() {
             </div>
 
           </div>
-          <Navbar/>
+          <Navbar id={shopId} />
           <div>
           </div>
         </div>

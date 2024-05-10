@@ -1,39 +1,45 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query'
 import productApi from 'src/apis/product.api'
 import Pagination from 'src/components/Pagination'
 import useQueryConfig from 'src/hooks/useQueryConfig'
 import { ProductListConfig, Product as ProductType } from 'src/types/product.type'
 import Product from 'src/pages/ProductList/components/Product/Product'
+import axiosInstance from 'src/apis/axiosClient'; 
 
 interface MenuItem {
   name: string;
   count?: number; // Optional property
 }
 
-const Navbar: React.FC = () => {
+interface NavbarProps {
+  id: number; // hoặc kiểu dữ liệu phù hợp với id của bạn
+}
+
+// Sử dụng generic type NavbarProps để chỉ định kiểu của props
+const Navbar: React.FC<NavbarProps> = ({ id }) => {
   // Sample data
   const menuItems: MenuItem[] = [
     { name: 'Tất cả', count: 3 },
-    { name: 'Đồ ăn vặt' },
-    { name: 'Đồng hồ' },
-    { name: 'Quần áo' },
-    { name: 'Giày' }
 
   ];
 
+  const [productsData,setProductsData] = React.useState<any[]>([]);
+  const fetchUpProductDeleteRating = async () => {
+    try {
+        // Example POST request
+        const response = await axiosInstance.get(`/api/v1/products/user?iduser=${id}`);
+        console.log('Response data:', response.data);
+        setProductsData(response.data);
+    } catch (error) {
+        console.error('Error fetching data:', error);
+    }
+  };
 
-  const queryConfig = useQueryConfig()
-  // console.log('queryParam', queryParam)
-  // Product list use query to get data from server
-  const { data: productsData } = useQuery({
-    queryKey: ['products', queryConfig],
-    queryFn: () => {
-      return productApi.getProducts(queryConfig as ProductListConfig)
-    },
-    keepPreviousData: true,
-    staleTime: 3 * 60 * 1000
-  })
+  useEffect(() => {
+    fetchUpProductDeleteRating();
+  }, [id]);
+
 
   return (
     <div className="mt-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-3">
@@ -50,17 +56,15 @@ const Navbar: React.FC = () => {
         ))}
       </ul>
       <div className="col-span-5 md:col-span-2 xl:col-span-5">
-      {productsData && (
-            <div className='sticky z-10 col-span-9'>
+      <div className='sticky z-10 col-span-9'>
               <div className='mt-6 grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5'>
-                {productsData.data.data.products.map((product: ProductType) => (
+                {productsData.map((product: any) => (
                   <div className='col-span-1' key={product.id}>
                     <Product product={product} />
                   </div>
                 ))}
               </div>
             </div>
-          )}
       </div>
     </div>
   );

@@ -45,7 +45,7 @@ export default function Header() {
   })
   const purchasesInCart = purchasesInCartData?.data?.data
   const navigate = useNavigate();
-  // console.log(purchasesInCart)
+  console.log(purchasesInCart)
 
 
   // const logoutMutation = useMutation(authApi.logoutAccount)
@@ -94,15 +94,15 @@ export default function Header() {
         console.error('Error fetching data:', error);
     }
 };
+const [notifications, setNotifications] = useState<Notification[]>([]);
 const [showModal1, setShowModal1] = useState<boolean>(false);
 const handleClick = () => {
   fecthThongBao() 
   setShowModal1(true);
 };
-const [notifications, setNotifications] = useState<Notification[]>([]);
 const fecthThongBao = async () => {
   try {
-      // Example POST request
+
       const userId = localStorage.getItem('phone');
       const response = await axiosInstance.get(`/api/v1/communicate/noti/customer/${userId}`);
       if(response.status === 200) {
@@ -129,14 +129,41 @@ useEffect(() => {
         toast.info(data.description);
       }
     });
+
+    socket.on('thongbaochocustomeremit', (data) => {
+      let phone = localStorage.getItem('phone');
+      if(phone == data.customer) {
+        toast.info(data.description);
+      }
+    });
+
+    socket.on('thongbaochoseller', (data) => {
+      let phone = localStorage.getItem('id');
+      if(phone == data.seller) {
+        toast.info(data.description);
+      }
+    });
+
+
   }
 
   return () => {
     if (socket) {
       socket.off('notipush');
+      socket.off('thongbaochoseller');
+      socket.off('thongbaochocustomeremit');
     }
   };
 }, [socket]);
+
+const handleNotificationClick = (noti:Notification) => {
+  if(noti.type == 'TIN NHẮN'){
+    window.location.href = '/chat/'+noti.seller + '/customer';
+  }else{
+    alert("Đơn Hàng Mã số: " + noti.id_type);
+    window.location.href = '/user/purchase?status=5';
+  }
+};
 
 
   return (
@@ -387,7 +414,7 @@ useEffect(() => {
               <h2 className='text-lg font-bold mb-4'>Danh Sách Thông Báo</h2>
               <ul className="space-y-4">
               {notifications.map((notification, index) => (
-                  <li key={index} className="flex items-center justify-between bg-slate-400 p-2 m-2 cursor-pointer">
+                  <li key={index} className="flex items-center justify-between bg-slate-400 p-2 m-2 cursor-pointer" onClick={() => handleNotificationClick(notification)}>
                       <strong>Mô tả:</strong> {notification.description}<br />
                       <strong>Ngày:</strong> {new Date(notification.date).toLocaleString()}<br />
                   </li>

@@ -22,6 +22,8 @@ public interface ProductRepository extends JpaRepository<ProductEntity, Long> {
     @Query("UPDATE ProductEntity p SET p.rating = :newRating WHERE p.id = :productId")
     void updateRatingById(@Param("productId") Long productId, @Param("newRating") int newRating);
 
+
+
     @Query("SELECT p.rating FROM ProductEntity p WHERE p.id = :productId ORDER BY p.createdAt ASC")
     Integer getFirstRatingByProductId(@Param("productId") Long productId);
 
@@ -52,7 +54,7 @@ public interface ProductRepository extends JpaRepository<ProductEntity, Long> {
             "      ELSE 1 " +
             "    END " +
             "  ELSE 0 " +
-            "END")
+            "END DESC")
     Page<ProductEntity> findAllWithFiltersAndSorting(@Param("name") String name,
                                                      @Param("category") String category,
                                                      @Param("price_min") Double price_min,
@@ -61,7 +63,6 @@ public interface ProductRepository extends JpaRepository<ProductEntity, Long> {
                                                      @Param("order") String order,
                                                      @Param("rating_filter") Integer rating_filter,
                                                      Pageable pageable);
-
 
     @Query(value = "SELECT p FROM ProductEntity p WHERE LOWER(p.name) LIKE %:productName% " +
             "AND (p.brand.name IN :brandName OR (:brandName is null OR :brandName = '')) " +

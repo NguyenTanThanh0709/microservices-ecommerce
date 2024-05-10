@@ -96,6 +96,8 @@ public class OrderImpl implements IOrder {
         // Lưu OrderEntity và các OrderItemsEntity vào cơ sở dữ liệu
         entityManager.persist(orderEntity);
 
+
+
         // Trả về OrderEntity đã được lưu
         return orderEntity;
     }

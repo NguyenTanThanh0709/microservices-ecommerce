@@ -76,8 +76,12 @@ const fetchUpProductDeleteRating = async (idproduct:string, idu:string) => {
 
   const navigate = useNavigate()
 
-  const navigateToPageShop = () => {
-    window.location.href = '/admin-shop';
+  const navigateToPageShop = (id:number) => {
+    window.location.href = '/admin-shop/'+id;
+  };
+
+  const navigateToPageShop1 = (id:number) => {
+    window.location.href = '/chat/'+id + '/customer'
   };
 
   const queryClient = useQueryClient()
@@ -91,7 +95,7 @@ const fetchUpProductDeleteRating = async (idproduct:string, idu:string) => {
   const [currentIndexImages, setCurrentIndexImages] = useState([0, 5])
   const [activeImage, setActiveImage] = useState('')
   const product = productDetailData?.data.data
-  // console.log(product)
+  console.log(product)
   const imageRef = useRef<HTMLImageElement>(null)
   const currentImages = useMemo(
     () => (product ? product.productImages.map(image => image.urlimg).slice(...currentIndexImages) : []),
@@ -200,12 +204,19 @@ const fetchUpProductDeleteRating = async (idproduct:string, idu:string) => {
   var idu = localStorage.getItem('id') || '0'
 
   const addToCart = () => {
+    if(product != null && product.colors != "" && product.productSize.length!= 0){
+      if(selectColor== '' || selectedProductId == null){
+        alert("Vui lòng chọn size và màu")
+        return
+      }
+    }
     // Retrieve customerId from localStorage
     const customerId = parseInt(localStorage.getItem('id') || '0', 10);
-    console.log({ customerId:customerId as number, productId: product?.id as number, quantity: buyCount })
+    console.log({ customerId:customerId as number, productId: product?.id as number, quantity: buyCount, color:selectColor, size:selectedProductId+'-' +namesize });
+    // return
     addToCartMutation.mutate(
       
-      { customerId:customerId as number, productId: product?.id as number, quantity: buyCount },
+      { customerId:customerId as number, productId: product?.id as number, quantity: buyCount, color:selectColor, size:selectedProductId+'-' +namesize },
       {
         onSuccess: (data) => {
           toast.success(data.data.message, { autoClose: 1000 })
@@ -216,8 +227,22 @@ const fetchUpProductDeleteRating = async (idproduct:string, idu:string) => {
   }
 
   const buyNow = async () => {
+
+
+
+    if(product){
+      console.log(product)
+    if(product != null && product.colors != "" && product.productSize.length!= 0){
+      if(selectColor== '' || selectedProductId == null){
+        alert("Vui lòng chọn size và màu")
+        return
+      }
+    }
+    
+    console.log(product.id+ '-'+selectedProductId + '-'+ namesize + '-' + selectColor)
+
     const customerId = parseInt(localStorage.getItem('id') || '0', 10);
-    const res = await addToCartMutation.mutateAsync({ customerId:customerId as number, productId: product?.id as number, quantity: buyCount },)
+    const res = await addToCartMutation.mutateAsync({ customerId:customerId as number, productId: product?.id as number, quantity: buyCount,color:selectColor, size:selectedProductId+'-' +namesize },)
     const purchase = res.data
     console.log(purchase)
     navigate(path.cart, {
@@ -225,11 +250,18 @@ const fetchUpProductDeleteRating = async (idproduct:string, idu:string) => {
         purchaseId: purchase.id.toString()
       }
     })
+    }
     
   }
 
   const [selectedProductId, setSelectedProductId] = useState<number | null>(null);
-  const handleItemClick = (productId: number) => {
+  const [namesize, setNamesize] = useState<string>('');
+  const handleItemClick = (productId: number, size:string, quantity: number) => {
+    if(quantity == 0){
+      alert("Sản phẩm này đã hết hàng")
+      return
+    }
+      setNamesize(size.toString());
       setSelectedProductId(productId);
       // Perform any other actions you want when an item is clicked
   };
@@ -318,6 +350,7 @@ const fetchUpProductDeleteRating = async (idproduct:string, idu:string) => {
             </div>
             <div className='col-span-7'>
               <h1 className='text-xl font-medium uppercase'>{product.name}</h1>
+              <h1 className='text-sm font-medium uppercase'>{product.category}</h1>
               <div className='mt-8 flex items-center'>
                 <div className='flex items-center'>
                   <span className='mr-1 border-b border-b-orange text-orange'>{product.view}</span>
@@ -343,7 +376,7 @@ const fetchUpProductDeleteRating = async (idproduct:string, idu:string) => {
               <div className='mt-8  items-center bg-gray-50 px-5 py-4'>
                 <h1>Thông tin Size</h1>
                 {product.productSize.map((items) => (
-                  <div key={items.id}  className={`items-center border-2 cursor-pointer rounded-sm px-4 py-2 mt-2 ${selectedProductId === items.id ? 'border-blue-500' : 'border-gray-300'}`}   onClick={() => handleItemClick(items.id)}> 
+                  <div key={items.id}  className={`items-center border-2 cursor-pointer rounded-sm px-4 py-2 mt-2 ${selectedProductId === items.id ? 'border-blue-500' : 'border-gray-300'}`}   onClick={() => handleItemClick(items.id, items.size, items.quantity)}> 
                   <p>Size: {items.size}</p>
                   <p>Số lượng trong kho: {items.quantity}</p>
                 </div>
@@ -497,18 +530,19 @@ const fetchUpProductDeleteRating = async (idproduct:string, idu:string) => {
                     <div className='flex'>
                     <>
                     <button
-                      onClick={navigateToPageShop}
+    onClick={() => navigateToPageShop1(product.phoneOwner)}
+    className='fkex ml-4 h-12 min-w-[5rem] items-center justify-center rounded-sm bg-orange px-5 capitalize text-white shadow-sm outline-none hover:bg-orange/90'
+>
+    CHAT NGAY
+</button>
 
-                      className='fkex ml-4 h-12 min-w-[5rem] items-center justify-center rounded-sm bg-orange px-5 capitalize text-white shadow-sm outline-none hover:bg-orange/90'
-                    >
-                      CHAT NGAY
-                    </button>
-                    <button
-                      onClick={navigateToPageShop}
-                      className='fkex ml-4 h-12 min-w-[5rem] items-center justify-center rounded-sm bg-orange px-5 capitalize text-white shadow-sm outline-none hover:bg-orange/90'
-                    >
-                      XEM SHOP
-                    </button>
+
+<button
+    onClick={() => navigateToPageShop(product.phoneOwner)}
+    className='fkex ml-4 h-12 min-w-[5rem] items-center justify-center rounded-sm bg-orange px-5 capitalize text-white shadow-sm outline-none hover:bg-orange/90'
+>
+    XEM SHOP
+</button>
                   </>
                     </div>
 

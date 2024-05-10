@@ -24,7 +24,6 @@ public class OrderEntity {
     private Double totalMoney;
     private Long idSeller;
 
-
     @OneToMany(mappedBy = "orderId", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     List<OrderItemsEntity> orderItems;
 }

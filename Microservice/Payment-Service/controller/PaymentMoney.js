@@ -119,7 +119,7 @@ exports.returnPayment = async (req, res) => {
                 .then(() => {
                     // Gửi message tới topic 'payment-topic'
                     const topic = 'payment-topic';
-                    const message = 'Hello Kafka!';
+                    console.log(dataupdate)
                     producerService.sendMessage(topic, dataupdate);
                 })
                 .catch(error => {
@@ -133,11 +133,22 @@ exports.returnPayment = async (req, res) => {
 
             // Giao dịch không thành công, chuyển hướng đến trang thông báo lỗi
             const payment = await paymentService.addPayment(orderid, 'VNPAY', 'CANCELLED','vnpay', 'vnpay');
+
             console.log('Payment CANCELLED:', payment);
 
-            if(payment){
-    
 
+            if(payment){
+                const producerService = new KafkaProducerService();
+                let data1 = data[0].toString()
+                producerService.connectProducer()
+                .then(() => {
+                    // Gửi message tới topic 'payment-topic'
+                    const topic = 'order_Cancel_topic';
+                    producerService.sendMessage(topic, data1);
+                })
+                .catch(error => {
+                    console.error('Error connecting to Kafka:', error);
+                });
                 res.redirect(`http://localhost:3000/payment-result?vnp_ResponseCode=01&vnp_TransactionStatus=01&vnp_OrderInfo=${vnp_OrderInfo}`);
             }
             

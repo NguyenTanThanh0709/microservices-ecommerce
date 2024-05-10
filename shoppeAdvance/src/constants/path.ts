@@ -11,13 +11,9 @@ const path = {
   cart: '/cart',
   Payment:'/payment',
   PaymentResult :'/payment-result',
-
-
-
-
-
+  Chat :'/chat/:id/:status',
   adminhome:'/admin-home/:status',
-  pageShop:'/admin-shop',
+  pageShop:'/admin-shop/:id',
   pageFormPromotion:'/admin-promiton/:promotionId',
   pageListPromotion:'/admin-list-promotion',
   RegisterShop : '/admin-shop-register'

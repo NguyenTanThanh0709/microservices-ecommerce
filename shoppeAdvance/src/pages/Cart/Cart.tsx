@@ -6,7 +6,6 @@ import Button from 'src/components/Button'
 import QuantityController from 'src/components/QuantityController'
 import path from 'src/constants/path'
 import { Product } from 'src/types/product.type'
-
 import { formatCurrency, generateNameId } from 'src/utils/utils'
 import produce from 'immer'
 import keyBy from 'lodash/keyBy'
@@ -15,11 +14,12 @@ import { AppContext } from 'src/contexts/app.context'
 import noproduct from 'src/assets/images/no-product.png'
 import { Purchase } from 'src/types/purchase.type'
 import { useNavigate } from 'react-router-dom';
-
  interface orderTemp {
   idProduct: Product  ;
   priceProduct: number;
   quantityProdcut:number;
+  color:string;
+  size:string;
   message :string;
   discount:number;
 }
@@ -28,6 +28,7 @@ import { useNavigate } from 'react-router-dom';
 export default function Cart() {
 
   const { extendedPurchases, setExtendedPurchases } = useContext(AppContext)
+  console.log(extendedPurchases)
 
   const id = localStorage.getItem('id');
   const token = localStorage.getItem('accessToken');
@@ -37,6 +38,7 @@ export default function Cart() {
   const { data: purchasesInCartData, refetch } = useQuery({
     queryFn: () => purchaseApi.getPurchases(userId, tokenus),
   });
+
   const updatePurchaseMutation = useMutation({
     mutationFn: purchaseApi.updatePurchase,
     onSuccess: () => {
@@ -61,6 +63,8 @@ export default function Cart() {
   })
   const location = useLocation()
   const choosenPurchaseIdFromLocation = (location.state as { purchaseId: string } | null)?.purchaseId
+
+
   const purchasesInCart = purchasesInCartData?.data.data
   const isAllChecked = useMemo(() => extendedPurchases.every((purchase) => purchase.checked), [extendedPurchases])
   const checkedPurchases = useMemo(() => extendedPurchases.filter((purchase) => purchase.checked), [extendedPurchases])
@@ -136,10 +140,6 @@ export default function Cart() {
     }
   }
 
-
-  
-  //onClick={handleDelete(purchase._id, purchase.product.id)}
-
   const handleDelete = (purchaseid: string, productid: number) => async () => {
     try {
       await deletePurchasesMutation.mutateAsync([purchaseid]);
@@ -155,7 +155,6 @@ export default function Cart() {
     }
   };
   
-
   const handleDeleteManyPurchases = () => {
     const purchasesIds = checkedPurchases.map((purchase) => purchase._id)
     deletePurchasesMutation.mutate(purchasesIds)
@@ -169,6 +168,8 @@ export default function Cart() {
           idProduct: item.product,
           priceProduct: item.price_before_discount,
           quantityProdcut: item.buy_count,
+          color:item.color,
+          size:item.size,
           message :'lời nhắn: ',
           discount:0,
           
@@ -264,6 +265,11 @@ export default function Cart() {
                                   <span>
                                     Mã shop: {purchase.product.phoneOwner}
                                   </span>
+                                  <span>
+                                  <>    Mô tả đơn hàng mua: <span className=''>MÀU: {purchase.color} và Mã Size - Size {purchase.size}</span> </>
+                                  </span>
+                              
+
                                   </Link>
                                   
                                 </div>

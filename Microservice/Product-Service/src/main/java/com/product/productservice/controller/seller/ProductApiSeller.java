@@ -1,6 +1,7 @@
 package com.product.productservice.controller.seller;
 
 import com.example.commonservice.DTO.ProductDTO;
+import com.product.productservice.DTO.UPDATE.ProductDTOu;
 import com.product.productservice.entity.ProductEntity;
 import com.product.productservice.service.impl.CloudinaryService;
 import com.product.productservice.service.impl.ProductImpl;
@@ -30,6 +31,12 @@ public class ProductApiSeller {
         }
         ProductEntity newProduct = productimpl.addProduct(product, null, null);
         return new ResponseEntity<>(newProduct.getId(), HttpStatus.CREATED);
+    }
+
+    @PutMapping("/")
+    public ResponseEntity<?> addProduct(@RequestBody ProductDTOu product) {
+        productimpl.update(product);
+        return new ResponseEntity<>("OK", HttpStatus.CREATED);
     }
 
 

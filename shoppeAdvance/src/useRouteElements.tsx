@@ -14,6 +14,7 @@ import PaymentResult from './pages/PaymentResult'
 import Register_ from './pages/Register copy'
 
 const Login = lazy(() => import('./pages/Login'))
+const ChatApp = lazy(() => import('./pages/ChatApp'))
 const ProductList = lazy(() => import('./pages/ProductList'))
 const Profile = lazy(() => import('./pages/User/pages/Profile'))
 const Register = lazy(() => import('./pages/Register'))
@@ -119,6 +120,13 @@ export default function useRouteElements() {
       element: (
         <MainLayout>
           <ProductDetail />
+        </MainLayout>
+      )
+    },{
+      path: path.Chat,
+      element: (
+        <MainLayout>
+          <ChatApp />
         </MainLayout>
       )
     },

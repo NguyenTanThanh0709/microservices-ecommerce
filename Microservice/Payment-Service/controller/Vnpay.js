@@ -81,6 +81,17 @@ exports.result = async (req, res) => {
                 let orderid = data[0];
                 const payment = await paymentService.addPayment(orderid, 'PAYPAL', 'CANCELLED', 'paypal', 'paypal');
                 if(payment){
+                    const producerService = new KafkaProducerService();
+                let data1 = data[0].toString()
+                producerService.connectProducer()
+                .then(() => {
+                    // Gửi message tới topic 'payment-topic'
+                    const topic = 'order_Cancel_topic';
+                    producerService.sendMessage(topic, data1);
+                })
+                .catch(error => {
+                    console.error('Error connecting to Kafka:', error);
+                });
                   res.redirect(`http://localhost:3000/payment-result?vnp_ResponseCode=01&vnp_TransactionStatus=01&vnp_OrderInfo=${vnp_OrderInfo}`);
                 }
             } else {

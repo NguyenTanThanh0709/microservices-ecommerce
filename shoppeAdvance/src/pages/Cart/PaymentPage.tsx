@@ -108,11 +108,14 @@ const PaymentPage: React.FC<PaymentProps> = ({ delivery, payment, onDeliveryChan
           <div>
             <Label>Chọn phương thức giao hàng</Label>
             <WrapperRadio value={delivery}>
-              <Radio value="fast" onChange={onDeliveryChange}>
-                <span style={{ color: '#ea8500', fontWeight: 'bold' }}>FAST</span> Giao hàng tiết kiệm
+              <Radio value="Express" onChange={onDeliveryChange}>
+                <span style={{ color: '#ea8500', fontWeight: 'bold' }}>Express</span>
               </Radio>
-              <Radio value="gojek" onChange={onDeliveryChange}>
-                <span style={{ color: '#ea8500', fontWeight: 'bold' }}>GO_JEK</span> Giao hàng tiết kiệm
+              <Radio value="Standard" onChange={onDeliveryChange}>
+                <span style={{ color: '#ea8500', fontWeight: 'bold' }}>Standard</span>
+              </Radio>
+              <Radio value="Saving" onChange={onDeliveryChange}>
+                <span style={{ color: '#ea8500', fontWeight: 'bold' }}>Saving</span>
               </Radio>
             </WrapperRadio>
           </div>

@@ -12,36 +12,41 @@ import PaymentPage from '../Cart/PaymentPage';
 import { RadioChangeEvent } from 'antd/es/radio';
 import axiosInstance from 'src/apis/axiosClient'; 
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
+import { c } from 'msw/lib/glossary-de6278a9';
 interface orderTemp {
   idProduct: Product  ;
   priceProduct: number;
   quantityProdcut:number;
-  message: string;
-  discount: number;
+  color:string;
+  size:string;
+  message :string;
+  discount:number;
 }
 
 export default function Payment() {
 
   const location = useLocation();
   const { orderTempArray } = location.state;
+  console.log(orderTempArray)
   const navigate = useNavigate();
 
   const [showModal, setShowModal] = useState<boolean>(false);
   const [voucherCode, setVoucherCode] = useState<string>('');
   const [promotions, setPromotions] = useState<PromotionReponse[]>([]);
   const [inputValues, setInputValues] = useState<orderTemp[]>([]);
+  console.log();
   const [totalMoney, setTotalMoney] = useState<number>(0);
-
-
+  const [feedelivery, setFeedelivery] = useState<number>(0);
   
-
-
-  useEffect(() => {
+  useEffect(() => {inputValues
 
     const initialInputValues = orderTempArray.map((item: orderTemp) => ({
       idProduct: item.idProduct,
       priceProduct: item.priceProduct,
       quantityProdcut: item.quantityProdcut,
+      color:item.color,
+      size:item.size,
       message: 'lời nhắn: ',
       discount: 0,
     }));
@@ -108,21 +113,90 @@ export default function Payment() {
 
   };
 
-  const [delivery, setDelivery] = useState<string>('fast');
+  const [delivery, setDelivery] = useState<string>("null");
   const [payment, setPayment] = useState<string>('later_money');
 
   // Hàm xử lý sự kiện thay đổi phương thức giao hàng
   const handleDeliveryChange = (e: RadioChangeEvent) => {
     setDelivery(e.target.value);
+    console.log("Delivery method changed to:", e.target.value);
+    if(e.target.value === "Express") {
+      fetchDatadistrict(1000);
+
+    }
+    if(e.target.value === "Standard") {
+    fetchDatadistrict(1500);
+      
+    }
+    if(e.target.value === "Saving") {
+      
+    fetchDatadistrict(2000);
+  }
+
   };
+
+  const fetchDatadistrict = async (weight:number) => {
+    let objectprofile = localStorage.getItem('profile');
+    let wardcode = '20314';
+    let discode = '1444';
+    
+    if (objectprofile) {
+      const profile = JSON.parse(objectprofile);
+      wardcode = parseInt(profile.address.split('-')[1].split('_')[1]).toString();
+      discode = parseInt(profile.address.split('-')[2].split('_')[1]).toString();
+      console.log(profile);
+    } else {
+      console.log('Không tìm thấy dữ liệu trong localStorage');
+    }
+  
+    try {
+      const response = await axios.get<any>(
+        'https://online-gateway.ghn.vn/shiip/public-api/v2/shipping-order/fee',
+        {
+          headers: {
+            'token': '5b44734c-e7ae-11ee-8529-6a2e06bbae55'
+          },
+          params: {
+            service_id: 53321,
+            insurance_value: totalMoney,
+            coupon: null,
+            from_district_id: 1542,
+            to_district_id: discode,
+            to_ward_code: wardcode,
+            height: 15,
+            length: 15,
+            weight: weight,
+            width: 15
+          }
+        }
+      );
+      console.log(response.data.data.total);
+      setFeedelivery(response.data.data.total)
+      setTotalMoney(prevTotalMoney => prevTotalMoney + response.data.data.total);
+    } catch (error) {
+      console.error('Error fetching data:', error);
+    }
+  };
+  
   
   const handlePaymentChange = (e: RadioChangeEvent) => {
     setPayment(e.target.value);
+  
   };
 
   const handleOrderDetailsClick = () => {
+
+    if(delivery === "null" || payment === "null"){
+      alert("Please select delivery method and payment method");
+      return;
+    }
+
+
+
+
     const productIdsQuantitys: { [productId: string]: number } = {};
     // Iterate through inputValues to populate productIdsQuantitys
+    console.log(inputValues);
     inputValues.forEach((item: orderTemp) => {
       productIdsQuantitys[item.idProduct.id.toString()] = item.quantityProdcut;
     });
@@ -136,7 +210,6 @@ export default function Payment() {
     inputValues.forEach((item: orderTemp) => {
       productIdsNotes[item.idProduct.id.toString()] = item.message;
     });
-
 
     const data = {
       phoneNumber: profile?.phone || "",
@@ -158,13 +231,24 @@ export default function Payment() {
     let result = '';
     for (const key in data.productIdsQuantitys) {
       if (data.productIdsQuantitys.hasOwnProperty(key)) {
-          result += `${key}:${data.productIdsQuantitys[key]}-`;
+          result += `${key}t${data.productIdsQuantitys[key]}y`;
       }
   }
-    
     // Loại bỏ ký tự "-" cuối cùng nếu có
     result = result.slice(0, -1);
+    
     console.log(data)
+    console.log(result)
+    let ordersize = '';
+orderTempArray.forEach((product: any) => { // Sử dụng kiểu any
+  const { size, quantityProdcut } = product;
+  ordersize += `${size.split('-')[0]}-${quantityProdcut}_`;
+});
+// Xóa dấu '_' cuối cùng nếu có
+if (ordersize.length > 0) {
+  ordersize = ordersize.slice(0, -1);
+}
+
     try {
       let statuspayment = "0";
       if(payment != 'later_money'){
@@ -177,6 +261,9 @@ export default function Payment() {
         if(payment === 'later_money'){
           alert("Thanh toán khi nhận hàng")
           alert("Đặt Hàng Thành Công!")
+          handleorderProductQuantity(data.productIdsQuantitys)
+          return
+          handleorderSize(ordersize);
           navigate('/user/purchase?status=1')
         }else if(payment === 'paypal'){
           const dataPayment = {
@@ -219,6 +306,29 @@ export default function Payment() {
     }
 
   }
+
+
+  const handleorderSize = async (data:string) => { 
+
+    try {
+      const response = await axiosInstance.patch('/api/v1/products/update-quantity?ordersize='+data)
+    } catch (error) {
+        console.error('Error handling payment:', error);
+    }
+
+  }
+
+  const handleorderProductQuantity = async (content: string) => {
+    try {
+      const response = await axiosInstance.post('/api/v1/products/update-stock-and-sold-quantity', content);
+      console.log('Stock and sold quantity updated successfully:', response.data);
+      // Thực hiện các hành động tiếp theo nếu cần
+    } catch (error) {
+      console.error('Error updating stock and sold quantity:', error);
+      // Xử lý lỗi nếu cần
+    }
+  }
+  
 
   const handlePaymentPayPal = async (data:any) => { 
 
@@ -283,7 +393,7 @@ export default function Payment() {
 
             <div className='grid grid-cols-2 flex mt-4 pt-4' style={{ borderTop: '1px solid black' }}>
               <div className='col-span-1 flex justify-between'>
-                <p>Hóa đơn điện tử ?</p>
+                <p>Màu sản phẩm: {product.color} - Size sản phẩm(mã-tên): {product.size}</p>
                 <p className=' text-green-500'>Yêu cầu ngay</p>
               </div>
               <div className='col-span-1 mx-2 flex justify-between'>
@@ -305,8 +415,8 @@ export default function Payment() {
               </div>
               <div className='col-span-1 mx-2 flex justify-between' >
                 <span>Đơn vị vẩn chuyển:</span>
-                <span>Tên đơn vị vẩn chuyển</span>
-                <span>10.000đ</span>
+                <span>GIAO HÀNG NHANH</span>
+                <span>Chọn phương thức vận chuyển để xem phí</span>
               </div>
 
             </div>
@@ -328,6 +438,7 @@ export default function Payment() {
             <PaymentPage  delivery={delivery} payment={payment} 
                onDeliveryChange={handleDeliveryChange}
                onPaymentChange={handlePaymentChange}/>
+               <div>Phí vận chuyển: {feedelivery}</div>
           </div>
         </div>
 

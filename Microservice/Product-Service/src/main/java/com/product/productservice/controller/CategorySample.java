@@ -48,10 +48,6 @@ public class CategorySample {
                 .name("Thực Phẩm và Đồ Uống")
                 .build());
 
-        categories.add(Category.builder()
-                ._id("7")
-                .name("Điện Thoại & Phụ Kiện")
-                .build());
 
         return categories;
     }

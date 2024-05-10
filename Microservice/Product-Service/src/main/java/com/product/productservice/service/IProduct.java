@@ -3,6 +3,7 @@ package com.product.productservice.service;
 import com.example.commonservice.DTO.ProductDTO;
 import com.product.productservice.DTO.Reponse.ProductReponSingle;
 import com.product.productservice.DTO.Reponse.ProductReponse;
+import com.product.productservice.DTO.UPDATE.ProductDTOu;
 import com.product.productservice.entity.ProductEntity;
 import com.product.productservice.entity.ProductImage;
 import org.springframework.data.domain.Page;
@@ -26,6 +27,8 @@ public interface IProduct {
     void recalculateAndSetAverageRating(Long productId, int newRating);
     void subtractAndSetAverageRating(Long productId, int deletedRating);
     public void addProductImages(ProductEntity product, List<String> imageUrls);
+    public void updateQuantityById(String ordersize);
+    public void update(ProductDTOu productDTOu);
 
 
 }

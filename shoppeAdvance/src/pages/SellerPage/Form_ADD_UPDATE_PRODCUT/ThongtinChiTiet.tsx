@@ -26,6 +26,7 @@ const ThongtinChiTiet: React.FC<ThongtinChiTietProps> = ({ formDataProduct,chang
       {changeCategory == 5 && <FoodForm updateFormDataProduct={updateFormDataProduct}/>}
       {changeCategory == 4 && <WatchForm updateFormDataProduct={updateFormDataProduct}/>}
       <div>Thông tin được lưu: {formDataProduct.description}</div>
+      <div>Thông tin được lưu Brand: </div>
     </>
   );
 };

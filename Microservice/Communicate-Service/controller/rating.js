@@ -52,9 +52,9 @@ exports.deleteProductRating = async (req, res) => {
         const { product_id, user_id } = req.params;
 
         // Tìm và xóa đánh giá dựa trên product_id và user_id
-        await ProductRating.findOneAndDelete({ product_id, user_id });
+        let data = await ProductRating.findOneAndDelete({ product_id, user_id });
 
-        let dataupdate = product_id +  "-" + 2;
+        let dataupdate = product_id +  "-" + data.rating;
 
         const producerService = new KafkaProducerService();
                 producerService.connectProducer()
