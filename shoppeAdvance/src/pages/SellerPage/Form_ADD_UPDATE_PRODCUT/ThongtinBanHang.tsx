@@ -94,6 +94,17 @@ const handleSubmit1 = (e: React.FormEvent<HTMLFormElement>) => {
   };
 
   const handleClick = () => {
+
+    const totalQuantity: number = formDatathongtinbanhang.productSize.reduce(
+      (accumulator: number, currentSize: ProductSize) => accumulator + currentSize.quantity,
+      0
+    );
+
+    if(totalQuantity != formDatathongtinbanhang.stockQuantity){
+      alert("số lượng không hợp lệ vui lòng kiểm tra lại!")
+      return
+    }
+
     const formattedProductColor = productColor.join('-'); 
     updateFormDataProduct({
         price: formDatathongtinbanhang.price,

@@ -9,6 +9,7 @@ import java.util.List;
 public interface IOrder {
     OrderEntity createOder(OrderDTO orderDTO);
     void updateStatusOrder(Long orderid, String statusOrder);
+    void updateStatusOrder(Long orderid, String statusOrder, String token);
     void updateStatusDeliveryOrder(Long orderid, String statusOrderDelivery);
     List<OrderReponse> getOrderByUser(String  phoneNumber, String  status, String token);
     List<OrderReponse> getOrderBySeller(Long id, String  status, String token);

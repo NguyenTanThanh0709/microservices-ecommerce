@@ -137,7 +137,7 @@ useEffect(() => {
       }
     });
 
-    socket.on('thongbaochoseller', (data) => {
+    socket.on('thongbaochoselleremit', (data) => {
       let phone = localStorage.getItem('id');
       if(phone == data.seller) {
         toast.info(data.description);
@@ -412,7 +412,7 @@ const handleNotificationClick = (noti:Notification) => {
           <div className='fixed top-0 left-0 w-full h-full bg-gray-800 bg-opacity-50 flex items-center justify-center'>
             <div className='bg-white p-6 rounded-lg text-black'>
               <h2 className='text-lg font-bold mb-4'>Danh Sách Thông Báo</h2>
-              <ul className="space-y-4">
+              <ul className="space-y-4  max-h-60 overflow-y-auto">
               {notifications.map((notification, index) => (
                   <li key={index} className="flex items-center justify-between bg-slate-400 p-2 m-2 cursor-pointer" onClick={() => handleNotificationClick(notification)}>
                       <strong>Mô tả:</strong> {notification.description}<br />

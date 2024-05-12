@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Product } from 'src/types/product.type';
+import axiosInstance from 'src/apis/axiosClient'; 
+
 
 
 const MaxProductCount = 999;
@@ -44,6 +46,44 @@ const ProductTable: React.FC<{ products: Product[] }> = ({ products }) => {
   const navigate = useNavigate();
   const handleEditProduct = (productId: number) => {
     navigate(`/admin-home/1-${productId}`);
+  };
+
+  const fetchUpProduct = async (id:number) => {
+    console.log(id)
+    try {
+        const response = await axiosInstance.patch('/api/v1/products/delete-product?id='+  id);
+        if(response.status === 200) {
+            alert("Ẩn sản phẩm thành công")
+            return response.data
+        }
+        console.log(response)
+
+    } catch (error) {
+        console.error('Error fetching data:', error);
+    }
+};
+
+const fetchUpProduct1 = async (id:number) => {
+  console.log(id)
+  try {
+      const response = await axiosInstance.patch('/api/v1/products/show-product?id='+  id);
+      if(response.status === 200) {
+          alert("Ẩn sản phẩm thành công")
+          return response.data
+      }
+      console.log(response)
+
+  } catch (error) {
+      console.error('Error fetching data:', error);
+  }
+};
+
+const handleEditProductShow = (productId: number) => {
+  fetchUpProduct1(productId)
+};
+  
+  const handleEditProductHidden = (productId: number) => {
+    fetchUpProduct(productId)
   };
 
   return (
@@ -98,6 +138,9 @@ const ProductTable: React.FC<{ products: Product[] }> = ({ products }) => {
                 Doanh số
               </th>
               <th scope="col" className="px-6 py-3 text-left  text-gray-500 uppercase tracking-wider">
+                Trạng thái
+              </th>
+              <th scope="col" className="px-6 py-3 text-left  text-gray-500 uppercase tracking-wider">
                 Thao tác
               </th>
             </tr>
@@ -117,8 +160,18 @@ const ProductTable: React.FC<{ products: Product[] }> = ({ products }) => {
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div className=" text-gray-900">{product.sold || ''}</div>
                 </td>
+                <td className="px-6 py-4 whitespace-nowrap">
+                  <div className="text-gray-900">
+                    {product.published ? 'Đang hiện' : 'Đã ẩn'}
+                  </div>
+                </td>
+
+
                 <td className="px-6 py-4 whitespace-nowrap text-left  ">
                   <button onClick={() => handleEditProduct(product.id)} className="text-indigo-600 hover:text-indigo-900">Chỉnh sửa</button>
+                  <button onClick={() => handleEditProductHidden(product.id)} className="text-red-600 mx-2 hover:text-indigo-900">Ẩn</button>
+                  <button onClick={() => handleEditProductShow(product.id)} className="text-indigo-600 hover:text-indigo-900">Hiện</button>
+
                 </td>
               </tr>
             ))}

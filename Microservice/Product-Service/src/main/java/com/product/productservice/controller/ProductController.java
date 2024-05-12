@@ -4,6 +4,7 @@ import com.example.commonservice.DTO.ProductDTO;
 import com.product.productservice.DTO.Reponse.ProductReponSingle;
 import com.product.productservice.DTO.Reponse.ProductReponse;
 import com.product.productservice.entity.ProductEntity;
+import com.product.productservice.event.EventProducer;
 import com.product.productservice.service.impl.ProductImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -22,10 +23,23 @@ public class ProductController {
     @Autowired
     private ProductImpl productimpl;
 
+    @Autowired
+    private EventProducer eventProducer;
+
     @PatchMapping("/update-quantity")
     public ResponseEntity<String> updateQuantity( @RequestParam("ordersize") String ordersize) {
         try {
             productimpl.updateQuantityById(ordersize);
+            return new ResponseEntity<>("Quantity updated successfully.", HttpStatus.OK);
+        } catch (RuntimeException e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
+        }
+    }
+
+    @PatchMapping("/update-quantity-cancel")
+    public ResponseEntity<String> updateQuantitycancel( @RequestParam("ordersize") String ordersize) {
+        try {
+            productimpl.updateQuantityByIdByCancelOrder(ordersize);
             return new ResponseEntity<>("Quantity updated successfully.", HttpStatus.OK);
         } catch (RuntimeException e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
@@ -38,7 +52,6 @@ public class ProductController {
         List<ProductEntity> newProduct = productimpl.getAllByBrand(idbrand);
         return new ResponseEntity<>(newProduct, HttpStatus.OK);
     }
-
 
 
     @GetMapping("/")
@@ -83,9 +96,15 @@ public class ProductController {
         return new ResponseEntity<>(productimpl.getAllByLikeName(name,pageable), HttpStatus.OK);
     }
 
-    @DeleteMapping("/delete-product")
+    @PatchMapping("/delete-product")
     public ResponseEntity<?> deleteProduct(@RequestParam Long id){
         productimpl.deleteProductByid(id);
+        return new ResponseEntity<>("Xóa Thành Công Sản Phẩm", HttpStatus.OK);
+    }
+
+    @PatchMapping("/show-product")
+    public ResponseEntity<?> showProduct(@RequestParam Long id){
+        productimpl.deleteProductByid1(id);
         return new ResponseEntity<>("Xóa Thành Công Sản Phẩm", HttpStatus.OK);
     }
 
@@ -99,11 +118,24 @@ public class ProductController {
         productimpl.incrementProductView(productId);
     }
 
-
-    @PostMapping("/update-stock-and-sold-quantity")
-    public ResponseEntity<String> updateStockAndSoldQuantity(@RequestBody String content) {
+    @PostMapping("/update-stock-and-sold-quantity/{content}")
+    public ResponseEntity<String> updateStockAndSoldQuantity(@PathVariable String content) {
         try {
-            productimpl.updateStockAndSoldQuantity(content);
+            String[] split = content.split("z");
+            boolean check = productimpl.updateStockAndSoldQuantity(split[0]);
+            if(!check){
+                eventProducer.send("order_Cancel_topic", split[1])
+                        .subscribe(
+                                result -> {
+                                    // Xử lý kết quả nếu cần
+                                    System.out.println("Message sent successfully: " + result);
+                                },
+                                error -> {
+                                    // Xử lý lỗi nếu gửi message không thành công
+                                    System.err.println("Error sending message to Kafka: " + error.getMessage());
+                                }
+                        );
+            }
             return new ResponseEntity<>("Stock and sold quantity updated successfully.", HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>("Failed to update stock and sold quantity: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);

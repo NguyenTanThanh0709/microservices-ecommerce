@@ -162,6 +162,7 @@ export default function Cart() {
   const navigate = useNavigate();
   const handleBuyPurchases = () => {
     const orderTempArray: orderTemp[] = [];
+    console.log(extendedPurchases)
     for (const item of extendedPurchases) {
       if(item.checked){
         const order: orderTemp = {
@@ -170,7 +171,7 @@ export default function Cart() {
           quantityProdcut: item.buy_count,
           color:item.color,
           size:item.size,
-          message :'lời nhắn: ',
+          message :`sản phẩm: với màu ${item.color} và size ${item.size} với lời nhắn: ` ,
           discount:0,
           
         };

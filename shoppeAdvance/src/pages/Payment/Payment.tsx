@@ -35,7 +35,7 @@ export default function Payment() {
   const [voucherCode, setVoucherCode] = useState<string>('');
   const [promotions, setPromotions] = useState<PromotionReponse[]>([]);
   const [inputValues, setInputValues] = useState<orderTemp[]>([]);
-  console.log();
+  console.log(inputValues);
   const [totalMoney, setTotalMoney] = useState<number>(0);
   const [feedelivery, setFeedelivery] = useState<number>(0);
   
@@ -47,7 +47,7 @@ export default function Payment() {
       quantityProdcut: item.quantityProdcut,
       color:item.color,
       size:item.size,
-      message: 'lời nhắn: ',
+      message: item.message,
       discount: 0,
     }));
 
@@ -121,7 +121,7 @@ export default function Payment() {
     setDelivery(e.target.value);
     console.log("Delivery method changed to:", e.target.value);
     if(e.target.value === "Express") {
-      fetchDatadistrict(1000);
+      fetchDatadistrict(2000);
 
     }
     if(e.target.value === "Standard") {
@@ -130,7 +130,7 @@ export default function Payment() {
     }
     if(e.target.value === "Saving") {
       
-    fetchDatadistrict(2000);
+    fetchDatadistrict(1000);
   }
 
   };
@@ -191,9 +191,6 @@ export default function Payment() {
       return;
     }
 
-
-
-
     const productIdsQuantitys: { [productId: string]: number } = {};
     // Iterate through inputValues to populate productIdsQuantitys
     console.log(inputValues);
@@ -236,9 +233,8 @@ export default function Payment() {
   }
     // Loại bỏ ký tự "-" cuối cùng nếu có
     result = result.slice(0, -1);
-    
-    console.log(data)
     console.log(result)
+    
     let ordersize = '';
 orderTempArray.forEach((product: any) => { // Sử dụng kiểu any
   const { size, quantityProdcut } = product;
@@ -248,6 +244,7 @@ orderTempArray.forEach((product: any) => { // Sử dụng kiểu any
 if (ordersize.length > 0) {
   ordersize = ordersize.slice(0, -1);
 }
+console.log(ordersize)
 
     try {
       let statuspayment = "0";
@@ -261,8 +258,8 @@ if (ordersize.length > 0) {
         if(payment === 'later_money'){
           alert("Thanh toán khi nhận hàng")
           alert("Đặt Hàng Thành Công!")
-          handleorderProductQuantity(data.productIdsQuantitys)
-          return
+          console.log(data.productIdsQuantitys + 'z' +  response.data.id)
+          handleorderProductQuantity(result + 'z' +  response.data.id)
           handleorderSize(ordersize);
           navigate('/user/purchase?status=1')
         }else if(payment === 'paypal'){
@@ -272,7 +269,7 @@ if (ordersize.length > 0) {
             orderid: response.data.id,
             dataupdate:result
           }
-          handlePaymentPayPal(dataPayment)
+          handlePaymentPayPal(dataPayment, ordersize)
         }else if(payment === 'vnpay'){
           const dataPayment = {
             amount : totalMoney,
@@ -280,7 +277,7 @@ if (ordersize.length > 0) {
             orderid: response.data.id,
             dataupdate:result      
           }
-          handlePaymentVNPAY(dataPayment)
+          handlePaymentVNPAY(dataPayment,ordersize)
         }
 
       }else{
@@ -291,12 +288,13 @@ if (ordersize.length > 0) {
     }
   }
 
-  const handlePaymentVNPAY = async (data:any) => { 
+  const handlePaymentVNPAY = async (data:any, ordersize:any) => { 
 
     try {
       const response = await axiosInstance.post('api/v1/payments/create_payment_url', data)
       console.log(response.data)
       if(response){
+        handleorderSize(ordersize);
         window.location.href = response.data
       }else{
         alert('Không thể thực hiện chức năng thanh toán. Vui lòng thử lại sau!');
@@ -309,7 +307,6 @@ if (ordersize.length > 0) {
 
 
   const handleorderSize = async (data:string) => { 
-
     try {
       const response = await axiosInstance.patch('/api/v1/products/update-quantity?ordersize='+data)
     } catch (error) {
@@ -320,7 +317,7 @@ if (ordersize.length > 0) {
 
   const handleorderProductQuantity = async (content: string) => {
     try {
-      const response = await axiosInstance.post('/api/v1/products/update-stock-and-sold-quantity', content);
+      const response = await axiosInstance.post('/api/v1/products/update-stock-and-sold-quantity/' + content);
       console.log('Stock and sold quantity updated successfully:', response.data);
       // Thực hiện các hành động tiếp theo nếu cần
     } catch (error) {
@@ -330,12 +327,13 @@ if (ordersize.length > 0) {
   }
   
 
-  const handlePaymentPayPal = async (data:any) => { 
+  const handlePaymentPayPal = async (data:any, ordersize:nay) => { 
 
     try {
       const response = await axiosInstance.post('api/v1/payments/pay-pal', data)
       console.log(response)
       if(response.status === 200){
+        handleorderSize(ordersize);
         window.location.href = response.data.link;
       }else{
         alert('Không thể thực hiện chức năng thanh toán. Vui lòng thử lại sau!');
@@ -407,6 +405,7 @@ if (ordersize.length > 0) {
               <div className='col-span-1 flex justify-between'>
                 <input
                   type="text"
+                  style={{ width: '620px' }}
                   className='border'
                   value={inputValues[index]?.message || ''}
                   onChange={(e) => handleInputChangeSeparate(e, index, 'message')}

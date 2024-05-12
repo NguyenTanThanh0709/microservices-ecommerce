@@ -55,7 +55,6 @@ public class OrderController {
                                     System.err.println("Error sending message to Kafka: " + error.getMessage());
                                 }
                         );
-
             }
             return ResponseEntity.status(HttpStatus.CREATED).body(createdOrder);
         } else {
@@ -64,8 +63,16 @@ public class OrderController {
     }
 
     @PutMapping("/update/{orderId}/status")
-    public ResponseEntity<Void> updateStatusOrder(@PathVariable Long orderId, @RequestParam String statusOrder) {
-        iOrder.updateStatusOrder(orderId, statusOrder);
+    public ResponseEntity<Void> updateStatusOrder(@PathVariable Long orderId, @RequestParam String statusOrder
+    ,@RequestParam(defaultValue = "0") String token
+    ) {
+        if(token.equals("0")){
+            iOrder.updateStatusOrder(orderId, statusOrder);
+
+        }else {
+            iOrder.updateStatusOrder(orderId, statusOrder,token);
+
+        }
         return ResponseEntity.ok().build();
     }
 

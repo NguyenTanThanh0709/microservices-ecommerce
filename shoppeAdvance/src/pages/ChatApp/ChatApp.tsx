@@ -9,6 +9,7 @@ interface Message {
     seller_id: string;
     message: string;
     created_at: Date;
+    type: string;
 }
 
 const ChatApp: React.FC = () => {
@@ -45,10 +46,10 @@ const ChatApp: React.FC = () => {
     } catch (error) {
         console.error('Error fetching data:', error);
     }
-};
+    };
 
   useEffect(() => {
-    if(status == 'seller'){
+    if(status1 == 'seller'){
         fetchMessages1()
     }else{
         fetchMessages()
@@ -57,63 +58,87 @@ const ChatApp: React.FC = () => {
 
 
 
-    const sendMessage = async () => {
-        console.log({
-            customer_id: localStorage.getItem('id'),
-            seller_id: shopId,
+  const SellerSend = async () =>{
+
+    try {
+        // Example POST request
+        const response = await axiosInstance.post(`/api/v1/communicate/chat/send`, {
+            customer_id: shopId,
+            seller_id:  localStorage.getItem('id'),
             message: newMessage,
-        })
-      try {
-          // Example POST request
-          const response = await axiosInstance.post(`/api/v1/communicate/chat/send`, {
-              customer_id: localStorage.getItem('id'),
-              seller_id: shopId,
-              message: newMessage,
-          });
+            type: 'seller'
+        });
 
-          if(response){
-            if(status1 == 'seller'){
-                const phone = localStorage.getItem('id');
-                const data: Notification = {
-                    description: "Bạn có tin nhắn! Click để xem chi tiết",
-                    seller: phone ? parseInt(phone) : 0,
-                    customer: shopId,
-                    type: 'TIN NHẮN',
-                    id_type: phone ?phone : '0',
-                    date: new Date(),
-                };
-                fetchAddThongBao(data);
-                handleClickaddUser(data)
-
-                  
-            }else{
-                const phone = localStorage.getItem('id');
-                const data: Notification = {
-                    description: "Bạn có tin nhắn! Click để xem chi tiết",
-                    seller: parseInt(shopId),
-                    customer: phone || '0',
-                    type: 'TIN NHẮN',
-                    id_type: phone || '0',
-                    date: new Date(),
-
-                };
-
-                fetchAddThongBao(data);
-                handleClickaddUser1(data)
-
-
-            }
+        if(response){
+          if(status1 == 'seller'){
+              const phone = localStorage.getItem('id');
+              const data: Notification = {
+                  description: "Bạn có tin nhắn! Click để xem chi tiết",
+                  seller: phone ? parseInt(phone) : 0,
+                  customer: shopId,
+                  type: 'TIN NHẮN',
+                  id_type: phone ?phone : '0',
+                  date: new Date(),
+              };
+              console.log(data)
+              fetchAddThongBao(data);
+              handleClickaddUser(data)     
           }
+        }
 
-      } catch (error) {
-          console.error('Error fetching data:', error);
-      }
-
-      if(status == 'seller'){
-        fetchMessages1()
-    }else{
-        fetchMessages()
+    } catch (error) {
+        console.error('Error fetching data:', error);
     }
+
+    if(status1 == 'seller'){
+      fetchMessages1()
+  }
+  }
+
+  const CustomerrSend = async () =>{
+    try {
+        // Example POST request
+        const response = await axiosInstance.post(`/api/v1/communicate/chat/send`, {
+            customer_id: localStorage.getItem('phone'),
+            seller_id:   shopId,
+            message: newMessage,
+            type: 'customer'
+        });
+
+        if(response){
+          if(status1 == 'customer'){
+              const phone = localStorage.getItem('phone');
+              const data: Notification = {
+                  description: "Bạn có tin nhắn! Click để xem chi tiết",
+                  seller: parseInt(shopId),
+                  customer: phone ? phone : '0',
+                  type: 'TIN NHẮN',
+                  id_type: phone ?phone : '0',
+                  date: new Date(),
+              };
+              console.log(data)
+              fetchAddThongBao(data);
+              handleClickaddUser1(data)     
+          }
+        }
+
+    } catch (error) {
+        console.error('Error fetching data:', error);
+    }
+
+    if(status1 == 'customer'){
+      fetchMessages()
+  }
+  }
+
+
+    const sendMessage = async () => {
+      if(status1 == 'seller'){
+        SellerSend();
+      }else{
+        CustomerrSend();
+      }
+      setNewMessage('')
     };
 
     const [socket, setSocket] = useState<Socket | null>(null);
@@ -121,6 +146,36 @@ const ChatApp: React.FC = () => {
       setSocket(io("ws://localhost:8900"));
     }, []);
 
+
+    useEffect(() => {
+        if (socket) {
+
+      
+          socket.on('thongbaochocustomeremit', (data) => {
+            let phone = localStorage.getItem('phone');
+            if(phone == data.customer) {
+                fetchMessages()
+            }
+          });
+      
+          socket.on('thongbaochoselleremit', (data) => {
+            let phone = localStorage.getItem('id');
+            if(phone == data.seller) {
+                fetchMessages1()
+            }
+          });
+      
+      
+        }
+      
+        return () => {
+          if (socket) {
+
+            socket.off('thongbaochoseller');
+            socket.off('thongbaochocustomeremit');
+          }
+        };
+      }, [socket]);
     const fetchAddThongBao = async ( thongbao: Notification) => {
         try {
           const response = await axiosInstance.post('/api/v1/communicate/noti/', thongbao);
@@ -146,29 +201,17 @@ const ChatApp: React.FC = () => {
         <div className="container mx-auto mt-8">
             <div className="flex flex-col h-96 overflow-auto">
             {messages.map((msg, index) => (
-    status1 === 'seller' && (
-        <div
-            key={index}
-            className={`p-2 rounded-lg ${
-                msg.customer_id === localStorage.getItem('id') ? 'bg-blue-200 self-end' : 'bg-gray-200 self-start'
-            }`}
-        >
-            {msg.message}
-        </div>
-    )
+                <div
+                key={index}
+                className={`p-2 rounded-lg ${
+                    msg.type == status1  ? 'bg-blue-200 self-end' : 'bg-gray-200 self-start'
+                }`}
+            >
+                {msg.message}
+            </div>
 ))}
-{messages.map((msg, index) => (
-    status1 === 'customer' && (
-        <div
-            key={index}
-            className={`p-2 rounded-lg ${
-                msg.customer_id === localStorage.getItem('phone') ? 'bg-blue-200 self-end' : 'bg-gray-200 self-start'
-            }`}
-        >
-            {msg.message}
-        </div>
-    )
-))}
+
+
 
             </div>
             <div className="mt-4 flex">

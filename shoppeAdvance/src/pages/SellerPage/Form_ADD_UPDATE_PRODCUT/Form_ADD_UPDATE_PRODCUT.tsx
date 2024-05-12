@@ -170,6 +170,16 @@ export default function Form_ADD_UPDATE_PRODCUT({ productId }: { productId: stri
     };
 
     const fetchUpProductUpdate = async () => {
+        console.log({
+            name: formDataProduct.name,
+            id: formDataProduct_.id,
+            shortDescription: formDataProduct.shortDescription,
+            price: formDataProduct.price,
+            stockQuantity: formDataProduct.stockQuantity,
+            category: formDataProduct.category,
+            colors: formDataProduct.colors,
+            productSize: formDataProduct.productSize
+        })
         try {
             const response = await axiosInstance.put('/api/v1/products/seller/', {
                 name: formDataProduct.name,

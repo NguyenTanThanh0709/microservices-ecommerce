@@ -23,6 +23,7 @@ public class EventConsumer {
     public EventConsumer(ReceiverOptions<String,String> receiverOptions){
         KafkaReceiver.create(receiverOptions.subscription(Collections.singleton(Constant.orderCancel)))
                 .receive().subscribe(this::demoKafka);
+
     }
 
     public void demoKafka(ReceiverRecord<String,String> receiverRecord){
@@ -31,4 +32,5 @@ public class EventConsumer {
         Long idOrder = Long.parseLong(split);
         order.updateStatusOrder(idOrder,"Đã hủy");
     }
+
 }

@@ -20,6 +20,7 @@ public class OrderDTO {
     private Double totalMoney;
     private Long idSeller;
 
+
     private HashMap<Long, Integer> productIdsQuantitys;
     private HashMap<Long, Double> productIdsPrices;
     private HashMap<Long, String> productIdsNotes;

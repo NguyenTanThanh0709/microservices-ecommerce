@@ -104,8 +104,9 @@ const ListOrder: React.FC = () => {
   
 
   const fetchUpOrderHuyDon = async ( orderId:number, status:string, phoneUser:String) => {
+    const token = localStorage.getItem('accessToken')
     try {
-      const response = await axiosInstance.put(`/api/v1/orders/update/${orderId}/status?statusOrder=${status}`);
+      const response = await axiosInstance.put(`/api/v1/orders/update/${orderId}/status?statusOrder=${status}&token=${token}`);
       if(response.status === 200) {
         alert("Hủy Đơn Thành Công");
         if (phoneOwnerFromLocalStorage) {

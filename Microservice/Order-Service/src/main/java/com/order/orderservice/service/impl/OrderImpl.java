@@ -23,6 +23,7 @@ import reactor.kafka.sender.KafkaSender;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -105,9 +106,41 @@ public class OrderImpl implements IOrder {
     @Override
     @Transactional
     public void updateStatusOrder(Long orderid, String statusOrder) {
+
         orderRepository.updateStatusOrder(orderid, statusOrder);
     }
 
+    @Override
+    @Transactional
+    public void updateStatusOrder(Long orderId, String statusOrder, String token) {
+        orderRepository.updateStatusOrder(orderId, statusOrder);
+
+        if (statusOrder.equals("Đã hủy")) {
+            if(orderRepository.findById(orderId).isPresent()) {
+                OrderEntity o = orderRepository.findById(orderId).get();
+                String data = "";
+                for (OrderItemsEntity o1 : o.getOrderItems()) {
+                    data += o1.getProductId() + "-" + o1.getQuantity() + "_";
+                }
+                if (!data.isEmpty()) {
+                    data = data.substring(0, data.length() - 1);
+                }
+                if (!data.isEmpty()) {
+                    webClient.patch()
+                            .uri("http://localhost:8222/api/v1/products/update-quantity-cancel?ordersize=" + data)
+                            .headers(headers -> headers.setBearerAuth(token))
+                            .retrieve()
+                            .onStatus(status -> status.is4xxClientError(), response ->
+                                    Mono.error(new RuntimeException("Client error: " + response.statusCode())))
+                            .onStatus(status -> status.is5xxServerError(), response ->
+                                    Mono.error(new RuntimeException("Server error: " + response.statusCode())))
+                            .bodyToMono(String.class)
+                            .doOnError(error -> log.error("Failed to update quantity after cancellation: {}", error.getMessage()))
+                            .subscribe();
+                }
+            }
+        }
+    }
     @Override
     public void updateStatusDeliveryOrder(Long orderid, String statusOrderDelivery) {
         orderRepository.updateStatusDelivery(orderid, statusOrderDelivery);

@@ -22,12 +22,13 @@ public interface IProduct {
     ProductEntity updateProduct(ProductDTO productDTO);
     public ProductReponSingle findOneById(Long id);
     ProductEntity findOneByIdone(Long id);
-    public void updateStockAndSoldQuantity(String content);
+    public boolean updateStockAndSoldQuantity(String content);
     void incrementProductView(Long productId);
     void recalculateAndSetAverageRating(Long productId, int newRating);
     void subtractAndSetAverageRating(Long productId, int deletedRating);
     public void addProductImages(ProductEntity product, List<String> imageUrls);
     public void updateQuantityById(String ordersize);
+    public void updateQuantityByIdByCancelOrder(String temp);
     public void update(ProductDTOu productDTOu);
 
 

@@ -7,6 +7,11 @@ const chatSchema = new Schema({
     customer_id: { type: String, required: true }, // ID của người gửi tin nhắn
     seller_id: { type: String, required: true }, // ID của người nhận tin nhắn
     message: { type: String, required: true },
+    type: {
+        type: String,
+        required: false,
+        enum: ['seller', 'customer'],
+    },
     created_at: { type: Date, default: Date.now }
 });
 

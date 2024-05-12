@@ -29,6 +29,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -79,6 +80,23 @@ public  class ProductImpl implements IProduct {
     }
 
     @Override
+    public void updateQuantityByIdByCancelOrder(String temp) {
+        String[] orders = temp.split("_");
+        for (String item : orders) {
+            String[] orderInfo = item.split("-");
+            Long id = Long.parseLong(orderInfo[0]);
+            Integer count = Integer.parseInt(orderInfo[1]);
+            ProductEntity product = productRepository.findById(id).orElseThrow(() -> new  RuntimeException("ERROR"));
+            product.setStockQuantity(product.getStockQuantity()+ count);
+            if(product.getProductSize() != null && product.getProductSize().size() != 0){
+                product.getProductSize().get(0).setQuantity(product.getProductSize().get(0).getQuantity()+count);
+            }
+            product.setSold(product.getSold()-count);
+            productRepository.save(product);
+        }
+    }
+
+    @Override
     public void update(ProductDTOu productDTOu) {
         ProductEntity product = productRepository.findById(productDTOu.getId())
                 .orElseThrow(() -> new EntityNotFoundException("Product not found with id: " + productDTOu.getId()));
@@ -118,7 +136,6 @@ public  class ProductImpl implements IProduct {
         if (productDTOu.getColors() != null && !productDTOu.getColors().isEmpty()) {
             product.setColors(productDTOu.getColors());
         }
-
         productRepository.save(product);
     }
 
@@ -127,7 +144,9 @@ public  class ProductImpl implements IProduct {
     @Transactional
     public ProductEntity addProduct(ProductDTO productDTO,  List<MultipartFile> files, MultipartFile file) {
         ProductEntity productEntity = mapper.map(productDTO,ProductEntity.class);
-
+        productEntity.setPublished(true);
+        productEntity.setCreatedAt(LocalDateTime.now());
+        productEntity.setRating(5);
         if(productDTO.getImgsurl() != null){
             List<ProductImage> productImages = new ArrayList<>();
             for(String urlimg: productDTO.getImgsurl()){
@@ -197,7 +216,15 @@ public  class ProductImpl implements IProduct {
     public void deleteProductByid(Long id) {
         ProductEntity product = productRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Product not found with id: " + id));
-        productRepository.delete(product);
+        product.setPublished(false);
+        productRepository.save(product);
+    }
+
+    public void deleteProductByid1(Long id) {
+        ProductEntity product = productRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Product not found with id: " + id));
+        product.setPublished(true);
+        productRepository.save(product);
     }
 
     @Override
@@ -239,7 +266,7 @@ public  class ProductImpl implements IProduct {
 
     @Override
     @Transactional
-    public void updateStockAndSoldQuantity(String content) {
+    public boolean updateStockAndSoldQuantity(String content) {
         // Split the content by "-" to get individual items
 
         if(content.contains("y")){
@@ -258,6 +285,10 @@ public  class ProductImpl implements IProduct {
                 // Parse product ID and quantity from string to long
                 id = Long.parseLong(i[0]);
                 quantity = Long.parseLong(i[1]);
+                ProductEntity product = findOneByIdone(id);
+                if(product.getStockQuantity() <= quantity){
+                    return false;
+                }
             } catch (NumberFormatException e) {
                 // Log and skip invalid items
                 log.error("Invalid ID or quantity format: " + item);
@@ -271,7 +302,7 @@ public  class ProductImpl implements IProduct {
             // Split each item by ":" to get product ID and quantity
             String[] i = content.split("t");
             if (i.length != 2) {
-                return;
+                return false;
             }
             long id;
             long quantity;
@@ -279,14 +310,20 @@ public  class ProductImpl implements IProduct {
                 // Parse product ID and quantity from string to long
                 id = Long.parseLong(i[0]);
                 quantity = Long.parseLong(i[1]);
+
             } catch (NumberFormatException e) {
                 // Log and skip invalid items
                 log.error("Invalid ID or quantity format: " + content);
-                return;
+                return false;
+            }
+            ProductEntity product = findOneByIdone(id);
+            if(product.getStockQuantity() <= quantity){
+                return false;
             }
             // Update stock and sold quantity for the product
             updateStockAndSoldQuantity(id, quantity);
         }
+        return true;
     }
 
     @Override

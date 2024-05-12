@@ -44,6 +44,7 @@ public interface ProductRepository extends JpaRepository<ProductEntity, Long> {
             "AND (:price_min IS NULL OR p.price >= :price_min) " +
             "AND (:rating_filter IS NULL OR p.rating >= :rating_filter) " +
             "AND (:price_max IS NULL OR p.price <= :price_max) " +
+            "AND p.isPublished = true " +
             "ORDER BY " +
             "CASE " +
             "  WHEN :sortBy = 'view' THEN p.view " +

@@ -28,7 +28,7 @@ public class ProductEntity {
     private Long phoneOwner;
     @Column(columnDefinition = "boolean default true")
     @ColumnDefault("true")
-    private boolean isPublished;
+    private boolean isPublished = true;
     private boolean isFeatured;
     private Long stockQuantity;
     private int sold;

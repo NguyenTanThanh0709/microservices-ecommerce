@@ -6,12 +6,13 @@ const Chat = require('../models/chats'); // Import model của Bảng Chat
 // Controller để gửi tin nhắn mới
 const sendMessage = async (req, res) => {
     try {
-        const { customer_id, seller_id, message } = req.body;
+        const { customer_id, seller_id, message, type } = req.body;
         console.log(req.body)
         const newMessage = new Chat({
             customer_id,
             seller_id,
-            message
+            message,
+            type
         });
         await newMessage.save();
         res.status(201).json({ message: 'Message sent successfully' });

@@ -130,6 +130,7 @@ const fetchPaymentByID = async (id: number): Promise<void> => {
   } catch (error) {
     console.error('Error fetching payment data:', error);
   }
+
 };
 
 const fetchPaymentRefund = async (data: PaymentData): Promise<void> => {
@@ -148,7 +149,20 @@ const handleCancelOrder = (orderId: number) => {
   // Implement cancellation logic here
   console.log("Order cancelled:", orderId);
   // You can call any function to handle the cancellation process
-  fetchPaymentByID(orderId);
+  // fetchPaymentByID(orderId);
+  fetchUpOrderHuyDon(orderId,"Đã hủy")
+};
+
+const fetchUpOrderHuyDon = async ( orderId:number, status:string) => {
+  const token = localStorage.getItem('accessToken')
+  try {
+    const response = await axiosInstance.put(`/api/v1/orders/update/${orderId}/status?statusOrder=${status}&token=${token}`);
+    if(response.status === 200) {
+      alert("Hủy Đơn Thành Công");
+    }
+  } catch (error) {
+    console.error('Error fetching data:', error);
+  }
 };
 
 
@@ -258,7 +272,9 @@ const handleCancelOrder = (orderId: number) => {
     }
   };
 
-  
+  const navigateToPageShop1 = (id:number) => {
+    window.location.href = '/chat/'+id + '/seller'
+  };
 
 
   return (
@@ -288,17 +304,20 @@ const handleCancelOrder = (orderId: number) => {
                 </button>
                 </div>
                 <div>
-                    <button className="bg-pink-500 mt-2 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                    <button onClick={() => navigateToPageShop1(purchase.idSeller)} className="bg-pink-500 mt-2 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
                       Nhắn tin
                     </button>
                 </div>
                     <div>
-                    <button 
+                    {status == 1 ? <>
+                      <button 
                       className="bg-blue-500 mt-2 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded" 
                       onClick={() => handleCancelOrder(purchase.id)}
                     >
                       Hủy Hàng
                     </button>
+                    
+                    </> : <></>}
 
                     </div>
                 <div>

@@ -20,7 +20,7 @@ const io = require("socket.io")(8900, {
     });
 
     socket.on("thongbaochoseller", (message) => {
-      console.log(message)
+      console.log(message ,1)
       io.emit("thongbaochoselleremit", message); 
     });
   });
